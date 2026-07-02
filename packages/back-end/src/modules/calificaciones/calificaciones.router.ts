@@ -4,7 +4,9 @@ import {
   getCalificacionesGrupoSchema, 
   getCalificacionesAlumnoSchema, 
   upsertCalificacionSchema, 
-  deleteCalificacionSchema 
+  deleteCalificacionSchema,
+  GenerarBoletaSchema,
+  KardexSchema
 } from './calificaciones.schema';
 
 export const calificacionesRouter = router({
@@ -45,5 +47,67 @@ export const calificacionesRouter = router({
     .input(deleteCalificacionSchema)
     .mutation(({ input }) => {
       return CalificacionesService.deleteCalificacion(input);
+    }),
+
+  /**
+   * Genera la boleta consolidada de un alumno en un ciclo escolar específico
+   */
+  generarBoletaCiclo: protectedProcedure
+    .input(GenerarBoletaSchema)
+    .query(async ({ input, ctx }) => {
+      const alumno = await ctx.prisma.alumno.findUnique({
+        where: { alumnoId: input.alumnoId },
+        include: { nivel: true }
+      });
+      const ciclo = await ctx.prisma.cicloEscolar.findUnique({
+        where: { cicloId: input.cicloId }
+      });
+
+      const calificaciones = await ctx.prisma.calificacion.findMany({
+        where: { 
+          alumnoId: input.alumnoId, 
+          grupoMateria: { grupo: { cicloId: input.cicloId } } 
+        },
+        include: {
+          grupoMateria: { include: { materia: true } }
+        }
+      });
+
+      return {
+        alumno,
+        ciclo,
+        materias: calificaciones.map(c => ({
+          materia: c.grupoMateria.materia.nombre,
+          evaluacion: c.tipoEvaluacion,
+          calificacion: c.valorNumerico || c.valorCualitativo,
+        }))
+      };
+    }),
+
+  /**
+   * Obtiene el historial académico completo de todos los ciclos
+   */
+  obtenerKardexCompleto: protectedProcedure
+    .input(KardexSchema)
+    .query(async ({ input, ctx }) => {
+      const historial = await ctx.prisma.calificacion.findMany({
+        where: { alumnoId: input.alumnoId },
+        include: {
+          grupoMateria: {
+            include: {
+              materia: true,
+              grupo: { include: { ciclo: true, nivel: true } }
+            }
+          }
+        },
+        orderBy: { grupoMateria: { grupo: { ciclo: { fechaInicio: 'desc' } } } }
+      });
+
+      return historial.map(c => ({
+        ciclo: c.grupoMateria.grupo.ciclo.nombre,
+        nivel: c.grupoMateria.grupo.nivel.nombre,
+        materia: c.grupoMateria.materia.nombre,
+        calificacion: c.valorNumerico || c.valorCualitativo,
+      }));
     })
 });

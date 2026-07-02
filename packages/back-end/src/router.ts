@@ -8,6 +8,10 @@ import { pagosRouter } from './modules/pagos/pagos.router';
 import { becasRouter } from './modules/becas/becas.router';
 import { calificacionesRouter } from './modules/calificaciones/calificaciones.router';
 import { inscripcionesRouter } from './modules/inscripciones/inscripciones.router';
+import { usuariosRouter } from './modules/usuarios/usuarios.router';
+import { auditoriaRouter } from './modules/auditoria/auditoria.router';
+import { dashboardRouter } from './modules/dashboard/dashboard.router';
+import { reportesRouter } from './modules/reportes/reportes.router';
 
 export const appRouter = router({
   auth: authRouter,
@@ -19,7 +23,10 @@ export const appRouter = router({
   becas: becasRouter,
   calificaciones: calificacionesRouter,
   inscripciones: inscripcionesRouter,
-  // Otros módulos se agregarán aquí...
+  usuarios: usuariosRouter,
+  auditoria: auditoriaRouter,
+  dashboard: dashboardRouter,
+  reportes: reportesRouter,
 });
 
 export type AppRouter = typeof appRouter;

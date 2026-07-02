@@ -36,3 +36,12 @@ export type GetCalificacionesGrupoInput = z.infer<typeof getCalificacionesGrupoS
 export type GetCalificacionesAlumnoInput = z.infer<typeof getCalificacionesAlumnoSchema>;
 export type UpsertCalificacionInput = z.infer<typeof upsertCalificacionSchema>;
 export type DeleteCalificacionInput = z.infer<typeof deleteCalificacionSchema>;
+
+export const GenerarBoletaSchema = z.object({
+  alumnoId: z.number().int().positive(),
+  cicloId: z.number().int().positive(),
+});
+
+export const KardexSchema = z.object({
+  alumnoId: z.number().int().positive(),
+});
