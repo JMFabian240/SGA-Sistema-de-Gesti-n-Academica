@@ -6,6 +6,7 @@ import { tutoresRouter } from './modules/tutores/tutores.router';
 import { alumnosRouter } from './modules/alumnos/alumnos.router';
 import { pagosRouter } from './modules/pagos/pagos.router';
 import { becasRouter } from './modules/becas/becas.router';
+import { calificacionesRouter } from './modules/calificaciones/calificaciones.router';
 
 export const appRouter = router({
   auth: authRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   alumnos: alumnosRouter,
   pagos: pagosRouter,
   becas: becasRouter,
+  calificaciones: calificacionesRouter,
   // Otros módulos se agregarán aquí...
 });
 
