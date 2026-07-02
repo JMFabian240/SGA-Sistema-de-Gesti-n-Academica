@@ -173,12 +173,10 @@ export class PagosService {
           data: {
             tutorId: input.tutorId,
             pagoId: pago.pagoId,
-            tipoMovimiento: 'INGRESO',
+            tipo: 'INGRESO',
             monto: saldoAFavorGenerado,
-            saldoAnterior: 0, // En una app real lo leeríamos antes
-            saldoNuevo: saldoAFavorGenerado, // En una app real, calcular bien
-            fechaMovimiento: new Date(),
-            descripcion: 'Saldo a favor generado por exceso en pago.'
+            descripcion: 'Saldo a favor generado por exceso en pago.',
+            creadoPor: registradorId
           }
         });
       }

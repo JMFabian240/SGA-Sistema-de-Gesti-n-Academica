@@ -82,7 +82,7 @@ export class AuthService {
       usuario: {
         id: usuario.usuarioId,
         nombre: usuario.nombreCompleto,
-        roles: usuario.roles.map(r => r.rol.nombreRol),
+        roles: usuario.roles.map(r => r.rol.nombre),
         debeCambiarPwd: usuario.debeCambiarPwd
       }
     };

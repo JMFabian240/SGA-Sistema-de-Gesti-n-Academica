@@ -63,7 +63,7 @@ export class CalificacionesService {
       orderBy: [
         { grupoMateria: { grupo: { cicloId: 'desc' } } },
         { periodoId: 'asc' },
-        { grupoMateria: { materia: { nombreMateria: 'asc' } } }
+        { grupoMateria: { materia: { nombre: 'asc' } } }
       ]
     });
   }

@@ -42,7 +42,7 @@ export class AlumnosService {
           include: {
             ciclo: true,
             grupo: true,
-            beca: true
+            planPago: true
           }
         }
       }
