@@ -1,0 +1,74 @@
+import { prisma } from '@sga/data-access';
+import { TRPCError } from '@trpc/server';
+import { UpdateConfigInput } from './configuracion.schema';
+
+export class ConfiguracionService {
+  // Siempre asumiremos que la configuración global tiene el ID 1 (Single Row)
+  private static CONFIG_ID = 1;
+
+  /**
+   * Obtiene la configuración global actual
+   */
+  static async getConfiguracion() {
+    let config = await prisma.configuracionGlobal.findUnique({
+      where: { configuracionId: this.CONFIG_ID }
+    });
+
+    if (!config) {
+      // Si no existe, creamos una por defecto
+      config = await prisma.configuracionGlobal.create({
+        data: {
+          configuracionId: this.CONFIG_ID,
+          montoRecargoDefecto: 400.00,
+          diasGraciaRecargo: 5,
+          plazoInscripcionDias: 60,
+          umbralesSmtpDias: [5, 3, 1] // Umbrales por defecto en la DB (JSON)
+        }
+      });
+    }
+
+    return {
+      configuracionId: config.configuracionId,
+      montoRecargoDefecto: Number(config.montoRecargoDefecto),
+      diasGraciaRecargo: config.diasGraciaRecargo,
+      plazoInscripcionDias: config.plazoInscripcionDias,
+      umbralesSmtpDias: config.umbralesSmtpDias as number[],
+      actualizadoEn: config.actualizadoEn
+    };
+  }
+
+  /**
+   * Actualiza la configuración global
+   */
+  static async updateConfiguracion(input: UpdateConfigInput) {
+    // Asegurarse de que exista primero
+    await this.getConfiguracion();
+
+    try {
+      const updatedConfig = await prisma.configuracionGlobal.update({
+        where: { configuracionId: this.CONFIG_ID },
+        data: {
+          montoRecargoDefecto: input.montoRecargoDefecto !== undefined ? input.montoRecargoDefecto : undefined,
+          diasGraciaRecargo: input.diasGraciaRecargo,
+          plazoInscripcionDias: input.plazoInscripcionDias,
+          umbralesSmtpDias: input.umbralesSmtpDias ? input.umbralesSmtpDias : undefined,
+          actualizadoEn: new Date()
+        }
+      });
+
+      return {
+        configuracionId: updatedConfig.configuracionId,
+        montoRecargoDefecto: Number(updatedConfig.montoRecargoDefecto),
+        diasGraciaRecargo: updatedConfig.diasGraciaRecargo,
+        plazoInscripcionDias: updatedConfig.plazoInscripcionDias,
+        umbralesSmtpDias: updatedConfig.umbralesSmtpDias as number[],
+        actualizadoEn: updatedConfig.actualizadoEn
+      };
+    } catch (error) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Error al actualizar la configuración global'
+      });
+    }
+  }
+}
