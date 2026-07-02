@@ -1,0 +1,70 @@
+import { z } from 'zod';
+
+// Nivel Educativo
+export const createNivelEducativoSchema = z.object({
+  codigo: z.string().min(1, 'El código es requerido').max(15),
+  nombre: z.string().min(1, 'El nombre es requerido').max(60),
+  rvoe: z.string().max(40).optional(),
+  orden: z.number().int()
+});
+
+export const updateNivelEducativoSchema = createNivelEducativoSchema.partial().extend({
+  nivelId: z.number().int().positive()
+});
+
+// Ciclo Escolar
+export const createCicloEscolarSchema = z.object({
+  nombre: z.string().min(1, 'El nombre es requerido').max(20),
+  fechaInicio: z.string().datetime({ message: 'Formato de fecha inválido' }),
+  fechaFin: z.string().datetime({ message: 'Formato de fecha inválido' }),
+  activo: z.boolean().optional()
+});
+
+export const updateCicloEscolarSchema = createCicloEscolarSchema.partial().extend({
+  cicloId: z.number().int().positive()
+});
+
+// Materia
+export const createMateriaSchema = z.object({
+  nombre: z.string().min(1, 'El nombre es requerido').max(80),
+  clave: z.string().min(1, 'La clave es requerida').max(20)
+});
+
+export const updateMateriaSchema = createMateriaSchema.partial().extend({
+  materiaId: z.number().int().positive()
+});
+
+// Grupo
+export const createGrupoSchema = z.object({
+  nivelId: z.number().int().positive(),
+  cicloId: z.number().int().positive(),
+  nombre: z.string().min(1, 'El nombre es requerido').max(10),
+  cupoMaximo: z.number().int().positive()
+});
+
+export const updateGrupoSchema = createGrupoSchema.partial().extend({
+  grupoId: z.number().int().positive()
+});
+
+// GrupoMateria (Asignación)
+export const assignMateriaGrupoSchema = z.object({
+  grupoId: z.number().int().positive(),
+  materiaId: z.number().int().positive(),
+  docenteId: z.number().int().positive().optional()
+});
+
+export const unassignMateriaGrupoSchema = z.object({
+  grupoMateriaId: z.number().int().positive()
+});
+
+// Types
+export type CreateNivelEducativoInput = z.infer<typeof createNivelEducativoSchema>;
+export type UpdateNivelEducativoInput = z.infer<typeof updateNivelEducativoSchema>;
+export type CreateCicloEscolarInput = z.infer<typeof createCicloEscolarSchema>;
+export type UpdateCicloEscolarInput = z.infer<typeof updateCicloEscolarSchema>;
+export type CreateMateriaInput = z.infer<typeof createMateriaSchema>;
+export type UpdateMateriaInput = z.infer<typeof updateMateriaSchema>;
+export type CreateGrupoInput = z.infer<typeof createGrupoSchema>;
+export type UpdateGrupoInput = z.infer<typeof updateGrupoSchema>;
+export type AssignMateriaGrupoInput = z.infer<typeof assignMateriaGrupoSchema>;
+export type UnassignMateriaGrupoInput = z.infer<typeof unassignMateriaGrupoSchema>;
