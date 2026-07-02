@@ -1,0 +1,86 @@
+## Identidad del Proyecto
+- Nombre: SGA
+- Propósito: Sistema de gestión escolar de escritorio para
+  registro de pagos, gestión de alumnos, tutores y calificaciones
+- Distribución: instalable único sin requerir Docker, Node.js
+  ni PostgreSQL en el equipo del usuario (Tauri Sidecars)
+
+## Stack Tecnológico
+- @sga/front-end: React 18, Vite, TypeScript, CSS Modules,
+  TanStack Query, React Router
+- @sga/back-end: Fastify, tRPC, Zod
+- @sga/data-access: Prisma ORM, PostgreSQL portable
+- @sga/app-tauri: Tauri v2, Rust
+
+## Arquitectura de Paquetes
+- @sga/front-end → solo UI, renderizado por WebView2
+- @sga/back-end → lógica de negocio y endpoints tRPC,
+  corre como sidecar
+- @sga/data-access → única fuente de verdad de la BD
+- @sga/app-tauri → orquestador de procesos sidecar
+
+## Flujo de Datos
+Usuario → React (TanStack Query)
+       → tRPC client
+       → Fastify sidecar (tRPC router + Zod)
+       → Prisma ORM
+       → PostgreSQL portable (sidecar)
+
+## Convenciones de Código
+- TypeScript estricto en todos los paquetes (strict: true)
+- Nunca usar 'any' como tipo
+- Archivos en kebab-case: mi-componente.tsx
+- Componentes React en PascalCase: MiComponente
+- Funciones y variables en camelCase: miVariable
+- Toda entrada del backend validada con Zod
+
+## Organización de Archivos y Directorios
+- **Priorizar el Orden:** Tanto al crear archivos de código como de documentación, prioriza siempre mantener una estructura limpia.
+- **Creación de Directorios:** Si vas a crear archivos relacionados, crea un subdirectorio específico para separarlos y estructurar el contenido de forma lógica, evitando dejar archivos revueltos o sueltos.
+
+## Reglas por Capa
+- @sga/front-end: NUNCA importar PrismaClient directamente
+- @sga/back-end: TODA comunicación con BD va por data-access
+- @sga/data-access: única capa que conecta a PostgreSQL
+- @sga/app-tauri: sin lógica de negocio, solo orquesta
+
+## Reglas de Base de Datos
+- Toda modificación al schema va en prisma/schema.prisma
+- Nunca modificar la BD directamente sin migración Prisma
+- Nombrar migraciones descriptivamente:
+  add_tabla_campo / update_tabla_campo / remove_tabla_campo
+
+## Documentación
+- **Docs-First**: Toda nueva funcionalidad debe ser documentada primero. Ninguna funcionalidad se considera terminada ni debe programarse sin que antes se hayan generado sus requerimientos y diagramas en `docs/design/`.
+- **Ingeniería Inversa**: Si ya existe código sin documentar, utiliza las skills de diseño para leer el código fuente y generar los requerimientos, escenarios y diagramas de forma retrospectiva.
+- Artefactos de diseño en docs/design/ → consultar antes
+  de implementar cualquier funcionalidad nueva
+- Se cuenta con skills específicas para la creación y modificación
+  de artefactos de diseño. Úsalas cuando sea necesario.
+- Documentación generada en docs/generated/
+- Al introducir un nuevo patrón, actualizar el SKILL.md
+  del paquete correspondiente
+
+## Uso de Skills
+- Consultar .agents/skills/[paquete]/SKILL.md antes
+  de tocar archivos de ese paquete
+- Consultar .agents/skills/skill-creator/SKILL.md
+  antes de crear o mejorar cualquier skill
+
+### Flujo de Diseño y Arquitectura (Pipeline)
+Las skills de diseño han sido analizadas y están diseñadas para complementarse sin conflictos. Sigue este orden lógico al diseñar una nueva funcionalidad:
+1. **generador-requisitos**: Convierte ideas en Requerimientos Funcionales estructurados (ej. RF-XX).
+2. **principios-diseno**: Evalúa o define la arquitectura de alto nivel.
+3. **escenarios-cu**: Detalla un requerimiento en un Escenario de Caso de Uso.
+4. **diagramas-robustez**: Convierte el Escenario de CU en un modelo BCE (Boundary-Control-Entity).
+5. **diagramas-secuencia**: Mapea el Escenario y el Diagrama de Robustez a interacciones técnicas.
+6. **diagramas-clases**: Genera el diseño técnico orientado a objetos.
+7. **Implementación**: Escribe el código con las skills de `front`, `back`, etc., basándote en los artefactos previos.
+
+## Prohibiciones
+- No instalar dependencias sin consultarme primero
+- No eliminar archivos sin confirmar
+- No cambiar estructura de carpetas sin avisar
+- No conectar @sga/front-end directamente a PostgreSQL
+- No subir archivos .env ni binarios .exe al repositorio
+- No modificar más de un paquete a la vez sin avisar
