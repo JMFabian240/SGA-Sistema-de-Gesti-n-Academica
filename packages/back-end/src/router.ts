@@ -4,6 +4,7 @@ import { configuracionRouter } from './modules/configuracion/configuracion.route
 import { gruposRouter } from './modules/grupos/grupos.router';
 import { tutoresRouter } from './modules/tutores/tutores.router';
 import { alumnosRouter } from './modules/alumnos/alumnos.router';
+import { pagosRouter } from './modules/pagos/pagos.router';
 
 export const appRouter = router({
   auth: authRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   grupos: gruposRouter,
   tutores: tutoresRouter,
   alumnos: alumnosRouter,
+  pagos: pagosRouter,
   // Otros módulos se agregarán aquí...
 });
 
