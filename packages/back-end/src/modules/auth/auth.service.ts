@@ -1,0 +1,127 @@
+import { prisma } from '@sga/data-access';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { TRPCError } from '@trpc/server';
+import { LoginInput } from './auth.schema';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+
+export class AuthService {
+  static async login(input: LoginInput, ip: string, userAgent: string) {
+    const usuario = await prisma.usuario.findUnique({
+      where: { correo: input.correo },
+      include: {
+        roles: {
+          include: {
+            rol: true
+          }
+        },
+        permisosModulos: true
+      }
+    });
+
+    if (!usuario) {
+      await this.registrarIntentoLogin(null, input.correo, false, ip, userAgent);
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' });
+    }
+
+    if (!usuario.activo || usuario.eliminadoEn) {
+      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta desactivada o eliminada' });
+    }
+
+    if (usuario.bloqueadoHasta && usuario.bloqueadoHasta > new Date()) {
+      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta bloqueada temporalmente' });
+    }
+
+    const isValid = await bcrypt.compare(input.contrasena, usuario.passwordHash);
+
+    if (!isValid) {
+      // Incrementar intentos fallidos
+      const intentos = (usuario.intentosFallidos || 0) + 1;
+      let bloqueadoHasta = null;
+
+      if (intentos >= 5) {
+        bloqueadoHasta = new Date();
+        bloqueadoHasta.setMinutes(bloqueadoHasta.getMinutes() + 15); // Bloquear por 15 minutos
+      }
+
+      await prisma.usuario.update({
+        where: { usuarioId: usuario.usuarioId },
+        data: { intentosFallidos: intentos, bloqueadoHasta }
+      });
+
+      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' });
+    }
+
+    // Resetear intentos fallidos
+    await prisma.usuario.update({
+      where: { usuarioId: usuario.usuarioId },
+      data: { intentosFallidos: 0, bloqueadoHasta: null, ultimoAcceso: new Date() }
+    });
+
+    await this.registrarIntentoLogin(usuario.usuarioId, input.correo, true, ip, userAgent);
+
+    // Generar token JWT
+    const jti = crypto.randomUUID();
+    const token = jwt.sign(
+      {
+        usuarioId: usuario.usuarioId,
+        nombreUsuario: usuario.nombreUsuario,
+        jti,
+      },
+      JWT_SECRET,
+      { expiresIn: '12h' }
+    );
+
+    return {
+      token,
+      usuario: {
+        id: usuario.usuarioId,
+        nombre: usuario.nombreCompleto,
+        roles: usuario.roles.map(r => r.rol.nombreRol),
+        debeCambiarPwd: usuario.debeCambiarPwd
+      }
+    };
+  }
+
+  static async logout(jti: string, usuarioId: number, exp: number) {
+    try {
+      await prisma.tokenRevocado.create({
+        data: {
+          jti,
+          usuarioId,
+          expiraEn: new Date(exp * 1000)
+        }
+      });
+      return { success: true };
+    } catch (e) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error al cerrar sesión' });
+    }
+  }
+
+  private static async registrarIntentoLogin(
+    usuarioId: number | null,
+    nombreUsuarioIntentado: string,
+    exitoso: boolean,
+    ip: string,
+    userAgent: string
+  ) {
+    try {
+      await prisma.intentoLogin.create({
+        data: {
+          usuarioId,
+          nombreUsuarioIntentado,
+          exitoso,
+          direccionIp: ip,
+          userAgent: userAgent
+        }
+      });
+    } catch (e) {
+      console.error('Error al registrar intento de login', e);
+    }
+  }
+}

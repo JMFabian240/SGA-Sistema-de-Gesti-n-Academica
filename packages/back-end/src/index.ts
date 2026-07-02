@@ -1,21 +1,16 @@
-import fastify from 'fastify';
-import { prisma } from '@sga/data-access';
+import { buildServer } from './server';
 
-const server = fastify();
-const port = Number(process.env.TRPC_PORT) || 3000;
+const server = buildServer();
+const PORT = Number(process.env.PORT) || 3000;
 
-server.get('/health', async () => {
-  return { status: 'ok' };
-});
-
-const start = async () => {
+async function start() {
   try {
-    await server.listen({ port, host: '127.0.0.1' });
-    console.log(`Backend server listening on http://127.0.0.1:${port}`);
+    await server.listen({ port: PORT, host: '0.0.0.0' });
+    console.log(`🚀 Server listening on http://localhost:${PORT}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
   }
-};
+}
 
 start();
