@@ -294,7 +294,7 @@ CREATE TABLE pago (
     tutor_id INT NOT NULL REFERENCES tutor(tutor_id),
     fecha_pago DATE NOT NULL,
     monto_total NUMERIC(12,2) NOT NULL,
-    metodo_pago VARCHAR(20) NOT NULL CHECK (metodo_pago IN ('TRANSFERENCIA', 'TARJETA_DEBITO', 'TARJETA_CREDITO')),
+    metodo_pago VARCHAR(20) NOT NULL CHECK (metodo_pago IN ('DEPOSITO,TRANSFERENCIA', 'TARJETA_DEBITO', 'TARJETA_CREDITO')),
     aplicado_a_saldo BOOLEAN DEFAULT FALSE,
     observaciones TEXT,
     registrado_por INT NOT NULL REFERENCES usuario(usuario_id),
@@ -345,7 +345,7 @@ CREATE TABLE movimiento_saldo (
 CREATE TABLE beca (
     beca_id SERIAL PRIMARY KEY,
     nombre_beca VARCHAR(60) NOT NULL,
-    criterio VARCHAR(25) NOT NULL CHECK (criterio IN ('ACADEMICA', 'SOCIOECONOMICA', 'DEPORTIVA', 'CULTURAL', 'POR_HERMANOS', 'PROMOCION_TEMPRANA')),
+    criterio VARCHAR(25) NOT NULL CHECK (criterio IN ('ACADEMICA', 'SOCIOECONOMICA', 'DEPORTIVA', 'CULTURAL', 'POR_HERMANOS', 'PROMOCION_TEMPRANA','EXTERNA')),
     porcentaje NUMERIC(5,2) NOT NULL,
     descripcion TEXT,
     creado_en TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

@@ -1,3 +1,2 @@
-export * from './client';
-// Export generated Prisma types here if needed
-// export * from '@prisma/client';
+export { prisma } from './client';
+export * from '@prisma/client';
