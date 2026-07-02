@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Docente" as Docente
+boundary "Pantalla\nConsulta Alumno" as PantallaConsulta
+control "Buscador\nAlumnos" as Buscador
+entity "Expediente\nAlumno" as Expediente
+
+Docente --> PantallaConsulta : Navega y escribe criterio
+Docente --> PantallaConsulta : Ejecuta búsqueda
+PantallaConsulta --> Buscador : Envía parámetros de búsqueda
+Buscador --> Expediente : Consulta perfiles (ocultando datos sensibles)
+Expediente --> Buscador : Retorna coincidencias permitidas
+Buscador --> PantallaConsulta : Despliega lista de resultados
+Docente --> PantallaConsulta : Selecciona un perfil
+PantallaConsulta --> Buscador : Solicita perfil completo básico
+Buscador --> PantallaConsulta : Retorna perfil (nombre, grado, grupo, tutores)
+PantallaConsulta --> Docente : Muestra perfil del alumno
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Alumnos.
+    Administrador -> Boundary: Utiliza la barra de búsqueda para localizar al alumno por nombre o matrícula.
+    Administrador -> Boundary: El actor selecciona el expediente deseado de la lista de resultados.
+    Administrador -> Boundary: El actor hace clic en la opción 'Editar' o 'Modificar datos'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: habilita los campos del formulario con la información actual precargada.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor ingresa la información corregida o actualizada (grado, grupo, personas autorizadas u otros datos escolares permitidos).
+    Administrador -> Boundary: El actor hace clic en 'Guardar cambios'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida que los nuevos datos se...
+    activate Control
+    Control --> Boundary: valida que los nuevos datos sean correctos, que no falte información obligatoria y que los valores de CURP y matrícula, en caso de ser modificados, no estén ya asignados a otro alumno en el sistema.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: actualiza la base de datos de forma inmediata, registra la acción en la bitácora de auditoría y muestra el mensaje: 'Datos actualizados correctamente'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

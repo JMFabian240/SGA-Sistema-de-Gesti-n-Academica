@@ -1,0 +1,27 @@
+@startuml
+actor Administrador
+participant "Pantalla\nBitácora" as Boundary
+participant "Controlador\nSeguridad" as Control
+database "Registro\nBitácora" as Entity
+
+Administrador -> Boundary: Ingresa al módulo de Seguridad y Bitácora
+activate Boundary
+Boundary -> Control: SolicitarHistorial()
+activate Control
+Control -> Entity: SelectAll() order by fecha desc
+activate Entity
+
+alt Recuperación Exitosa
+    Entity --> Control: Retorna registros
+    Control --> Boundary: Renderiza registros cronológicamente
+    Boundary --> Administrador: Despliega tabla con historial (Usuario, Fecha, Módulo, Cambio)
+else Base de datos sin actividad
+    Entity --> Control: Retorna lista vacía
+    deactivate Entity
+    Control --> Boundary: Historial vacío
+    deactivate Control
+    Boundary --> Administrador: Muestra mensaje "Aún no hay registros de actividad en la plataforma"
+end
+
+deactivate Boundary
+@enduml

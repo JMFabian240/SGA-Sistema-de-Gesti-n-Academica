@@ -1,0 +1,39 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: Selecciona 'Gestión de Alumnos' → 'Registrar nuevo alumno' en la interfaz.
+    Boundary -> Control: Valida token de sesión activo ...
+    activate Control
+    Control --> Boundary: Valida token de sesión activo y privilegios del rol (ROLE\_ADMIN / ROLE\_GESTOR).
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: Renderiza el formulario de registro con todos los campos requeridos.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: Ingresa los datos personales del alumno: nombre completo, CURP, número de matrícula y fecha de nacimiento.
+    Administrador -> Boundary: Selecciona el nivel educativo (preescolar, primaria, secundaria o bachillerato), el grado y el grupo del catálogo disponible.
+    Administrador -> Boundary: Ingresa los nombres de las personas autorizadas para recoger al alumno.
+    Administrador -> Boundary: Asocia al alumno con un perfil de tutor existente buscándolo por RFC o nombre; o inicia la creación de un nuevo tutor (ver Punto de Extensión RF-11).
+    Boundary -> Control: Verifica en base de datos que ...
+    activate Control
+    Control --> Boundary: Verifica en base de datos que la CURP y la matrícula ingresadas no existan en ningún expediente activo o inactivo.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: Hace clic en 'Guardar expediente'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: Valida que todos los campos ob...
+    activate Control
+    Control --> Boundary: Valida que todos los campos obligatorios estén completos y con formato correcto.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: Inicia transacción SQL; inserta el nuevo expediente vinculado al ID del tutor y ejecuta Commit.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: Registra la acción en la bitácora de auditoría con usuario ejecutor, fecha-hora, módulo afectado y tipo de operación.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: Muestra mensaje de éxito: 'Alumno registrado correctamente. Expediente disponible para asignación de becas y cobros'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

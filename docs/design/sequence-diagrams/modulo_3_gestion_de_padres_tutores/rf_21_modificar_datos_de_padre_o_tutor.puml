@@ -1,0 +1,25 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Gestión de Padres/Tutores.
+    Administrador -> Boundary: Localiza al tutor por nombre o RFC.
+    Control --> Boundary: despliega el perfil con la información actual.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor hace clic en 'Editar datos'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: habilita el formulario con los datos precargados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor actualiza los datos deseados: contacto (teléfono, correo, dirección) o perfil general (RFC, régimen fiscal, CURP del alumno, RVOE del nivel).
+    Administrador -> Boundary: El actor hace clic en 'Guardar cambios'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida campos obligatorios y u...
+    activate Control
+    Control --> Boundary: valida campos obligatorios y unicidad del RFC.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: actualiza el perfil, registra en bitácora y muestra: 'Datos actualizados. Los cambios fiscales aplican solo a facturas futuras'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

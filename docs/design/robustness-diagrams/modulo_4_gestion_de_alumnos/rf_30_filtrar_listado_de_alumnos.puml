@@ -1,0 +1,19 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nListado Alumnos" as PantallaListado
+control "Motor\nFiltros" as MotorFiltros
+entity "Tabla\nAlumnos" as BDAlumnos
+
+Actor --> PantallaListado : Selecciona criterios (nivel, grado, grupo)
+PantallaListado --> MotorFiltros : Envía parámetros de filtro
+MotorFiltros --> BDAlumnos : Consulta con filtros aplicados
+BDAlumnos --> MotorFiltros : Retorna subconjunto de alumnos
+MotorFiltros --> PantallaListado : Renderiza tabla filtrada
+Actor --> PantallaListado : Selecciona "Exportar" (CSV)
+PantallaListado --> MotorFiltros : Solicita archivo
+MotorFiltros --> PantallaListado : Genera archivo CSV
+PantallaListado --> Actor : Inicia descarga de archivo
+@enduml

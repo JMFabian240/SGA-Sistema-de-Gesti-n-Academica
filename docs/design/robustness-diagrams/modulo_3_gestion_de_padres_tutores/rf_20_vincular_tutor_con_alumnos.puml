@@ -1,0 +1,24 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador / Gestor" as Actor
+boundary "Pantalla\nVinculación" as PantallaVinculo
+control "Gestor\nVinculaciones" as CtrlVinculo
+entity "Perfil\nTutor" as PerfilTutor
+entity "Expediente\nAlumno" as ExpedienteAlumno
+
+Actor --> PantallaVinculo : Busca y selecciona tutor
+PantallaVinculo --> CtrlVinculo : Carga perfil y alumnos vinculados
+Actor --> PantallaVinculo : Selecciona "Vincular alumno" e ingresa matrícula
+PantallaVinculo --> CtrlVinculo : Envía búsqueda de alumno
+CtrlVinculo --> ExpedienteAlumno : Consulta coincidencias
+ExpedienteAlumno --> CtrlVinculo : Retorna resultados
+CtrlVinculo --> PantallaVinculo : Muestra resultados de alumno
+Actor --> PantallaVinculo : Selecciona alumno deseado
+PantallaVinculo --> CtrlVinculo : Solicita vinculación
+CtrlVinculo --> PerfilTutor : Verifica no duplicidad y crea vínculo
+PerfilTutor --> CtrlVinculo : Confirma asociación
+CtrlVinculo --> PantallaVinculo : Envía éxito y actualiza lista
+PantallaVinculo --> Actor : Muestra "Alumno vinculado correctamente"
+@enduml

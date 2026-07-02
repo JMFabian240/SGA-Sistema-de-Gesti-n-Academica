@@ -1,0 +1,19 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Alumnos.
+    Control --> Boundary: despliega el listado completo de alumnos registrados con sus datos básicos.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona uno o más criterios de filtrado disponibles: nivel educativo, grado o grupo. Adicionalmente, el actor puede activar la opción 'Incluir alumnos inactivos o dados de baja' si desea ampliar el alcance de la búsqueda.
+    Control --> Boundary: procesa los criterios seleccionados y despliega únicamente los alumnos que coincidan con todos los filtros aplicados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor visualiza el listado filtrado con el nombre del alumno, grado, grupo, nivel y estado del expediente.
+    Administrador -> Boundary: Opcionalmente, el actor hace clic en 'Exportar' y selecciona el formato CSV.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: genera y descarga el archivo con el listado filtrado en el formato elegido.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

@@ -1,0 +1,25 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Gestor / Caja" as Actor
+boundary "Pantalla\nRegistro Pagos" as PantallaPagos
+control "Procesador\nPagos" as GestorPagos
+entity "Estado\nCuenta" as EstadoCuenta
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaPagos : Localiza adeudo de alumno
+PantallaPagos --> GestorPagos : Solicita adeudo pendiente
+GestorPagos --> EstadoCuenta : Consulta monto
+EstadoCuenta --> GestorPagos : Retorna monto a pagar
+GestorPagos --> PantallaPagos : Despliega formulario
+Actor --> PantallaPagos : Captura monto recibido y método
+Actor --> PantallaPagos : Clic "Registrar Pago"
+PantallaPagos --> GestorPagos : Envía transacción
+GestorPagos --> EstadoCuenta : Valida y descuenta saldo
+EstadoCuenta --> GestorPagos : Actualiza a "Pagado"
+GestorPagos --> Bitacora : Guarda movimiento en historial
+Bitacora --> GestorPagos : Log confirmado
+GestorPagos --> PantallaPagos : Retorna éxito y genera recibo
+PantallaPagos --> Actor : Muestra recibo generado
+@enduml

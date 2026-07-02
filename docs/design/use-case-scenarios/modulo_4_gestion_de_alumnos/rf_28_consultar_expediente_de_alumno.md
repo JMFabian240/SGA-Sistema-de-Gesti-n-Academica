@@ -1,0 +1,13 @@
+# RF-28: Consultar expediente de alumno
+
+| Campo | Descripción |
+| :---- | ----- |
+| **Autor** | José Manuel Fabian Hernández |
+| **Nombre** | RF-28: Consultar expediente de alumno |
+| **Actor** | Administrador y Gestor Administrativo |
+| **Objetivo** | Buscar y visualizar de forma completa la información personal, escolar y de seguridad de un estudiante, así como los datos del padre o tutor vinculado a su expediente. |
+| **Flujo Principal** | 1. El actor (Administrador o Gestor) ingresa al módulo de Gestión de Alumnos.<br>2. Se ubica en la barra de búsqueda del directorio de alumnos.<br>3. El actor ingresa un parámetro de búsqueda: nombre parcial o completo, matrícula o CURP del alumno.<br>4. El actor ejecuta la búsqueda presionando Enter o el botón de buscar.<br>5. El sistema procesa la consulta y despliega una lista con los resultados coincidentes.<br>6. El actor selecciona el expediente deseado haciendo clic sobre él.<br>7. El sistema despliega una vista detallada con todos los datos del alumno y la información de contacto del tutor correspondiente. |
+| **Flujo Alterno** | <b>A.</b> Búsqueda sin resultados:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 5, el sistema no encuentra ningún expediente que coincida con el nombre, matrícula o CURP ingresado.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema muestra el mensaje: "No se encontraron resultados para la búsqueda solicitada".<br>&nbsp;&nbsp;&nbsp;&nbsp;3. El actor limpia la barra de búsqueda y vuelve a intentar con un parámetro diferente (regresa al paso 3).<br><br><b>B.</b> Selección de alumno inactivo o dado de baja:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 6, el actor selecciona el expediente de un alumno con estatus de baja o inactivo.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema despliega la vista detallada, pero resalta en la cabecera el estado "INACTIVO" o "BAJA" en color rojo para evitar confusiones operativas. |
+| **Precondiciones** | El actor debe tener una sesión activa con los privilegios de Administrador o Gestor Administrativo. Deben existir alumnos registrados previamente en la base de datos. |
+| **Postcondiciones** | El actor visualiza la información completa del expediente. Al ser una operación de consulta, no se realiza ninguna modificación, creación ni eliminación en la base de datos. |
+| **Reglas de negocio involucradas** | • La consulta completa de expedientes y datos del tutor está habilitada únicamente para los perfiles Administrador y Gestor Administrativo.<br>• El motor de búsqueda debe soportar consultas por nombre, matrícula y CURP para facilitar la localización rápida del expediente.<br>• Los expedientes de alumnos inactivos o dados de baja permanecen consultables, pero deben señalarse visualmente con su estado actual. |

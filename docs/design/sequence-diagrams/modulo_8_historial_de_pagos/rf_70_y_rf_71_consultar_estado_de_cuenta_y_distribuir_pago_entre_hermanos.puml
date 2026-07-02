@@ -1,0 +1,30 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Pagos.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la opción de consultar por 'Tutor / Familia'.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Ingresa el nombre del tutor o de cualquiera de sus alumnos vinculados.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra el estado de cuenta consolidado, enlistando todos los adeudos pendientes agrupados por cada hermano.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor hace clic en 'Registrar Pago Múltiple'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: permite al actor seleccionar (palomear) los conceptos que el tutor desea liquidar, incluso si pertenecen a diferentes hijos.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor ingresa el monto total recibido, fecha y método de pago (Transferencia, Tarjeta, Depósito) y adjunta el comprobante digital único.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Hace clic en 'Procesar Pago'.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: liquida todos los conceptos seleccionados distribuyendo el monto, actualiza el estado de cada adeudo, vincula el mismo comprobante a todos ellos y genera un único recibo desglosado.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

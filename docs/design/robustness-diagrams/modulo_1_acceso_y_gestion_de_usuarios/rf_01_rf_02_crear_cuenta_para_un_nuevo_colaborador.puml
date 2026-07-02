@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nGestión Usuarios" as PantallaUsuarios
+control "Gestor\nCuentas" as GestorCuentas
+entity "Registro\nUsuarios" as RegistroUsuarios
+
+Admin --> PantallaUsuarios : Selecciona registrar colaborador
+PantallaUsuarios --> GestorCuentas : Solicita formulario
+GestorCuentas --> PantallaUsuarios : Despliega formulario
+Admin --> PantallaUsuarios : Ingresa datos, rol y contraseña
+Admin --> PantallaUsuarios : Clic en "Guardar"
+PantallaUsuarios --> GestorCuentas : Envía datos de nueva cuenta
+GestorCuentas --> RegistroUsuarios : Valida información y guarda
+RegistroUsuarios --> GestorCuentas : Confirma creación
+GestorCuentas --> PantallaUsuarios : Retorna mensaje de éxito
+PantallaUsuarios --> Admin : Muestra mensaje y lista actualizada
+@enduml

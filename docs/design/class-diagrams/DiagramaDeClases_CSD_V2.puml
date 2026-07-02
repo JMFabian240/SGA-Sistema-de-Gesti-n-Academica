@@ -1,0 +1,636 @@
+@startuml DiagramaDeClases_CSD
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+' =========================================================
+'  ACADEMICO
+' =========================================================
+
+class ExpedienteAcademico {
+  - idExpediente: UUID
+  - idAlumno: UUID
+  - idCiclo: UUID
+  - promedioGeneral: Decimal
+  - creditosAprobados: Integer
+  --
+  + recalcularPromedioGlobal(): Decimal
+  + emitirBoletaInterna(): File
+  + agregarCalificacion(nuevaCalificacion: Calificacion): void
+  + calcularPromedioGeneral(): Decimal
+  + generarCalendarioCargos(plan: PlanPago): void
+}
+
+abstract class Calificacion <<Abstract>> {
+  - idCalificacion: UUID
+  - idExpediente: UUID
+  - materia: String
+  - periodoEvaluacion: TipoPeridoEvaluacion
+  - fechaCaptura: DateTime
+  --
+  + registrarEvaluacion(): void
+  + modificarEvaluacion(motivo: String): void
+}
+
+class CalificacionCurricular {
+  - materia: String
+  - valorNumerico: Decimal
+  --
+  + actualizarValor(nuevoValor: Decimal): void
+}
+
+class CalificacionExtracuricular {
+  - club: String
+  - valorNumerico: Decimal
+  --
+  + actualizarValor(nuevoValor: Decimal): void
+}
+
+class CalificacionTaller {
+  - materia: String
+  - escala: EscalaTaller
+  --
+  + actualizarEscala(nuevaEscala: EscalaTaller): void
+}
+
+enum EscalaTaller {
+  ACREDITADO
+  NO_ACREDITADO
+}
+
+class EvaluacionAcademica {
+  - id: UUID
+  - idAlumno: UUID
+  - materia: String
+  - periodo: TipoEvaluacion
+  - calificacionNumerica: double
+  - calificacionCualitativa: string
+  --
+  + aperturarCiclo(): void
+  + cerrarCiclo(): void
+}
+
+enum TipoPeridoEvaluacion {
+  PARCIAL
+  BIMESTRE
+  BLOQUE
+  TRIMESTRE
+}
+
+class Boleta {
+  - fechaEmision: Date
+  - observacionesPreescolar: String
+  - recomendacionesPreescolar: String
+  --
+  + generarFormatoDinamico(): File
+  + integrarEspaciosParaFirmas(): void
+}
+
+enum TipoBoleta {
+  PREESCOLAR
+  PRIMARIA
+  SECUNDARIA
+  BACHILLERATO
+}
+
+class ReporteAcademico {
+  - fechaGeneracion: DateTime
+  - nivelFiltro: NivelEducativo
+  --
+  + generarReporteEvaluaciones(): void
+  + exportarExcel(): File
+}
+
+class Grado {
+  - id: UUID
+  - nivel: NivelEducativo
+  - numeroGrado: Integer
+  --
+  + obtenerMateriasCurriculares(): List<String>
+}
+
+enum NivelEducativo {
+  PREESCOLAR
+  PRIMARIA
+  SECUNDARIA
+  BACHILLERATO
+}
+
+class Grupo {
+  - id: UUID
+  - idGrado: UUID
+  - identificador: String
+  - capacidadMaxima: int
+  --
+  + asignarAlumno(idAlumno): void
+  + verificarCapacidadDisponible(): boolean
+}
+
+class CicloEscolar {
+  - id: UUID
+  - nombre: String
+  - fechaInicio: Date
+  - fechaFin: Date
+  - estado: EstadoCicloEscolar
+  --
+  + aperturarCiclo(): void
+  + cerrarCiclo(): void
+}
+
+enum EstadoCicloEscolar {
+  ABIERTO
+  CERRADO
+}
+
+class CierreCicloEscolar {
+  - id: UUID
+  - fechaEjecucion: DateTime
+  - ejecutadoPorUsuario: UUID
+  --
+  + ejecutarPromocionMasiva(): void
+  + retenerAlumnosDeudores(): void
+}
+
+class PromocionTemprana {
+  - id: UUID
+  - fechaInicio: Date
+  - fechaFin: Date
+  - porcentajeDescuento: Decimal
+  --
+  + validarVigencia(fechaActual: Date): Boolean
+}
+
+' =========================================================
+'  ALUMNOS Y FAMILIA
+' =========================================================
+
+class Alumno {
+  - idAlumno: UUID
+  - nombreCompleto: String
+  - curp: String
+  - matricula: String
+  - fechaNacimiento: Date
+  - nivelEducativo: NivelEducativo
+  - estado: EstadoAlumno
+  - personasAutorizadas: arrayList<PersonaAutorizada>
+  - tipoSangre: String
+  - alergias: string
+  - padecimiento: String
+  --
+  + promoverSiguienteGrado(): void
+  + transitarEstado(nuevoEstado: EstadoAlumno): void
+  + verificarBloqueoExamen(): Boolean
+}
+
+enum EstadoAlumno {
+  ACTIVO
+  BAJA_DEFINITIVA
+  BAJA_TEMPORAL
+  EGRESADO
+  TRANSICION_PENDIENTE
+}
+
+class Tutor {
+  - id: UUID
+  - nombreCompleto: String
+  - direccion: String
+  - telefono: String
+  - correo: String
+  - requiereFactura: Boolean
+  - tipoPagoHabitual: MetodoPago
+  --
+  + vincularAlumno(idAlumno: UUID): void
+  + consultarDeudaConsolidada(): Decimal
+  + actualizarPreferenciaFacturacion(requiere: Boolean): void
+}
+
+class PersonaAutorizada {
+  - idPersonaAutorizada: UUID
+  - idAlumno: UUID
+  - nombreCompleto: String
+  - parentesco: String
+  - telefonoEmergencia: String
+  --
+  + agregarAutorizado(): void
+  + removerAutorizado(): void
+}
+
+class DatosFiscales {
+  - id: UUID
+  - rfc: String
+  - nombreRazonSocial: String
+  - regimenFiscal: String
+  - direccionFiscal: String
+  - curpAsociada: String
+  - rvoeNivel: String
+  --
+  + actualizarInformacionFiscal(): void
+  + validarEstructuraRFC(): Boolean
+}
+
+class EstadoCuentaFamiliar {
+  - idFamilia: UUID
+  - deudaTotalConsolidada: Decimal
+  --
+  + recalcularDeudaTotal(): Decimal
+  + desglosarAdeudosPorHijo(): List<Cargo>
+}
+
+' =========================================================
+'  BECAS
+' =========================================================
+
+class Beca {
+  - id: UUID
+  - nombre: String
+  - criterio: TipoCriterioBeca
+  - porcentajeDescuento: Decimal
+  --
+  + modificarPorcentaje(nuevoPorcentaje: Decimal): void
+}
+
+enum TipoCriterioBeca {
+  ACADEMICA
+  SOCIOECONOMICA
+  DEPORTIVA
+  CULTURAL
+  POR_HERMANOS
+  PROMOCION_TEMPRANA
+}
+
+class SolicitudBeca {
+  - id: UUID
+  - porcentaje: Decimal
+  - tipo: TipoSolicitudBeca
+  - estado: EstadoSolicitudBeca
+  - motivo: String
+  - fechaSolicitud: Date
+  --
+  + aprobarSolicitud(): void
+  + rechazarSolicitud(): void
+  + retirarPorMorosidad(): void
+}
+
+enum TipoSolicitudBeca {
+  NUEVA
+  RENOVACION
+  REACTIVACION
+}
+
+enum EstadoSolicitudBeca {
+  ACTIVA
+  SUSPENDIDA
+  CANCELADA
+  VENCIDA
+}
+
+' =========================================================
+'  PAGOS Y FINANZAS
+' =========================================================
+
+class Pago {
+  - id: UUID
+  - montoTotalAbonado: Decimal
+  - fechaPago: Date
+  - metodo: MetodoPago
+  --
+  + procesarTransaccion(): void
+  + anularPago(motivo: String): void
+  + generarComprobante(): ComprobanteDigital
+}
+
+enum MetodoPago {
+  DEPOSITO
+  TRANSFERENCIA
+  TARJETA_DEBITO
+  TARJETA_CREDITO
+}
+
+class DetallePago {
+  - id: UUID
+  - montoAsignado: Decimal
+  --
+  + vincularACargo(idCargo: UUID): void
+}
+
+class ComprobanteDigital {
+  - id: UUID
+  - nombreArchivo: String
+  - uuidArchivo: UUID
+  - rutaAlmacenamiento: String
+  --
+  + cargarArchivo(): void
+  + descargarDocumento(): File
+}
+
+class Cargo {
+  - id: UUID
+  - concepto: ConceptoCargo
+  - montoOriginal: BigDecimal
+  - fechaVencimiento: Date
+  - estadoPago: EstadoPago
+  - recargoAplicado: BigDecimal
+  --
+  + aplicarRecargoAutomatico(): void
+  + condonarRecargo(motivo: String): void
+  + calcularSaldoPendiente(): Decimal
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  VENCIDO
+  CANCELADO
+}
+
+enum ConceptoCargo {
+  COLEGIATURA
+  INSCRIPCION
+  ARANCEL
+  MATERIAL
+  LIBROS
+  UNIFORME
+}
+
+enum PlanPago {
+  PLAN_10_MESES
+  PLAN_12_MESES
+}
+
+class ConfiguracionColegiatura {
+  - idCC: UUID
+  - nivelEducativo: NivelEducativo
+  - montoInscripcion: Decimal
+  - montoMensualidad: Decimal
+  - montoArancel: Decimal
+  - montoMaterial: Decimal
+  - montoUniforme: Decimal
+  --
+  + actualizarTarifasCiclo(): void
+  + calcularPagoProporcional(fechaIngreso: Date): List<Cargo>
+}
+
+class ReporteFinanciero {
+  - fechaGeneracion: DateTime
+  - tipo: TipoReporte
+  - periodoFiltro: String
+  --
+  + generarResumenIngresosMensual(): void
+  + generarListaDeudores(): void
+}
+
+enum TipoReporte {
+  PAGOS_DIA
+  INGRESOS_MES
+  CICLO_COMPLETO
+  DEUDORES
+  ALUMNOS_EXAMEN_RESTRINGIDO
+  PADRES_FACTURABLES
+  BITACORA
+}
+
+class RegistroNotificacionSMTP {
+  - idRegistro: UUID
+  - idCargo: UUID
+  - idTutor: UUID
+  - tipoAviso: String
+  - fechaEnvio: DateTime
+  --
+  + registrarEnvio(idCargo: UUID, idTutor: UUID, tipoAviso: String): void
+  + verificarAvisoEnviado(idCargo: UUID, tipoAviso: String): Boolean
+}
+
+' =========================================================
+'  SEGURIDAD Y USUARIOS
+' =========================================================
+
+class CuentaUsuario {
+  - idCuenta: UUID
+  - nombreUsuario: String
+  - contrasenaHash: String
+  - rol: TipoRol
+  - estado: EstadoCuenta
+  - ultimoAcceso: DateTime
+  - intentosFallidos: Integer = 0
+  --
+  + iniciarSesion(): Boolean
+  + cerrarSesion(): void
+  + cambiarEstado(nuevoEstado: EstadoCuenta): void
+}
+
+enum TipoRol {
+  ADMINISTRADOR
+  GESTOR
+  DOCENTE
+}
+
+enum EstadoCuenta {
+  ACTIVA
+  DESACTIVA
+  BLOQUEDA
+}
+
+class PermisoModulo {
+  - idPermiso: UUID
+  - nombreModulo: String
+  - nivel: NivelPermiso
+  --
+  + otorgarPermiso(): void
+  + revocarPermiso(): void
+}
+
+enum NivelPermiso {
+  LECTURA
+  LECTURA_Y_ESCRITURA
+  DENEGADO
+}
+
+class Sesion {
+  - idSesion: UUID
+  - idUsuario: UUID
+  - token: String
+  - fechaInicio: DateTime
+  - fechaExpiracion: DateTime
+  --
+  + generarToken(): String
+  + validarVigencia(): Boolean
+  + destruirSesion(): void
+}
+
+class Empleado {
+  - idEmpleado: UUID
+  - nombreCompleto: String
+  - correo: String
+  - telefono: String
+  --
+  + actualizarDatos(nombre: String): void
+  + asignarCuenta(cuenta: CuentaUsuario): void
+}
+
+class Alerta {
+  - idAlerta: UUID
+  - idUsuarioDestino: UUID
+  - mensaje: String
+  - tipo: TipoAlerta
+  - fechaEmision: Timestamp
+  - leida: Boolean
+  --
+  + generarAlertaAutomatica(mensaje: String): void
+  + marcarComoLeida(): void
+  + descartar(): void
+}
+
+enum TipoAlerta {
+  ADEUDO
+  BECA
+  PAGO_VENCIDO
+  CIERRE_CICLO
+  DOCUMENTACION
+}
+
+class ConfiguracionGlobal <<Singleton>> {
+  - montoRecargo: double = 400.00
+  - diasGraciaRecargo: int = 5
+  - plazoInicioCicloDias: int = 60
+  - umbralesAvisoSMTP: List<int> = [5,3,1]
+  --
+  + obtenerInstancia(): ConfiguracionGlobal
+  + actualizarPoliticaMorosidad(nuevoRecargo: Decimal, nuevosDiasGracia: Integer): void
+  + actualizarUmbralesSMTP(nuevosDias: List<Integer>): void
+  + obtenerDiasRestantesVencimiento(fechaVencimiento: Date): Integer
+}
+
+' =========================================================
+'  BITACORA / AUDITORIA
+' =========================================================
+
+class RegistroBitacora {
+  - idRegistro: UUID
+  - fechaHora: DateTime
+  - accion: String
+  - entidadAfectada: String
+  - idEntidadAfectada: UUID
+  - idCuenta: UUID
+  --
+  + registrarEvento(accion: String, entidad: String): void
+  + exportarHistorial(rangoInicio: Date, rangoFin: Date): Archivo
+}
+
+class ReporteBitacora {
+  - idReporte: UUID
+  - fechaGeneracion: DateTime
+  - rangoInicio: DateTime
+  - rangoFin: DateTime
+  --
+  + exportarPDF(): File
+  + exportarExcel(): File
+}
+
+' =========================================================
+'  RELACIONES - Académico
+' =========================================================
+
+CalificacionCurricular --|> Calificacion
+CalificacionExtracuricular --|> Calificacion
+CalificacionTaller --|> Calificacion
+Calificacion "1" --* "0..*" ExpedienteAcademico
+Calificacion ..> TipoPeridoEvaluacion
+CalificacionTaller ..> EscalaTaller
+
+ExpedienteAcademico "1" -- "1" Alumno
+Alumno "1" -- "1..*" EvaluacionAcademica
+
+Boleta ..> ExpedienteAcademico : "1" -- "1..*"
+ReporteAcademico ..> ExpedienteAcademico : "1..*" -- "1"
+ReporteAcademico ..> TipoReporte
+Boleta ..> TipoBoleta
+
+Grado "1..*" -- "1" Alumno
+Grupo "1" -- "1..*" Grado
+Grupo "1" -- "0..*" Alumno
+Alumno ..> NivelEducativo
+
+CicloEscolar ..> EstadoCicloEscolar
+CicloEscolar "1" -- "0..*" Calificacion
+CierreCicloEscolar "1" -- "0..1" CicloEscolar
+PromocionTemprana "1" -- "0..1" CicloEscolar
+CierreCicloEscolar ..> ConfiguracionGlobal : Use
+
+' =========================================================
+'  RELACIONES - Alumnos y familia
+' =========================================================
+
+Alumno ..> EstadoAlumno
+PersonaAutorizada "1..*" --* "1" Alumno
+Alumno "1..*" o-- "1..*" Tutor
+DatosFiscales "0..1" --* "1" Tutor
+Tutor "1" -- "0..*" RegistroNotificacionSMTP
+EstadoCuentaFamiliar ..> Tutor : "1" -- "1..*"
+
+' =========================================================
+'  RELACIONES - Becas
+' =========================================================
+
+Alumno "1" -- "0..*" SolicitudBeca
+Beca "0..*" -- "1" SolicitudBeca
+Beca ..> TipoCriterioBeca
+SolicitudBeca ..> TipoSolicitudBeca
+SolicitudBeca ..> EstadoSolicitudBeca
+
+' =========================================================
+'  RELACIONES - Pagos y finanzas
+' =========================================================
+
+Alumno "0..*" -- "1" Pago
+Pago ..> MetodoPago
+DetallePago "1" --* "1..*" Pago
+ComprobanteDigital "1" --* "0..1" Pago
+Cargo ..> EstadoPago
+Cargo ..> ConceptoCargo
+Cargo "1" -- "0..*" DetallePago
+Alumno "1" -- "0..*" Cargo
+PlanPago -- Cargo
+Alumno -- PlanPago
+
+ConfiguracionColegiatura "1" -- "0..*" Cargo
+ConfiguracionColegiatura "1" o-- "1..*" CicloEscolar
+ConfiguracionColegiatura ..> RegistroBitacora : audita
+
+ReporteFinanciero ..> TipoReporte
+ReporteFinanciero ..> Pago : Use : "1" -- "0..*"
+
+RegistroNotificacionSMTP "1" -- "0..*" Cargo
+
+Cargo ..> ConfiguracionGlobal : Use
+Alerta ..> ConfiguracionGlobal : Use
+
+' =========================================================
+'  RELACIONES - Seguridad y usuarios
+' =========================================================
+
+CuentaUsuario ..> TipoRol
+CuentaUsuario ..> EstadoCuenta
+PermisoModulo "1" --* "1..*" CuentaUsuario
+PermisoModulo ..> NivelPermiso
+Sesion "1" --* "0..*" CuentaUsuario
+Empleado "1" -- "0..1" CuentaUsuario
+CuentaUsuario ..> ConfiguracionGlobal
+
+Alerta "1" --* "0..*" CuentaUsuario
+Alerta ..> TipoAlerta
+
+' =========================================================
+'  RELACIONES - Bitacora / Auditoria
+' =========================================================
+
+RegistroBitacora "1" -- "0..*" CuentaUsuario : registra
+ReporteBitacora ..> RegistroBitacora : Use : "1" -- "0..*"
+
+RegistroBitacora ..> Alumno : audita
+RegistroBitacora ..> Pago : audita
+RegistroBitacora ..> PermisoModulo : audita
+RegistroBitacora ..> Calificacion : audita
+RegistroBitacora ..> SolicitudBeca : audita
+RegistroBitacora ..> Cargo : audita
+
+@enduml

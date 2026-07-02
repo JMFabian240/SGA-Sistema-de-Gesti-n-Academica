@@ -1,0 +1,28 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Gestión de Padres/Tutores.
+    Administrador -> Boundary: Localiza al tutor por nombre o RFC mediante la barra de búsqueda.
+    Control --> Boundary: muestra el perfil del tutor y la lista de alumnos actualmente vinculados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona la opción 'Vincular alumno'.
+    Control --> Boundary: despliega un buscador de alumnos.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor ingresa nombre o matrícula del alumno y ejecuta la búsqueda.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra los resultados coincidentes.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona al alumno deseado.
+    Boundary -> Control: verifica que el alumno no esté...
+    activate Control
+    Control --> Boundary: verifica que el alumno no esté ya vinculado a este perfil.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: crea el vínculo y asocia el expediente al perfil de pagos del tutor.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra: 'Alumno vinculado correctamente' y actualiza la lista.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

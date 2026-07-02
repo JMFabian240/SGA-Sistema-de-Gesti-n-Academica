@@ -1,0 +1,23 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nGestión Alumnos" as PantallaGestion
+control "Controlador\nEstado Alumno" as CtrlEstado
+entity "Expediente\nAlumno" as BDExpediente
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaGestion : Busca y selecciona expediente
+Actor --> PantallaGestion : Clic "Desactivar expediente" (Baja)
+PantallaGestion --> CtrlEstado : Envía comando
+CtrlEstado --> PantallaGestion : Despliega cuadro confirmación
+Actor --> PantallaGestion : Confirma desactivación
+PantallaGestion --> CtrlEstado : Solicita cambio a Inactivo
+CtrlEstado --> BDExpediente : Cambia estado a "Inactivo"
+BDExpediente --> CtrlEstado : Actualización exitosa
+CtrlEstado --> Bitacora : Registra desactivación
+Bitacora --> CtrlEstado : Guarda log
+CtrlEstado --> PantallaGestion : Retorna éxito y refresca vistas
+PantallaGestion --> Actor : Muestra "Expediente desactivado"
+@enduml

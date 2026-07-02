@@ -1,0 +1,27 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nBajas" as PantallaBajas
+control "Gestor\nFinanciero Académico" as GestorFA
+entity "Expediente\nAlumno" as BDExpediente
+entity "Log\nAuditoría" as Bitacora
+
+Admin --> PantallaBajas : Filtra alumnos en "Baja Temporal"
+PantallaBajas --> GestorFA : Solicita lista baja temporal
+GestorFA --> BDExpediente : Consulta estado
+BDExpediente --> GestorFA : Retorna lista
+GestorFA --> PantallaBajas : Despliega lista
+Admin --> PantallaBajas : Selecciona expediente y clic baja definitiva
+PantallaBajas --> GestorFA : Verifica estatus
+GestorFA --> PantallaBajas : Muestra advertencia de cierre
+Admin --> PantallaBajas : Confirma baja definitiva
+PantallaBajas --> GestorFA : Ejecuta salida permanente
+GestorFA --> BDExpediente : Cambia a "Baja Definitiva" y detiene cobros
+BDExpediente --> GestorFA : Acción persistida
+GestorFA --> Bitacora : Registra ejecución de baja
+Bitacora --> GestorFA : Log guardado
+GestorFA --> PantallaBajas : Envía éxito
+PantallaBajas --> Admin : Muestra "Baja definitiva ejecutada"
+@enduml

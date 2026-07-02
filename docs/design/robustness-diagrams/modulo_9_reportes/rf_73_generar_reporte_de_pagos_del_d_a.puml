@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Reportes" as Pantalla
+control "Generador Reportes" as Generador
+entity "Registro Pagos" as BDPagos
+Admin --> Pantalla : Solicita reporte de pagos del día
+Pantalla --> Generador : Envía fecha actual
+Generador --> BDPagos : Consulta ingresos del día
+BDPagos --> Generador : Retorna sumatoria y lista
+Generador --> Pantalla : Despliega y exporta
+Pantalla --> Admin : Entrega corte de caja
+@enduml

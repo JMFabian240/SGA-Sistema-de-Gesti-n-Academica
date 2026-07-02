@@ -1,0 +1,44 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El usuario accede al módulo de pagos.
+    Administrador -> Boundary: Busca y selecciona al alumno.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra los conceptos de cobro pendientes.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona el concepto a pagar.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra el saldo pendiente.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario ingresa el monto, fecha y método de pago.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida la información....
+    activate Control
+    Control --> Boundary: valida la información.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra un resumen de la operación.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario confirma el registro del pago.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra el pago y actualiza el saldo.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: actualiza el estado del concepto según corresponda.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra la operación en el historial y muestra un mensaje de éxito.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

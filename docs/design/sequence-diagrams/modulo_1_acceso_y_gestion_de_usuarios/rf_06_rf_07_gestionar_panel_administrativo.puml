@@ -1,0 +1,56 @@
+﻿@startuml
+actor "Gestor Administrativo" as Gestor
+participant "Panel\nPrincipal" as Boundary
+participant "Controlador\nSeguridad" as ControlSeguridad
+participant "Controlador\nFinanciero" as ControlFinanciero
+database "Base de Datos" as Entity
+
+Gestor -> Boundary: Inicia sesiÃ³n
+activate Boundary
+Boundary -> ControlSeguridad: Validar Permisos(Gestor)
+activate ControlSeguridad
+ControlSeguridad --> Boundary: Redirige a Panel Seguro
+deactivate ControlSeguridad
+
+Boundary --> Gestor: Muestra panel administrativo (Escolar, Financiero, Pagos)
+
+alt NavegaciÃ³n Permitida
+    Gestor -> Boundary: Navega / Realiza consultas
+    Boundary -> ControlFinanciero: ConsultarDatos()
+    activate ControlFinanciero
+    ControlFinanciero -> Entity: Select()
+    activate Entity
+    Entity --> ControlFinanciero: Resultados
+    deactivate Entity
+    ControlFinanciero --> Boundary: Datos procesados
+    deactivate ControlFinanciero
+    Boundary --> Gestor: Muestra informaciÃ³n cotejada
+    
+    Gestor -> Boundary: Captura pago diario
+    Boundary -> ControlFinanciero: RegistrarPago()
+    activate ControlFinanciero
+    ControlFinanciero -> Entity: InsertPago()
+    activate Entity
+    Entity --> ControlFinanciero: Ã‰xito
+    deactivate Entity
+    ControlFinanciero --> Boundary: Pago registrado y saldos actualizados
+    deactivate ControlFinanciero
+    Boundary --> Gestor: Confirma pago
+    
+    Gestor -> Boundary: Genera reporte
+    Boundary -> ControlFinanciero: SolicitarReporte()
+    activate ControlFinanciero
+    ControlFinanciero --> Boundary: Archivo / Vista Reporte
+    deactivate ControlFinanciero
+    Boundary --> Gestor: Entrega reporte en pantalla o descarga
+else Intento de Acceso a Funciones CrÃ­ticas
+    Gestor -> Boundary: Intenta acceder a configuraciÃ³n crÃ­tica
+    Boundary -> ControlSeguridad: Validar Permisos()
+    activate ControlSeguridad
+    ControlSeguridad --> Boundary: Acceso denegado (Permisos insuficientes)
+    deactivate ControlSeguridad
+    Boundary --> Gestor: Muestra error de acceso denegado y devuelve al panel seguro
+end
+
+deactivate Boundary
+@enduml

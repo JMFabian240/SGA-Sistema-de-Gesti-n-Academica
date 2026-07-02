@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Exámenes" as Pantalla
+control "Motor Reglas" as Motor
+entity "Estado Cuenta" as BDEstado
+Admin --> Pantalla : Solicita lista derecho a examen
+Pantalla --> Motor : Evalúa morosidad vs políticas
+Motor --> BDEstado : Cruza pagos al corriente
+BDEstado --> Motor : Retorna alumnos solventes
+Motor --> Pantalla : Bloquea morosos
+Pantalla --> Admin : Muestra lista autorizada para examen
+@enduml

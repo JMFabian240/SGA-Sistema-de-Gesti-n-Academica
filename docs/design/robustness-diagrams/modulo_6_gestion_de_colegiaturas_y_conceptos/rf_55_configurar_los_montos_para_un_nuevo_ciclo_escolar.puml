@@ -1,0 +1,25 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nTarifas Ciclo" as PantallaTarifas
+control "Gestor\nFinanciero" as GestorFinanzas
+entity "Tabla\nTarifas" as BDTarifas
+entity "Log\nAuditoría" as Bitacora
+
+Admin --> PantallaTarifas : Selecciona "Configurar montos de ciclo"
+PantallaTarifas --> GestorFinanzas : Solicita estructura base
+GestorFinanzas --> BDTarifas : Recupera plantilla (Inscripción, Colegiatura, etc.)
+BDTarifas --> GestorFinanzas : Retorna conceptos por nivel
+GestorFinanzas --> PantallaTarifas : Despliega matriz de captura
+Admin --> PantallaTarifas : Captura montos (preescolar, primaria, secundaria, bachillerato)
+Admin --> PantallaTarifas : Clic "Guardar configuración"
+PantallaTarifas --> GestorFinanzas : Envía matriz de montos
+GestorFinanzas --> BDTarifas : Valida campos obligatorios y formato
+BDTarifas --> GestorFinanzas : Registra tarifas para el ciclo seleccionado
+GestorFinanzas --> Bitacora : Registra actualización de montos
+Bitacora --> GestorFinanzas : Log guardado
+GestorFinanzas --> PantallaTarifas : Confirma configuración
+PantallaTarifas --> Admin : Notifica "Montos configurados para ciclo escolar"
+@enduml

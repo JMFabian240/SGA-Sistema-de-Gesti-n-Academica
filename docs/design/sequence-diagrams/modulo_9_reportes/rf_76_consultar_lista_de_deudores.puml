@@ -1,0 +1,18 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes / Cobranza.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Hace clic en 'Lista de deudores'.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona un filtro opcional (por mes o periodo específico).
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: cruza las fechas de vencimiento con los pagos no realizados.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: despliega un listado agrupado por padre/tutor que incluye: nombre del tutor, deuda consolidada de toda la familia, nombres de los alumnos con adeudo y días totales de retraso.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

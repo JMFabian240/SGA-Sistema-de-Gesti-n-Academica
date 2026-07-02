@@ -1,0 +1,19 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Gestor / Caja" as Actor
+boundary "Pantalla\nPagos Adelantados" as PantallaPagos
+control "Motor\nPagos Múltiples" as MotorPagos
+entity "Estado\nCuenta" as EstadoCuenta
+
+Actor --> PantallaPagos : Selecciona múltiples meses futuros
+PantallaPagos --> MotorPagos : Evalúa meses seleccionados
+MotorPagos --> PantallaPagos : Despliega suma total
+Actor --> PantallaPagos : Ingresa pago por el total
+PantallaPagos --> MotorPagos : Procesa transacción global
+MotorPagos --> EstadoCuenta : Liquida colegiaturas seleccionadas
+EstadoCuenta --> MotorPagos : Cambia estado a "Pagado Adelantado"
+MotorPagos --> PantallaPagos : Genera recibo único global
+PantallaPagos --> Actor : Imprime o muestra recibo
+@enduml

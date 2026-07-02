@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Tutor / Alumno / Admin" as Actor
+boundary "Pantalla Historial" as Pantalla
+control "Buscador Académico" as Buscador
+entity "Historial Completo" as BDAcademico
+Actor --> Pantalla : Solicita calificaciones pasadas
+Pantalla --> Buscador : Filtra por ciclo escolar anterior
+Buscador --> BDAcademico : Consulta registros históricos
+BDAcademico --> Buscador : Retorna matriz de calificaciones
+Buscador --> Pantalla : Despliega resultados
+Pantalla --> Actor : Muestra calificaciones archivadas
+@enduml

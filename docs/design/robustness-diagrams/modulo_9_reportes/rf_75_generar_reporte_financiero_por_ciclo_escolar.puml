@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Reportes" as Pantalla
+control "Analista Financiero" as Analista
+entity "Base Datos Central" as BD
+Admin --> Pantalla : Solicita reporte anual / ciclo escolar
+Pantalla --> Analista : Envía ciclo objetivo
+Analista --> BD : Consolida colegiaturas, inscripciones y deudas
+BD --> Analista : Retorna big data
+Analista --> Pantalla : Exporta informe ejecutivo
+Pantalla --> Admin : Descarga PDF/Excel
+@enduml

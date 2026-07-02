@@ -1,0 +1,21 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nBúsqueda Expediente" as PantallaBusqueda
+control "Controlador\nAlumnos" as CtrlAlumnos
+entity "Expediente\nAlumno" as BDExpediente
+
+Actor --> PantallaBusqueda : Localiza alumno (nombre o matrícula)
+PantallaBusqueda --> CtrlAlumnos : Solicita búsqueda
+CtrlAlumnos --> BDExpediente : Consulta coincidencias
+BDExpediente --> CtrlAlumnos : Retorna resultados
+CtrlAlumnos --> PantallaBusqueda : Despliega resultados
+Actor --> PantallaBusqueda : Selecciona "Ver expediente"
+PantallaBusqueda --> CtrlAlumnos : Solicita expediente detallado
+CtrlAlumnos --> BDExpediente : Extrae datos completos
+BDExpediente --> CtrlAlumnos : Retorna perfil y datos escolares
+CtrlAlumnos --> PantallaBusqueda : Despliega información
+PantallaBusqueda --> Actor : Muestra detalles, tutor y datos financieros
+@enduml

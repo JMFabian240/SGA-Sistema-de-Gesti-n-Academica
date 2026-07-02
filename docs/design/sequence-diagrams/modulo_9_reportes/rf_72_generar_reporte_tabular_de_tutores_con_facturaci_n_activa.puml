@@ -1,0 +1,35 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo Directorio de datos fiscales.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra las opciones disponibles del directorio fiscal.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona la opción 'Generar reporte de tutores con facturación activa'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida los permisos del actor ...
+    activate Control
+    Control --> Boundary: valida los permisos del actor para consultar información fiscal.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: consulta los tutores que tienen activa la bandera 'Requiere facturación externa'.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: recupera los datos fiscales asociados a cada tutor encontrado.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: consolida la información en una estructura tabular.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: genera el reporte mostrando nombre del tutor, RFC, régimen fiscal, código postal y CFDI de uso.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra el reporte en pantalla.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona la opción Exportar.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: El actor elige el formato de exportación (PDF o Excel).
+    Control --> Boundary: genera el archivo correspondiente.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: descarga o pone a disposición el archivo generado.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

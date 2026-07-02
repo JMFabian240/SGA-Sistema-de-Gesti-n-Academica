@@ -1,0 +1,29 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Becas.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la opción 'Consultar catálogo de becas' y localiza el tipo de beca que desea modificar.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: El actor hace clic en 'Editar' sobre el tipo de beca seleccionado.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: habilita los campos del formulario con los datos actuales precargados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor actualiza el criterio de asignación, el porcentaje de descuento u otro atributo permitido.
+    Administrador -> Boundary: El actor hace clic en 'Guardar cambios'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida que los nuevos datos se...
+    activate Control
+    Control --> Boundary: valida que los nuevos datos sean correctos y que no se duplique el nombre con otra beca existente en el catálogo.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: actualiza el catálogo con los nuevos valores y muestra el mensaje: 'Tipo de beca actualizado correctamente'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

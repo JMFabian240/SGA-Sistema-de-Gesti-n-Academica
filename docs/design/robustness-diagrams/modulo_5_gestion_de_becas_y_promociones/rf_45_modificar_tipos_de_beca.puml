@@ -1,0 +1,25 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nEdición Becas" as PantallaEdicion
+control "Gestor\nModificaciones" as GestorMods
+entity "Catálogo\nBecas" as BDBecas
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaEdicion : Localiza beca y clic en "Editar"
+PantallaEdicion --> GestorMods : Solicita datos de beca
+GestorMods --> BDBecas : Consulta perfil de beca
+BDBecas --> GestorMods : Retorna perfil
+GestorMods --> PantallaEdicion : Habilita formulario precargado
+Actor --> PantallaEdicion : Modifica porcentaje o nombre
+Actor --> PantallaEdicion : Clic en "Guardar cambios"
+PantallaEdicion --> GestorMods : Envía payload
+GestorMods --> BDBecas : Aplica cambios (solo para inscripciones futuras)
+BDBecas --> GestorMods : Actualización confirmada
+GestorMods --> Bitacora : Registra modificación
+Bitacora --> GestorMods : Log guardado
+GestorMods --> PantallaEdicion : Retorna éxito
+PantallaEdicion --> Actor : Muestra confirmación de actualización
+@enduml

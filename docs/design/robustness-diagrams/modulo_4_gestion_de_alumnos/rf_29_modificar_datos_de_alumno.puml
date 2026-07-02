@@ -1,0 +1,25 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nEdición Alumno" as PantallaEdicion
+control "Gestor\nModificaciones" as GestorMods
+entity "Expediente\nAlumno" as BDExpediente
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaEdicion : Localiza alumno y selecciona "Editar"
+PantallaEdicion --> GestorMods : Solicita datos precargados
+GestorMods --> BDExpediente : Consulta perfil actual
+BDExpediente --> GestorMods : Retorna datos
+GestorMods --> PantallaEdicion : Habilita formulario
+Actor --> PantallaEdicion : Modifica datos (nombre, CURP, matrícula, grado)
+Actor --> PantallaEdicion : Clic en "Guardar cambios"
+PantallaEdicion --> GestorMods : Envía datos actualizados
+GestorMods --> BDExpediente : Valida unicidad (CURP/Matrícula) y obligatorios
+BDExpediente --> GestorMods : Confirma actualización
+GestorMods --> Bitacora : Registra modificación
+Bitacora --> GestorMods : Guarda log
+GestorMods --> PantallaEdicion : Retorna mensaje de éxito
+PantallaEdicion --> Actor : Muestra "Datos del alumno actualizados"
+@enduml

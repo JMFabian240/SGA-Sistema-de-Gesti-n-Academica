@@ -1,0 +1,45 @@
+@startuml
+actor "Administrador / Gestor" as Actor
+participant "Pantalla\nGestionAlumnos" as Boundary
+participant "Controlador\nAlumno" as Control
+database "Registro\nAlumno" as Entity
+
+Actor -> Boundary: Ingresa al módulo de Gestión de Alumnos
+activate Boundary
+Actor -> Boundary: Selecciona "Registrar nuevo alumno"
+Boundary -> Control: Solicita formulario de expediente
+activate Control
+Control --> Boundary: Retorna formulario
+deactivate Control
+Boundary --> Actor: Despliega formulario de registro
+Actor -> Boundary: Ingresa datos (nombre, CURP, matrícula, nacimiento, nivel, tutor)
+Actor -> Boundary: Clic en "Registrar Alumno"
+
+Boundary -> Control: Validar y guardar expediente
+activate Control
+
+alt CURP o Matrícula duplicada
+    Control -> Entity: VerificarUnicidad()
+    activate Entity
+    Entity --> Control: Existe = True
+    deactivate Entity
+    Control --> Boundary: Error: CURP/Matrícula duplicada
+    Boundary --> Actor: Alerta "Error: La CURP/Matrícula ya se encuentra registrada"
+    Actor -> Boundary: Corrige dato erróneo y reintenta
+    Boundary -> Control: Validar y guardar expediente
+else Faltan datos obligatorios
+    Control --> Boundary: Error: Faltan campos (tutor, nivel educativo)
+    Boundary --> Actor: Resalta campos en rojo y solicita llenado
+    Actor -> Boundary: Llena datos faltantes y reintenta
+    Boundary -> Control: Validar y guardar expediente
+end
+
+Control -> Entity: CrearExpediente()
+activate Entity
+Entity --> Control: Éxito
+deactivate Entity
+Control --> Boundary: Expediente creado exitosamente
+deactivate Control
+Boundary --> Actor: Muestra mensaje "Alumno registrado correctamente"
+deactivate Boundary
+@enduml

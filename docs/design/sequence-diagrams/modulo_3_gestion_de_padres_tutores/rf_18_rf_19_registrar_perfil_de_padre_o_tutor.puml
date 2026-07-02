@@ -1,0 +1,29 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Gestión de Padres/Tutores.
+    Administrador -> Boundary: Selecciona la opción 'Registrar nuevo padre/tutor'.
+    Control --> Boundary: despliega el formulario de registro.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor ingresa datos personales y de contacto: nombre completo, dirección, teléfono y correo electrónico.
+    Administrador -> Boundary: El actor ingresa datos fiscales: RFC y régimen fiscal.
+    Administrador -> Boundary: El actor indica si el tutor requiere factura electrónica (sí/no).
+    Administrador -> Boundary: El actor selecciona el tipo de pago habitual (transferencia, depósito o tarjeta).
+    Administrador -> Boundary: El actor ingresa la CURP del alumno asociado y el RVOE del nivel escolar.
+    Administrador -> Boundary: El actor hace clic en 'Guardar perfil'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida campos obligatorios y q...
+    activate Control
+    Control --> Boundary: valida campos obligatorios y que el RFC no esté duplicado.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: almacena el perfil y muestra: 'Perfil de tutor registrado correctamente. Ya puede vincularse con alumnos'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

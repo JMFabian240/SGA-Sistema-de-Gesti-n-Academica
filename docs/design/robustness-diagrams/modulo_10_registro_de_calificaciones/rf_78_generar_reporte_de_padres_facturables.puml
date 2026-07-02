@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Reportes" as Pantalla
+control "Generador Reportes" as Generador
+entity "Datos Facturación" as BDFact
+Admin --> Pantalla : Solicita reporte padres facturables
+Pantalla --> Generador : Inicia flujo
+Generador --> BDFact : Consulta tutores con datos fiscales
+BDFact --> Generador : Retorna lista
+Generador --> Pantalla : Renderiza reporte
+Pantalla --> Admin : Muestra archivo para descarga
+@enduml

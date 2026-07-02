@@ -1,0 +1,16 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nBitácora" as PantallaBitacora
+control "Auditor\nSistema" as Auditor
+entity "Registro\nBitácora" as LogBitacora
+
+Admin --> PantallaBitacora : Ingresa al módulo
+PantallaBitacora --> Auditor : Solicita historial completo
+Auditor --> LogBitacora : Consulta orden cronológico inverso
+LogBitacora --> Auditor : Retorna historial
+Auditor --> PantallaBitacora : Despliega tabla de historial
+PantallaBitacora --> Admin : Muestra registros de auditoría
+@enduml

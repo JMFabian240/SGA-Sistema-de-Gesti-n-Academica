@@ -1,0 +1,39 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El usuario accede al módulo de pagos.
+    Administrador -> Boundary: Busca y selecciona al alumno.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra el historial de pagos.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona el pago correspondiente.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la opción **Adjuntar comprobante**.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Elige una imagen o archivo PDF.
+    Boundary -> Control: valida el formato del archivo....
+    activate Control
+    Control --> Boundary: valida el formato del archivo.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra la información del archivo y del pago.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario confirma la operación.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: almacena el comprobante y lo relaciona con el pago.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra la operación.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra un mensaje de confirmación.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de directorio escolar.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Utiliza la barra de búsqueda e ingresa el nombre del alumno o el nombre del tutor.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: despliega las coincidencias encontradas.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el perfil del padre de familia o alumno deseado.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: carga y muestra en pantalla una línea de tiempo detallada con todos los pagos realizados, montos, fechas, estados (pagado, pendiente, vencido) y saldos restantes.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

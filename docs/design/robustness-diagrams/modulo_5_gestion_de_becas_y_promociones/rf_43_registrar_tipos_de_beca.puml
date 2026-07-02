@@ -1,0 +1,23 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nRegistro Becas" as PantallaBecas
+control "Controlador\nCatálogo Becas" as CtrlBecas
+entity "Catálogo\nBecas" as BDBecas
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaBecas : Selecciona "Nuevo tipo de beca"
+PantallaBecas --> CtrlBecas : Solicita formulario
+CtrlBecas --> PantallaBecas : Despliega formulario
+Actor --> PantallaBecas : Ingresa nombre, tipo y porcentaje
+Actor --> PantallaBecas : Clic en "Guardar Beca"
+PantallaBecas --> CtrlBecas : Envía datos de nueva beca
+CtrlBecas --> BDBecas : Valida porcentaje (1-100) y obligatorios
+BDBecas --> CtrlBecas : Confirma validación y guarda
+CtrlBecas --> Bitacora : Registra creación en bitácora
+Bitacora --> CtrlBecas : Log guardado
+CtrlBecas --> PantallaBecas : Retorna éxito
+PantallaBecas --> Actor : Muestra mensaje "Beca registrada"
+@enduml

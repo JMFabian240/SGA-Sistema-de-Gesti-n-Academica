@@ -1,0 +1,16 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nLínea de Tiempo" as PantallaHistorial
+control "Gestor\nConsultas" as GestorHistorial
+entity "Registro\nPagos" as BDPagos
+
+Actor --> PantallaHistorial : Busca tutor o alumno
+PantallaHistorial --> GestorHistorial : Solicita consolidado
+GestorHistorial --> BDPagos : Consulta historial ordenado por fecha
+BDPagos --> GestorHistorial : Retorna lista de movimientos
+GestorHistorial --> PantallaHistorial : Genera estructura de línea de tiempo
+PantallaHistorial --> Actor : Despliega historial interactivo
+@enduml

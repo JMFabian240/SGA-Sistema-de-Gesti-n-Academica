@@ -1,0 +1,45 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: accede al módulo de ciclo escolar.
+    Control --> Boundary: muestra las opciones disponibles.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: selecciona la opción Promoción por inscripción temprana.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra el formulario de configuración.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: selecciona el ciclo escolar correspondiente.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: ingresa la fecha de inicio y la fecha de finalización.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: selecciona el tipo de beneficio.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: define el porcentaje de descuento o la beca correspondiente.
+    Boundary -> Control: valida las fechas y el benefic...
+    activate Control
+    Control --> Boundary: valida las fechas y el beneficio seleccionado.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra un resumen de la configuración.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: revisa la información y selecciona Guardar promoción.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: solicita confirmación.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: confirma la operación.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra la promoción y la activa para el periodo configurado.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra la operación en la bitácora y muestra un mensaje de éxito.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

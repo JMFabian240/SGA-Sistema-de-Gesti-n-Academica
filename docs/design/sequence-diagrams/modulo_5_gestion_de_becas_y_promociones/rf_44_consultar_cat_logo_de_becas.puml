@@ -1,0 +1,23 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Becas.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la opción 'Consultar catálogo de becas'.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: consulta la base de datos y despliega en pantalla el listado completo de tipos de beca registrados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor visualiza para cada beca: nombre, criterio de asignación y porcentaje de descuento.
+    Administrador -> Boundary: Opcionalmente, el actor selecciona un tipo de beca específico para ver su detalle completo.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra la información detallada de la beca seleccionada.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

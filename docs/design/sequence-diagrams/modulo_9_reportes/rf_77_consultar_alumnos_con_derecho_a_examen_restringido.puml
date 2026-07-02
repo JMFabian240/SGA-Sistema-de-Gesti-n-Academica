@@ -1,0 +1,20 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes o Evaluación.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Hace clic en 'Alumnos con examen restringido'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: solicita el periodo de evaluación próximo a realizarse.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor indica el periodo (ej. Trimestre 1).
+    Control --> Boundary: cruza el historial de adeudos vigentes con el calendario de exámenes.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: genera y muestra la lista de los alumnos que no cumplen los requisitos financieros para presentar examen.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor exporta la lista en Excel o PDF para entregar a los docentes.
+
+@enduml

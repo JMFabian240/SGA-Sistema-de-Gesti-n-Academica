@@ -1,0 +1,19 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona 'Reporte Financiero por Ciclo Escolar'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra un menú desplegable con los ciclos escolares disponibles
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el ciclo (ej. 2026-2027) y presiona 'Generar'
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: procesa los datos y despliega el resumen: ingresos totales del ciclo, número de alumnos activos y total de pagos realizados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor exporta el reporte en Excel o PDF.
+
+@enduml

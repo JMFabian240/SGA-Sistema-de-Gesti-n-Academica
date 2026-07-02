@@ -1,0 +1,25 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa a la Configuración del Sistema en el panel administrativo.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la pestaña 'Políticas y Notificaciones'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra los parámetros actuales: días para recargo, días para alerta de morosidad, meses para baja automática, y días de anticipación para el envío de correos (ej. 5, 3 y 1 día).
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor modifica los valores numéricos requeridos para adaptarlos a una nueva política escolar.
+    Administrador -> Boundary: Hace clic en 'Guardar Cambios'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida que los valores sean ló...
+    activate Control
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: valida que los valores sean lógicos (ej. que el primer aviso sea antes que el último aviso) y actualiza la base de datos de configuración global.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

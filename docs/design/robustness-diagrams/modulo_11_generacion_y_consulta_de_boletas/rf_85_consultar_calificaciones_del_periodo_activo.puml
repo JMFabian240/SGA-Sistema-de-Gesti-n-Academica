@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Tutor / Alumno" as Actor
+boundary "Portal Boletas" as Pantalla
+control "Generador Boletas" as Generador
+entity "Historial Académico" as BDAcademico
+Actor --> Pantalla : Solicita boleta actual
+Pantalla --> Generador : Valida sesión y solicita notas
+Generador --> BDAcademico : Extrae calificaciones del periodo activo
+BDAcademico --> Generador : Retorna datos
+Generador --> Pantalla : Construye PDF visual de boleta
+Pantalla --> Actor : Muestra o descarga boleta oficial
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona 'Reporte de Padres Facturables'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: recupera a todos los tutores que tienen activa la casilla de 'Requiere factura electrónica', sin pedir parámetros extra.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: despliega un listado con: nombre, RFC, régimen fiscal, dirección, CURP del alumno asociado y tipo de pago habitual.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor hace clic en 'Exportar'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: descarga el archivo en Excel o PDF para su uso contable.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

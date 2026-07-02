@@ -1,0 +1,23 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nPromociones" as PantallaPromo
+control "Motor\nPromociones" as MotorPromo
+entity "Catálogo\nPromociones" as BDPromos
+entity "Log\nAuditoría" as Bitacora
+
+Admin --> PantallaPromo : Selecciona "Promoción por inscripción temprana"
+PantallaPromo --> MotorPromo : Solicita formulario configuración
+MotorPromo --> PantallaPromo : Muestra formulario
+Admin --> PantallaPromo : Ingresa fechas (inicio/fin) y selecciona beneficio
+Admin --> PantallaPromo : Clic en "Guardar promoción" y "Confirmar"
+PantallaPromo --> MotorPromo : Envía parámetros
+MotorPromo --> BDPromos : Valida consistencia de fechas e invoca catálogo becas
+BDPromos --> MotorPromo : Guarda periodo promocional
+MotorPromo --> Bitacora : Registra activación
+Bitacora --> MotorPromo : Log guardado
+MotorPromo --> PantallaPromo : Retorna confirmación
+PantallaPromo --> Admin : Muestra éxito y activa promoción
+@enduml

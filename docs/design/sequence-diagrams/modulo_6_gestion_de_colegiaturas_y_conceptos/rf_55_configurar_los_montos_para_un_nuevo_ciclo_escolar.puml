@@ -1,0 +1,53 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El usuario ingresa al módulo de ciclo escolar.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra los ciclos escolares disponibles.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona el ciclo escolar que desea configurar.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: muestra los niveles educativos registrados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona un nivel educativo.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra los conceptos configurables: colegiatura, inscripción, aranceles y materiales.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario captura los montos correspondientes para cada concepto.
+    Boundary -> Control: valida que los montos ingresad...
+    activate Control
+    Control --> Boundary: valida que los montos ingresados sean correctos.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: muestra un resumen con el ciclo escolar, nivel educativo y montos registrados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario revisa la información capturada.
+    Administrador -> Boundary: El usuario selecciona la opción Guardar.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: solicita confirmación para registrar los cambios.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario confirma la operación.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: guarda la configuración de montos para el ciclo escolar seleccionado.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra un mensaje de confirmación.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

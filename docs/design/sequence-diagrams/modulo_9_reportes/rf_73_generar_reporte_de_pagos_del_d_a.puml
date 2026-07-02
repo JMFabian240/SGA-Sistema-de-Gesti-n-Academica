@@ -1,0 +1,24 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Hace clic en la opción 'Reporte de pagos del día'.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: recopila automáticamente los pagos registrados en la fecha actual (del sistema).
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: despliega un desglose en pantalla con: nombre de alumno, monto pagado, método de pago y el total global del día.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona 'Exportar' y elige Excel o PDF.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: descarga el archivo en el formato elegido.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

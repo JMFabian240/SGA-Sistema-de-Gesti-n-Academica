@@ -1,0 +1,28 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nWizard Inscripción" as PantallaWizard
+control "Transactor\nInscripción" as Transactor
+entity "Catálogo\nAcadémico" as Catalogos
+entity "Expediente\nAlumno" as BDExpediente
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaWizard : Selecciona "Registrar nuevo alumno"
+PantallaWizard --> Transactor : Valida permisos y solicita wizard
+Transactor --> PantallaWizard : Renderiza formulario por pasos
+Actor --> PantallaWizard : Ingresa datos (personales, nivel, grado, tutor)
+Actor --> PantallaWizard : Clic en "Guardar expediente"
+PantallaWizard --> Transactor : Envía payload completo
+Transactor --> Catalogos : Valida niveles y grados
+Catalogos --> Transactor : Catálogo validado
+Transactor --> BDExpediente : Valida unicidad (CURP/Matrícula) y vincula Tutor
+BDExpediente --> Transactor : Restricciones superadas
+Transactor --> BDExpediente : Inserta expediente (Operación Atómica)
+BDExpediente --> Transactor : Commit exitoso
+Transactor --> Bitacora : Registra creación en log
+Bitacora --> Transactor : Log guardado
+Transactor --> PantallaWizard : Retorna confirmación final
+PantallaWizard --> Actor : Muestra "Alumno registrado correctamente"
+@enduml

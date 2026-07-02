@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Admin / Gestor" as Actor
+boundary "Pantalla Reportes" as Pantalla
+control "Gestor Morosidad" as Gestor
+entity "Estado Cuenta" as BDEstado
+Actor --> Pantalla : Solicita lista de deudores
+Pantalla --> Gestor : Inicia consulta
+Gestor --> BDEstado : Filtra alumnos con saldo vencido > 0
+BDEstado --> Gestor : Retorna lista negra
+Gestor --> Pantalla : Agrupa por nivel y grado
+Pantalla --> Actor : Despliega deudores y montos
+@enduml

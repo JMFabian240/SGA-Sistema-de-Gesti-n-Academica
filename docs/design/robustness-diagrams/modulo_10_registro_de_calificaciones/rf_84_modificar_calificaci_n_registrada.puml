@@ -1,0 +1,17 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Edición Notas" as Pantalla
+control "Auditor Académico" as Auditor
+entity "Historial Académico" as BDAcademico
+entity "Log Auditoría" as Bitacora
+Admin --> Pantalla : Corrige calificación errónea
+Pantalla --> Auditor : Envía nueva calificación y motivo
+Auditor --> BDAcademico : Sobrescribe registro
+BDAcademico --> Auditor : Confirmación
+Auditor --> Bitacora : Registra modificación (antes/después)
+Bitacora --> Auditor : Log guardado
+Auditor --> Pantalla : Retorna éxito
+Pantalla --> Admin : Muestra "Calificación actualizada"
+@enduml

@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Docente" as Docente
+boundary "Pantalla Evaluación" as Pantalla
+control "Gestor Calificaciones" as Gestor
+entity "Historial Académico" as BDAcademico
+Docente --> Pantalla : Ingresa evaluación trimestral (Preescolar)
+Pantalla --> Gestor : Envía rubricas
+Gestor --> BDAcademico : Guarda evaluación cualitativa
+BDAcademico --> Gestor : Confirma registro
+Gestor --> Pantalla : Muestra éxito
+Pantalla --> Docente : Notifica guardado
+@enduml

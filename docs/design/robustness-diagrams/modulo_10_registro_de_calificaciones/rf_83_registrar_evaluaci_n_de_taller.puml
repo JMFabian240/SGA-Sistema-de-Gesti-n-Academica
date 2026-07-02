@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Docente" as Docente
+boundary "Pantalla Calificaciones" as Pantalla
+control "Gestor Notas" as Gestor
+entity "Historial Académico" as BDAcademico
+Docente --> Pantalla : Captura evaluación Taller (Acreditado/No Acreditado)
+Pantalla --> Gestor : Envía estatus
+Gestor --> BDAcademico : Guarda validación extraescolar
+BDAcademico --> Gestor : Confirma
+Gestor --> Pantalla : Retorna mensaje
+Pantalla --> Docente : Evaluaciones guardadas
+@enduml

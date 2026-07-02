@@ -1,0 +1,45 @@
+﻿@startuml
+actor Administrador
+participant "Pantalla\nGestionUsuarios" as Boundary
+participant "Controlador\nUsuario" as Control
+database "Registro\nUsuario" as Entity
+
+Administrador -> Boundary: Ingresa al mÃ³dulo de GestiÃ³n de Usuarios
+activate Boundary
+Administrador -> Boundary: Selecciona crear cuenta nueva
+Boundary -> Control: Solicita formulario de registro
+activate Control
+Control --> Boundary: Retorna formulario
+deactivate Control
+Boundary --> Administrador: Despliega formulario
+Administrador -> Boundary: Ingresa nombre, rol, contraseÃ±a y da clic en "Guardar"
+
+Boundary -> Control: Validar y guardar cuenta
+activate Control
+
+alt Datos incompletos
+    Control --> Boundary: Error: Faltan campos obligatorios
+    Boundary --> Administrador: Resalta campo y muestra alerta
+    Administrador -> Boundary: Completa informaciÃ³n y reintenta
+    Boundary -> Control: Validar y guardar cuenta
+else Usuario duplicado
+    Control -> Entity: VerificarExistencia()
+    activate Entity
+    Entity --> Control: Existe = True
+    deactivate Entity
+    Control --> Boundary: Error: Usuario ya existe
+    Boundary --> Administrador: Advierte sobre registro duplicado
+    Administrador -> Boundary: Usa identificador distinto y reintenta
+    Boundary -> Control: Validar y guardar cuenta
+end
+
+Control -> Entity: CrearCuenta()
+activate Entity
+Entity --> Control: Exito
+deactivate Entity
+
+Control --> Boundary: Cuenta creada y permisos asignados
+deactivate Control
+Boundary --> Administrador: Muestra mensaje de Ã©xito y regresa a lista
+deactivate Boundary
+@enduml

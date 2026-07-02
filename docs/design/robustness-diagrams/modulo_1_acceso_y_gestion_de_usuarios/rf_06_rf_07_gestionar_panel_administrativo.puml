@@ -1,0 +1,21 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Gestor Administrativo" as Gestor
+boundary "Panel\nAdministrativo" as PanelAdmin
+control "Controlador\nPanel" as CtrlPanel
+entity "Base de Datos\nCentral" as BDCentral
+
+Gestor --> PanelAdmin : Inicia sesión y navega secciones
+PanelAdmin --> CtrlPanel : Solicita acceso a sección
+CtrlPanel --> BDCentral : Verifica permisos y consulta
+BDCentral --> CtrlPanel : Retorna datos permitidos
+CtrlPanel --> PanelAdmin : Despliega información
+Gestor --> PanelAdmin : Consulta, captura pagos y genera reportes
+PanelAdmin --> CtrlPanel : Procesa acciones y reportes
+CtrlPanel --> BDCentral : Guarda pagos y extrae reportes
+BDCentral --> CtrlPanel : Confirma guardado y envía datos reporte
+CtrlPanel --> PanelAdmin : Entrega reporte
+PanelAdmin --> Gestor : Muestra resultados o descarga
+@enduml

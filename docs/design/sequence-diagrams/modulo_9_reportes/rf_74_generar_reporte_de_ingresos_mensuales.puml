@@ -1,0 +1,20 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Reportes.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona la opción 'Reporte de Ingresos Mensuales'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: solicita los parámetros de 'Mes' y 'Año'.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona los parámetros deseados (ej. octubre
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: ) y presiona 'Generar'.
+    Control --> Boundary: consolida la información y despliega un resumen con el desglose de pagos por alumno y la suma total del periodo.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor exporta el documento en Excel o PDF.
+
+@enduml

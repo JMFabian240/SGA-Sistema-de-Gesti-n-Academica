@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nBitácora" as PantallaBitacora
+control "Generador\nReportes" as Generador
+entity "Registro\nBitácora" as LogBitacora
+
+Admin --> PantallaBitacora : Clic en "Exportar historial"
+PantallaBitacora --> Generador : Solicita opciones de exportación
+Generador --> PantallaBitacora : Despliega filtros y formatos
+Admin --> PantallaBitacora : Define filtros (fecha/usuario) y formato
+Admin --> PantallaBitacora : Clic en "Generar"
+PantallaBitacora --> Generador : Envía parámetros de reporte
+Generador --> LogBitacora : Filtra tabla de bitácora
+LogBitacora --> Generador : Retorna datos filtrados
+Generador --> PantallaBitacora : Genera archivo PDF/Excel
+PantallaBitacora --> Admin : Inicia descarga de archivo
+@enduml

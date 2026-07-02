@@ -1,0 +1,12 @@
+# RF-20: Vincular tutor con alumnos
+
+| Campo | Descripción |
+| :---- | :---- |
+| **Nombre** | RF-20: Vincular tutor con alumnos |
+| **Actor** | Administrador y Gestor Administrativo |
+| **Objetivo** | Asociar el perfil de un padre o tutor registrado con uno o más alumnos del plantel, consolidando todos los hijos bajo un único perfil de pagos y facturación. |
+| **Flujo Principal** | 1. El actor ingresa al módulo de Gestión de Padres/Tutores.<br>2. Localiza al tutor por nombre o RFC mediante la barra de búsqueda.<br>3. El sistema muestra el perfil del tutor y la lista de alumnos actualmente vinculados.<br>4. El actor selecciona la opción "Vincular alumno".<br>5. El sistema despliega un buscador de alumnos.<br>6. El actor ingresa nombre o matrícula del alumno y ejecuta la búsqueda.<br>7. El sistema muestra los resultados coincidentes.<br>8. El actor selecciona al alumno deseado.<br>9. El sistema verifica que el alumno no esté ya vinculado a este perfil.<br>10. El sistema crea el vínculo y asocia el expediente al perfil de pagos del tutor.<br>11. El sistema muestra: "Alumno vinculado correctamente" y actualiza la lista. |
+| **Flujo Alterno** | <b>A.</b> Alumno ya vinculado a este tutor:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 9, el sistema detecta la duplicidad.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema muestra: "Este alumno ya se encuentra vinculado a este perfil de tutor".<br><br><b>B.</b> Alumno no encontrado:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 7, no hay coincidencias.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema muestra: "No se encontraron alumnos con los criterios proporcionados".<br>&nbsp;&nbsp;&nbsp;&nbsp;3. El actor ajusta la búsqueda y reintenta.<br><br><b>C.</b> Cancelación:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. El actor hace clic en "Cancelar" en cualquier punto.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema descarta la operación sin cambios. |
+| **Precondiciones** | • El actor debe tener sesión activa con privilegios de Administrador o Gestor Administrativo. • El perfil del tutor debe existir previamente (RF-11). • El expediente del alumno a vincular debe existir previamente (RF-16). |
+| **Postcondiciones** | • El alumno queda asociado al perfil del tutor, consolidando cobros y facturación. • La acción queda registrada en la bitácora de auditoría (RF-08). |
+| **Reglas de negocio involucradas** | • Un tutor puede estar vinculado a más de un alumno.<br>• Un alumno solo puede tener un tutor principal para efectos de facturación y cobro.<br>• El sistema impide vincular al mismo alumno dos veces al mismo tutor. |

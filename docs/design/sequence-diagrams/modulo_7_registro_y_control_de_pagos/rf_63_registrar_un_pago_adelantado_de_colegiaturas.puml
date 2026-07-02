@@ -1,0 +1,35 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El usuario accede al módulo de pagos.
+    Administrador -> Boundary: Busca y selecciona al alumno.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra el calendario de colegiaturas pendientes.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona la opción **Registrar pago adelantado**.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Indica la cantidad de meses a cubrir.
+    Administrador -> Boundary: El usuario ingresa o confirma el monto, método y fecha de pago.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra un resumen de la operación.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario confirma el registro.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra el pago adelantado.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: marca los periodos seleccionados como **Pagados**.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: actualiza el calendario y muestra un mensaje de éxito.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

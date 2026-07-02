@@ -1,0 +1,29 @@
+﻿@startuml
+actor Administrador
+participant "Pantalla\nGestionUsuarios" as Boundary
+participant "Controlador\nUsuario" as Control
+database "Registro\nUsuario" as Entity
+
+Administrador -> Boundary: Ingresa al mÃ³dulo de GestiÃ³n de Usuarios
+activate Boundary
+Boundary -> Control: Solicitar lista de usuarios()
+activate Control
+Control -> Entity: ConsultarTodos()
+activate Entity
+
+alt RecuperaciÃ³n Exitosa
+    Entity --> Control: Retorna lista de usuarios
+    Control --> Boundary: Renderiza lista de usuarios
+    Boundary --> Administrador: Despliega tabla con usuarios (Nombre, Rol, Estado, Ãšltimo Acceso)
+else Error de carga o conexiÃ³n
+    Entity --> Control: Error(Timeout/ConexiÃ³n)
+    Control --> Boundary: Falla en recuperaciÃ³n
+    Boundary --> Administrador: Muestra error: "No se pudo cargar el listado. Verifique conexiÃ³n"
+    Administrador -> Boundary: Recarga pÃ¡gina o reingresa al mÃ³dulo
+    Boundary -> Control: Solicitar lista de usuarios()
+end
+
+deactivate Entity
+deactivate Control
+deactivate Boundary
+@enduml

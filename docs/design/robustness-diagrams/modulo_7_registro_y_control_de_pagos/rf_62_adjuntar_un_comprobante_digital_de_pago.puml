@@ -1,0 +1,18 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Gestor / Caja" as Actor
+boundary "Pantalla\nComprobantes" as PantallaDocs
+control "Gestor\nDocumentos" as GestorDocs
+entity "Registro\nPago" as RegistroPago
+
+Actor --> PantallaDocs : Clic en "Adjuntar comprobante" sobre pago
+PantallaDocs --> GestorDocs : Prepara subida
+Actor --> PantallaDocs : Sube archivo (PDF, JPG)
+PantallaDocs --> GestorDocs : Envía archivo al servidor
+GestorDocs --> RegistroPago : Vincula ruta del archivo al ID de pago
+RegistroPago --> GestorDocs : Confirma actualización
+GestorDocs --> PantallaDocs : Muestra ícono de archivo adjunto
+PantallaDocs --> Actor : Notifica archivo subido con éxito
+@enduml

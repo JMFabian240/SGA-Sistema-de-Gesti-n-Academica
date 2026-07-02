@@ -1,0 +1,849 @@
+<mxfile host="Electron" pages="13">
+  <diagram name="Página-1" id="SSu52sUGwElUIXoR07yy">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=260;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 1: Acceso y Gestión de Usuario" vertex="1">
+          <mxGeometry height="490" width="678" x="126" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-2" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=none;startFill=0;endArrow=none;endFill=0;" target="lE_OwYFQ3ftpBjLl3Nlq-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="24" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-4" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="lE_OwYFQ3ftpBjLl3Nlq-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-5" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="lE_OwYFQ3ftpBjLl3Nlq-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-6" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="24" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-7" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="lE_OwYFQ3ftpBjLl3Nlq-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-8" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Docente" vertex="1">
+          <mxGeometry height="60" width="30" x="24" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar permisos de acceso&amp;nbsp;&lt;div&gt;(RF-03)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="524" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Eliminar cuenta&lt;div&gt;&amp;nbsp;(RF-07)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="524" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar listado de usuarios&amp;nbsp;&lt;div&gt;(RF-02)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="158" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Crear cuenta de colaborador&lt;div&gt;&amp;nbsp;(RF-01)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="158" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar datos básicos de alumno&lt;div&gt;&amp;nbsp;(RF-05)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="170" y="735" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Cerrar sesión manualmente&lt;div&gt;(RF-06)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="164" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-15" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-11" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endFill=0;dashed=1;dashPattern=12 12;" target="lE_OwYFQ3ftpBjLl3Nlq-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-16" connectable="0" parent="lE_OwYFQ3ftpBjLl3Nlq-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.3816" y="-1" as="geometry">
+            <mxPoint x="-44" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-17" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-11" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endFill=0;dashed=1;dashPattern=8 8;" target="lE_OwYFQ3ftpBjLl3Nlq-10" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-18" connectable="0" parent="lE_OwYFQ3ftpBjLl3Nlq-17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0101" y="-3" as="geometry">
+            <mxPoint x="-11" y="17" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-19" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-3" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lE_OwYFQ3ftpBjLl3Nlq-11" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-20" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-3" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lE_OwYFQ3ftpBjLl3Nlq-12" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-21" edge="1" parent="1" source="lE_OwYFQ3ftpBjLl3Nlq-8" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="lE_OwYFQ3ftpBjLl3Nlq-14" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lE_OwYFQ3ftpBjLl3Nlq-22" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Gestionar panel administrativo&amp;nbsp;&lt;div&gt;(RF-04)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="170" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="oiKSHCVF8NK3d-sISqz-" name="Página-2">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=220;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 2: Seguridad y Bitácora" vertex="1">
+          <mxGeometry height="225" width="320" x="329" y="472" as="geometry" />
+        </mxCell>
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="179" y="522" as="geometry" />
+        </mxCell>
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar&amp;nbsp; historial&amp;nbsp;&lt;div&gt;(RF-09)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="369" y="522" as="geometry" />
+        </mxCell>
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-4" edge="1" parent="1" source="cL3V4Zxl5Z0PAjY7YgAr-2" style="endArrow=none;html=1;rounded=0;" target="cL3V4Zxl5Z0PAjY7YgAr-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-5" edge="1" parent="1" source="cL3V4Zxl5Z0PAjY7YgAr-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="368" y="642" as="sourcePoint" />
+            <mxPoint x="209" y="557" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cL3V4Zxl5Z0PAjY7YgAr-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;div&gt;Exportar Bitacora (RF-10)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="369" y="607" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4HE56d0bOFaP_U5fBIC9" name="Página-3">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p_mFFqG7KszQSotfdfQH-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=260;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 3: Gestión de Padres" vertex="1">
+          <mxGeometry height="270" width="589" x="205" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-2" edge="1" parent="1" source="p_mFFqG7KszQSotfdfQH-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="p_mFFqG7KszQSotfdfQH-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="111" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar datos de tutor&lt;div&gt;(RF-11)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="255" y="635" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-5" edge="1" parent="1" source="p_mFFqG7KszQSotfdfQH-7" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;startArrow=classic;startFill=1;dashed=1;dashPattern=12 12;" target="p_mFFqG7KszQSotfdfQH-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-6" connectable="0" parent="p_mFFqG7KszQSotfdfQH-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Include &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.2378" y="1" as="geometry">
+            <mxPoint x="10" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Vincular tutor con alumnos&amp;nbsp;&lt;div&gt;(RF-10)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="505" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar perfil de tutor&amp;nbsp;&lt;div&gt;(RH-09)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="255" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-9" edge="1" parent="1" source="p_mFFqG7KszQSotfdfQH-3" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="p_mFFqG7KszQSotfdfQH-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-10" edge="1" parent="1" source="p_mFFqG7KszQSotfdfQH-12" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="p_mFFqG7KszQSotfdfQH-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-11" edge="1" parent="1" source="p_mFFqG7KszQSotfdfQH-13" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=0;entryY=0.3333333333333333;entryDx=0;entryDy=0;entryPerimeter=0;" target="p_mFFqG7KszQSotfdfQH-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="104" y="515" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-12" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="34" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="p_mFFqG7KszQSotfdfQH-13" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="34" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="sXk_KbLglu1iyhD63QH8" name="Página-4">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=260;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 4: Gestión de Alumnos&amp;nbsp;" vertex="1">
+          <mxGeometry height="724" width="644" x="1010" y="223" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar nuevo alumno&amp;nbsp;&lt;div&gt;(RF-15)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1062" y="397" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar expediente de alumno&amp;nbsp;&lt;div&gt;(RF-18)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1062" y="533" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-4" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;startArrow=none;startFill=0;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashPattern=12 12;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cDxvNCZB4i3y1BxPsfhW-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1310.0019999691744" y="595.5864709836591" as="sourcePoint" />
+            <mxPoint x="1418" y="548" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-5" connectable="0" parent="cDxvNCZB4i3y1BxPsfhW-4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;&amp;nbsp; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0737" y="-1" as="geometry">
+            <mxPoint x="18" y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-6" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;dashed=1;dashPattern=12 12;" target="cDxvNCZB4i3y1BxPsfhW-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-7" connectable="0" parent="cDxvNCZB4i3y1BxPsfhW-6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.3996" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar datos de alumno&amp;nbsp;&lt;div&gt;&amp;nbsp;(RF-19)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1358" y="376" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Desactivar expediente&lt;div&gt;(RF-21)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1387" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Filtrar listado de alumnos&lt;div&gt;(RF-20)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1062" y="607" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Ejecutar cierre de ciclo escolar&lt;div&gt;(RF-22)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1070" y="757" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-12" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-14" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-13" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-14" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-14" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="878" y="533" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-15" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-14" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-16" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;dashed=1;dashPattern=12 12;" target="cDxvNCZB4i3y1BxPsfhW-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1446" y="605" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-17" connectable="0" parent="cDxvNCZB4i3y1BxPsfhW-16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1396" as="geometry">
+            <mxPoint x="5" y="7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-18" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Ejecutar baja definitiva&lt;div&gt;(RF-23)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1358" y="621" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-19" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-14" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-22">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1010" y="1073" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-20" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-14" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-21">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1010" y="1086" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-21" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Revertir&amp;nbsp; baja temporal&amp;nbsp;&lt;div&gt;(RF-17)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1070" y="679" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-22" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar alumno a&amp;nbsp; mitad de ciclo&lt;div&gt;(RF-16)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="1062" y="463" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-23" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-24" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-24" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="878" y="754" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-25" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-26" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="893" y="472" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-26" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="878" y="387" as="geometry" />
+        </mxCell>
+        <mxCell id="cDxvNCZB4i3y1BxPsfhW-27" edge="1" parent="1" source="cDxvNCZB4i3y1BxPsfhW-24" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="cDxvNCZB4i3y1BxPsfhW-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="828" y="663" as="sourcePoint" />
+            <mxPoint x="748" y="533" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="B0sANsyvkKwq1fORZIS4" name="Página-5">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="NBkxulEoi3HANGBR2bO7-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=190;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 5: Gestión de Becas" vertex="1">
+          <mxGeometry height="521" width="340" x="385" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="282" y="508" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar tipos de beca&amp;nbsp;&lt;div&gt;(RF-24)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="442" y="253" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Asignar beca a alumno&lt;div&gt;(RF-25)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="442" y="333" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-5" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-7" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=classic;endFill=1;startArrow=none;startFill=0;dashed=1;dashPattern=12 12;" target="NBkxulEoi3HANGBR2bO7-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-6" connectable="0" parent="NBkxulEoi3HANGBR2bO7-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0587" y="2" as="geometry">
+            <mxPoint x="33" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar catalogo de becas&lt;div&gt;&amp;nbsp;(RF-25)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="448" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Retirar beca asignada&lt;div&gt;&amp;nbsp;(RF-27)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="448" y="636" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-9" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="NBkxulEoi3HANGBR2bO7-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-10" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="NBkxulEoi3HANGBR2bO7-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-11" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-2" style="endArrow=none;html=1;entryX=0.015;entryY=0.486;entryDx=0;entryDy=0;entryPerimeter=0;" target="NBkxulEoi3HANGBR2bO7-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-12" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="NBkxulEoi3HANGBR2bO7-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar becas&lt;div&gt;&amp;nbsp;(RF-24)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="448" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-14" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="103" y="606" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-15" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="103" y="398" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-16" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-14" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" target="NBkxulEoi3HANGBR2bO7-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NBkxulEoi3HANGBR2bO7-17" edge="1" parent="1" source="NBkxulEoi3HANGBR2bO7-15" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" target="NBkxulEoi3HANGBR2bO7-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="N3ZY8PiMLkrIDJMB1ahs" name="Página-6">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="XFA8pI_GBse3auipwfZf-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=240;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 6: Gestión de Colegiaturas" vertex="1">
+          <mxGeometry height="310" width="350" x="234" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="94" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Asignar plan de pago&lt;div&gt;(RF-30)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="284" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Configurar montos&amp;nbsp;&lt;div&gt;(RF-29)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="284" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Configurar promoción temprana&lt;div&gt;(RF-31)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="284" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-6" edge="1" parent="1" source="XFA8pI_GBse3auipwfZf-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="XFA8pI_GBse3auipwfZf-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-7" edge="1" parent="1" source="XFA8pI_GBse3auipwfZf-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="XFA8pI_GBse3auipwfZf-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-8" edge="1" parent="1" source="XFA8pI_GBse3auipwfZf-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="XFA8pI_GBse3auipwfZf-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-9" edge="1" parent="1" source="XFA8pI_GBse3auipwfZf-11" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="XFA8pI_GBse3auipwfZf-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-10" edge="1" parent="1" source="XFA8pI_GBse3auipwfZf-11" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;" target="XFA8pI_GBse3auipwfZf-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XFA8pI_GBse3auipwfZf-11" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="704" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="7LGPopH7HMND49H8f3jG" name="Página-7">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=250;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 7: Registro y Control de Pagos" vertex="1">
+          <mxGeometry height="520" width="351" x="282" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="202" y="446" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar pago&lt;div&gt;(RF-37)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="332" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-4" edge="1" parent="1" source="zVy7MDMtxYW0JUzqZbcr-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;dashPattern=12 12;" target="zVy7MDMtxYW0JUzqZbcr-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-5" connectable="0" parent="zVy7MDMtxYW0JUzqZbcr-4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt; Extend &amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0199" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar pago adelantado&lt;div&gt;(RF-39)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="332" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar recargo&lt;div&gt;(RF-43)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="332" y="655" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-8" edge="1" parent="1" source="zVy7MDMtxYW0JUzqZbcr-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="zVy7MDMtxYW0JUzqZbcr-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-9" edge="1" parent="1" source="zVy7MDMtxYW0JUzqZbcr-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="zVy7MDMtxYW0JUzqZbcr-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-10" edge="1" parent="1" source="zVy7MDMtxYW0JUzqZbcr-11" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" target="zVy7MDMtxYW0JUzqZbcr-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-11" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="110" y="528" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-12" edge="1" parent="1" source="zVy7MDMtxYW0JUzqZbcr-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;startFill=0;endArrow=none;endFill=0;" target="zVy7MDMtxYW0JUzqZbcr-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zVy7MDMtxYW0JUzqZbcr-13" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="202" y="619" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="tjNs8hSYFQOwdaWHmhET" name="Página-8">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=270;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 8: Historial de Pagos" vertex="1">
+          <mxGeometry height="200" width="350" x="335" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="246" y="484" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar historial de pagos de un tutor&lt;div&gt;(RF-47)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="250" x="385" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar estado de cuenta familiar&lt;div&gt;(RF-48)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="385" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-5" edge="1" parent="1" source="DexHNmEPYdCSzuYY8tGK-2" style="endArrow=none;html=1;" target="DexHNmEPYdCSzuYY8tGK-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-6" edge="1" parent="1" source="DexHNmEPYdCSzuYY8tGK-2" style="endArrow=none;html=1;" target="DexHNmEPYdCSzuYY8tGK-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-7" edge="1" parent="1" source="DexHNmEPYdCSzuYY8tGK-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="DexHNmEPYdCSzuYY8tGK-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-8" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="143" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-9" edge="1" parent="1" source="DexHNmEPYdCSzuYY8tGK-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;startFill=0;endArrow=none;endFill=0;" target="DexHNmEPYdCSzuYY8tGK-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="DexHNmEPYdCSzuYY8tGK-10" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="157" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="150" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="350" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="550" y="730" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ojbF989xrbMHh6FOXUD1" name="Página-9">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="PK7A0e8EX14USvLaGiQh-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=240;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 9: Directorio de datos fiscales" vertex="1">
+          <mxGeometry height="340" width="350" x="329" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar datos fiscales del tutor&lt;br&gt;&lt;div&gt;(RF-49)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="379" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar los datos fiscales del tutor&lt;br&gt;&lt;div&gt;(RF-50)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="379" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-4" edge="1" parent="1" style="endArrow=none;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" target="PK7A0e8EX14USvLaGiQh-2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="219" y="527.74403059253" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-5" edge="1" parent="1" source="PK7A0e8EX14USvLaGiQh-9" style="endArrow=none;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" target="PK7A0e8EX14USvLaGiQh-3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="219" y="531.7567118153956" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-6" edge="1" parent="1" source="PK7A0e8EX14USvLaGiQh-7" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" target="PK7A0e8EX14USvLaGiQh-9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="249" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-7" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="249" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-8" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="149" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-9" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="199" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-10" edge="1" parent="1" source="PK7A0e8EX14USvLaGiQh-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" target="PK7A0e8EX14USvLaGiQh-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Marcar Bandera &quot;Requiere factura&quot;&lt;br&gt;&lt;div&gt;(RF-51)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="389" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-12" edge="1" parent="1" source="PK7A0e8EX14USvLaGiQh-9" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="PK7A0e8EX14USvLaGiQh-11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="399" y="730" as="sourcePoint" />
+            <mxPoint x="449" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PK7A0e8EX14USvLaGiQh-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Consultar datos fiscales del tutor&lt;br&gt;&lt;/span&gt;(RF-52)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="379" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="VIULxzegW521sKDsRXol" name="Página-10">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=140;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 10: Reportes" vertex="1">
+          <mxGeometry height="520" width="350" x="390" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="230" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="gestor administrativo" vertex="1">
+          <mxGeometry height="60" width="30" x="70" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="70" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Generar reporte de pagos diarios&lt;div&gt;(RF-55)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="440" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Generar reporte de ingresos mensuales&lt;div&gt;(RF-56)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="440" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Generar reporte financiero de ciclo&lt;div&gt;(RF-57)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="440" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar lista de deudores&lt;div&gt;(RF-58)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="440" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar lista de alumnos con examen restringido&lt;div&gt;(RF-53)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="250" x="440" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Generar reporte de facturables&lt;div&gt;(RF-59)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="440" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-11" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mPvNMIbQE3D6YpACaXeV-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-12" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mPvNMIbQE3D6YpACaXeV-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-13" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mPvNMIbQE3D6YpACaXeV-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-14" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;" target="mPvNMIbQE3D6YpACaXeV-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-15" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mPvNMIbQE3D6YpACaXeV-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-16" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mPvNMIbQE3D6YpACaXeV-10" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-17" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-4" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="mPvNMIbQE3D6YpACaXeV-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mPvNMIbQE3D6YpACaXeV-18" edge="1" parent="1" source="mPvNMIbQE3D6YpACaXeV-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="mPvNMIbQE3D6YpACaXeV-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="e3z7qLMhd33wir2bhpZF" name="Página-11">
+    <mxGraphModel dx="1347" dy="801" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=240;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 11: Registro de Calificaciones" vertex="1">
+          <mxGeometry height="635" width="350" x="350" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar evaluación de materia Taller&lt;div&gt;(RF-65)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar calificaciones de secundaria&lt;div&gt;(RF-62)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar calificaciones de bachillerato&lt;div&gt;(RF-63)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar clubes extracurriculares&lt;div&gt;(RF-64)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar calificación registrada&lt;div&gt;(RF-66)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="845" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar evaluación de preescolar&lt;div&gt;(RF-60)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar calificaciones de primaria&lt;div&gt;(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;RF-61)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="400" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-9" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-10" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="&lt;br&gt;&lt;div&gt;Docente&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="140" y="705" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-11" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="127" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-12" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-13" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-13" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="140" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-14" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-15" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-16" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-17" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-18" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-19" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-20" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-21" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="207" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="kafJbDDG4XZP7fyCJLrV-22" edge="1" parent="1" source="kafJbDDG4XZP7fyCJLrV-11" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" target="kafJbDDG4XZP7fyCJLrV-21">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="207" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="L4BviFvovG5oZsSbcaWS" name="Página-12">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="IblX__wGXv0VZwCIahjL-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=280;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 12: Generación y Consulta de Boletas" vertex="1">
+          <mxGeometry height="200" width="350" x="360" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Docente" vertex="1">
+          <mxGeometry height="60" width="30" x="120" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar calificaciones activas&lt;div&gt;(RF-66)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="410" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-4" edge="1" parent="1" source="IblX__wGXv0VZwCIahjL-2" style="endArrow=none;html=1;" target="IblX__wGXv0VZwCIahjL-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-5" edge="1" parent="1" source="IblX__wGXv0VZwCIahjL-6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="IblX__wGXv0VZwCIahjL-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-6" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&amp;nbsp;&lt;div&gt;Adminstrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="120" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-7" edge="1" parent="1" source="IblX__wGXv0VZwCIahjL-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="IblX__wGXv0VZwCIahjL-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-8" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="260" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-9" edge="1" parent="1" source="IblX__wGXv0VZwCIahjL-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="259.9999999999998" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IblX__wGXv0VZwCIahjL-10" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="120" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="p-SIy372VavOuh3GZb2z" name="Página-13">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=220;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fontStyle=1" value="Módulo 13: Historial Académico" vertex="1">
+          <mxGeometry height="220" width="350" x="370" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="230" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar historial de calificaciones por periodo&lt;br&gt;(RF-69)" vertex="1">
+          <mxGeometry height="70" width="250" x="420" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar historial académico completo&lt;div&gt;(RF-70)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="250" x="420" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-5" edge="1" parent="1" source="2tdcLRRFeZvz6K1SZAjC-2" style="endArrow=none;html=1;" target="2tdcLRRFeZvz6K1SZAjC-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-6" edge="1" parent="1" source="2tdcLRRFeZvz6K1SZAjC-2" style="endArrow=none;html=1;" target="2tdcLRRFeZvz6K1SZAjC-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-7" edge="1" parent="1" source="2tdcLRRFeZvz6K1SZAjC-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="2tdcLRRFeZvz6K1SZAjC-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-8" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Gestor&lt;div&gt;&amp;nbsp;Administrativo&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="80" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-9" edge="1" parent="1" source="2tdcLRRFeZvz6K1SZAjC-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="2tdcLRRFeZvz6K1SZAjC-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="2tdcLRRFeZvz6K1SZAjC-10" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="80" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-70-71" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-70 y RF-71: Consultar estado de cuenta y distribuir pago entre hermanos" vertex="1">
+          <mxGeometry height="80" width="160" x="100" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-82" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-82: Registrar calificaciones de bachillerato" vertex="1">
+          <mxGeometry height="80" width="160" x="300" y="2500" as="geometry" />
+        </mxCell>
+        <mxCell id="new-uc-90-91" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="RF-90 y RF-91: Configurar umbrales de morosidad y notificaciones" vertex="1">
+          <mxGeometry height="80" width="160" x="500" y="2500" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,25 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Registro de Calificaciones.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Selecciona a un alumno perteneciente al nivel 'Preescolar'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: carga una plantilla de evaluación de formato cualitativo adaptada para este nivel.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el trimestre correspondiente (Trimestre 1, 2 o 3).
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: El actor redacta en texto las observaciones y recomendaciones del alumno.
+    Administrador -> Boundary: Hace clic en 'Guardar Evaluación'.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: almacena la captura vinculándola al expediente y ciclo escolar activo, sin pedir promedios numéricos.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

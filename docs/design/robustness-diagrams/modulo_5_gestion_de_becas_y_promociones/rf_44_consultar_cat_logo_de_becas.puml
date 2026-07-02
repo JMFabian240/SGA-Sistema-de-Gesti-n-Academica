@@ -1,0 +1,16 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nCatálogo Becas" as PantallaCatalogo
+control "Gestor\nBecas" as GestorBecas
+entity "Catálogo\nBecas" as BDBecas
+
+Actor --> PantallaCatalogo : Ingresa al módulo de Becas
+PantallaCatalogo --> GestorBecas : Solicita lista completa de becas
+GestorBecas --> BDBecas : Consulta tipos de beca activos e inactivos
+BDBecas --> GestorBecas : Retorna lista de becas
+GestorBecas --> PantallaCatalogo : Despliega tabla de resultados
+PantallaCatalogo --> Actor : Muestra catálogo con nombre, tipo y porcentaje
+@enduml

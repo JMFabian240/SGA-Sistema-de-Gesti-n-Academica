@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador / Gestor" as Actor
+boundary "Pantalla\nRegistro Tutor" as PantallaRegistro
+control "Controlador\nTutores" as CtrlTutor
+entity "Perfil\nTutor" as PerfilTutor
+
+Actor --> PantallaRegistro : Selecciona registrar nuevo padre/tutor
+PantallaRegistro --> CtrlTutor : Solicita formulario
+CtrlTutor --> PantallaRegistro : Despliega formulario
+Actor --> PantallaRegistro : Ingresa datos (personales, contacto, fiscales, pago)
+Actor --> PantallaRegistro : Clic en "Guardar perfil"
+PantallaRegistro --> CtrlTutor : Envía datos de tutor
+CtrlTutor --> PerfilTutor : Valida obligatorios y RFC duplicado
+PerfilTutor --> CtrlTutor : Confirma creación
+CtrlTutor --> PantallaRegistro : Retorna estado exitoso
+PantallaRegistro --> Actor : Muestra confirmación de registro
+@enduml

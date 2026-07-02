@@ -1,0 +1,37 @@
+@startuml
+actor Administrador
+participant "Pantalla\nBitácora" as Boundary
+participant "Controlador\nExportación" as Control
+database "Registro\nBitácora" as Entity
+
+Administrador -> Boundary: Clic en "Exportar historial"
+activate Boundary
+Boundary --> Administrador: Despliega panel de filtros (fechas, usuario)
+Administrador -> Boundary: Define filtros y formato (Excel/PDF)
+Administrador -> Boundary: Clic en "Generar"
+
+Boundary -> Control: GenerarReporte(filtros, formato)
+activate Control
+Control -> Entity: SelectFiltered(filtros)
+activate Entity
+
+alt Recuperación y Generación Exitosa
+    Entity --> Control: Retorna registros filtrados
+    Control -> Control: Procesar documento en formato elegido
+    Control --> Boundary: Retorna archivo (Blob/URL)
+    Boundary --> Administrador: Inicia descarga del archivo en el equipo local
+else Error de Generación
+    Entity --> Control: Retorna registros
+    Control -> Control: Falla renderizado del archivo
+    Control --> Boundary: Error de procesamiento
+    Boundary --> Administrador: Muestra mensaje "Error al generar el documento. Intente nuevamente"
+else Filtros sin resultados
+    Entity --> Control: Retorna lista vacía
+    deactivate Entity
+    Control --> Boundary: Resultados = 0
+    deactivate Control
+    Boundary --> Administrador: Muestra mensaje "No se encontraron registros con los filtros aplicados"
+end
+
+deactivate Boundary
+@enduml

@@ -1,0 +1,41 @@
+﻿@startuml
+actor Docente
+participant "Pantalla\nConsultaAlumnos" as Boundary
+participant "Controlador\nAlumno" as Control
+database "Registro\nAlumno" as Entity
+
+Docente -> Boundary: Navega a secciÃ³n de consulta de alumnos
+activate Boundary
+
+Docente -> Boundary: Ingresa criterio (Estatus, nombre, grado, grupo)
+Docente -> Boundary: Ejecuta la bÃºsqueda
+Boundary -> Control: BuscarAlumnos(criterio)
+activate Control
+
+Control -> Control: AplicarFiltroSeguridad(Ocultar datos financieros)
+Control -> Entity: Select(criterio)
+activate Entity
+
+alt BÃºsqueda Exitosa
+    Entity --> Control: Retorna lista de coincidencias
+    Control --> Boundary: Retorna resultados filtrados
+    Boundary --> Docente: Despliega lista de resultados
+    
+    Docente -> Boundary: Selecciona perfil de un alumno
+    Boundary -> Control: ObtenerPerfilBasico(alumno_id)
+    Control -> Entity: SelectPerfil(alumno_id)
+    Entity --> Control: Datos de perfil
+    Control --> Boundary: Datos procesados
+    Boundary --> Docente: Muestra nombre, grado, grupo y personas autorizadas
+else BÃºsqueda sin resultados
+    Entity --> Control: Retorna lista vacÃ­a
+    deactivate Entity
+    Control --> Boundary: Resultados = 0
+    deactivate Control
+    Boundary --> Docente: Muestra "No se encontraron alumnos con los criterios proporcionados"
+    Docente -> Boundary: Ajusta parÃ¡metros y reintenta
+    Boundary -> Control: BuscarAlumnos(nuevos_criterios)
+end
+
+deactivate Boundary
+@enduml

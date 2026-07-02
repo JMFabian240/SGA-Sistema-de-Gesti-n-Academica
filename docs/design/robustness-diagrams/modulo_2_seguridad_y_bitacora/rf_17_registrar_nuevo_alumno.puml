@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Gestor Administrativo" as Gestor
+boundary "Pantalla\nRegistro Alumno" as PantallaRegistro
+control "Controlador\nInscripciones" as CtrlInscripcion
+entity "Expediente\nAlumno" as Expediente
+
+Gestor --> PantallaRegistro : Selecciona "Registrar nuevo alumno"
+PantallaRegistro --> CtrlInscripcion : Solicita formulario
+CtrlInscripcion --> PantallaRegistro : Despliega formulario
+Gestor --> PantallaRegistro : Ingresa datos, grado, y tutor
+Gestor --> PantallaRegistro : Clic en "Registrar Alumno"
+PantallaRegistro --> CtrlInscripcion : Envía datos del expediente
+CtrlInscripcion --> Expediente : Valida duplicados y campos
+Expediente --> CtrlInscripcion : Confirma creación
+CtrlInscripcion --> PantallaRegistro : Retorna estado exitoso
+PantallaRegistro --> Gestor : Muestra mensaje "Alumno registrado"
+@enduml

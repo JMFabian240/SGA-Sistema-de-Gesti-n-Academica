@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Docente" as Docente
+boundary "Pantalla Calificaciones" as Pantalla
+control "Gestor Notas" as Gestor
+entity "Historial Académico" as BDAcademico
+Docente --> Pantalla : Captura notas Bachillerato (extraordinario)
+Pantalla --> Gestor : Envía resultados de regularización
+Gestor --> BDAcademico : Actualiza historial
+BDAcademico --> Gestor : Confirma
+Gestor --> Pantalla : Éxito
+Pantalla --> Docente : Notifica guardado
+@enduml

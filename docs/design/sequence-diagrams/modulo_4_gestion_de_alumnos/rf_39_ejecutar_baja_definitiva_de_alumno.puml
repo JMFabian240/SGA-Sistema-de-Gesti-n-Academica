@@ -1,0 +1,25 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: ingresa al módulo de Gestión de Alumnos.
+    Administrador -> Boundary: Aplica un filtro para visualizar únicamente los alumnos con estatus 'Baja Temporal'.
+    Control --> Boundary: muestra el listado de alumnos con dicho estatus.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: selecciona el expediente del alumno al que desea formalizar la baja definitiva.
+    Control --> Boundary: despliega el cuadro de confirmación: '¿Está seguro de ejecutar la baja definitiva de este alumno• Esta acción cerrará su expediente para el ciclo vigente'.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: hace clic en 'Confirmar baja definitiva'.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: cambia el estatus del alumno a 'Baja Definitiva', cierra el expediente activo para el ciclo en curso y detiene la generación automática de nuevas colegiaturas.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: registra la acción en la bitácora de auditoría y muestra el mensaje: 'Baja definitiva ejecutada correctamente'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

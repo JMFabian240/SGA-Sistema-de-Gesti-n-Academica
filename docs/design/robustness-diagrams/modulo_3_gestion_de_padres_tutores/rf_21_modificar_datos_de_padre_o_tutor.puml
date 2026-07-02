@@ -1,0 +1,22 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador / Gestor" as Actor
+boundary "Pantalla\nEdición Tutor" as PantallaEdicion
+control "Controlador\nTutores" as CtrlTutor
+entity "Perfil\nTutor" as PerfilTutor
+
+Actor --> PantallaEdicion : Localiza tutor y clic "Editar datos"
+PantallaEdicion --> CtrlTutor : Solicita datos actuales
+CtrlTutor --> PerfilTutor : Consulta perfil
+PerfilTutor --> CtrlTutor : Retorna datos
+CtrlTutor --> PantallaEdicion : Habilita formulario precargado
+Actor --> PantallaEdicion : Actualiza datos (contacto, perfil general)
+Actor --> PantallaEdicion : Clic en "Guardar cambios"
+PantallaEdicion --> CtrlTutor : Envía nuevos datos
+CtrlTutor --> PerfilTutor : Valida unicidad de RFC y obligatorios
+PerfilTutor --> CtrlTutor : Actualiza y confirma
+CtrlTutor --> PantallaEdicion : Retorna mensaje de actualización
+PantallaEdicion --> Actor : Notifica cambios guardados
+@enduml

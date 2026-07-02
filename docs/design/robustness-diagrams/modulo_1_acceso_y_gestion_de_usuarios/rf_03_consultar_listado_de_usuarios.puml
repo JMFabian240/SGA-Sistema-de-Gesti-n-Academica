@@ -1,0 +1,16 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+boundary "Pantalla\nGestión Usuarios" as PantallaUsuarios
+control "Controlador\nUsuarios" as CtrlUsuarios
+entity "Registro\nUsuarios" as RegistroUsuarios
+
+Admin --> PantallaUsuarios : Ingresa al módulo
+PantallaUsuarios --> CtrlUsuarios : Solicita lista de usuarios
+CtrlUsuarios --> RegistroUsuarios : Consulta sin filtros
+RegistroUsuarios --> CtrlUsuarios : Retorna datos (nombre, rol, estado, acceso)
+CtrlUsuarios --> PantallaUsuarios : Envía tabla de usuarios
+PantallaUsuarios --> Admin : Despliega lista de usuarios
+@enduml

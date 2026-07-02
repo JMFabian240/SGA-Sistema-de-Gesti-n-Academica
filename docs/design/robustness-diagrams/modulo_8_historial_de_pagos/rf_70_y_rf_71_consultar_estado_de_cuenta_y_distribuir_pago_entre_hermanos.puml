@@ -1,0 +1,24 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nEstado de Cuenta Familiar" as PantallaFamiliar
+control "Motor\nDistribución" as MotorDistribucion
+entity "Expediente\nHermanos" as BDHermanos
+entity "Estado\nCuenta" as BDEstadoCuenta
+
+Actor --> PantallaFamiliar : Busca tutor (familia)
+PantallaFamiliar --> MotorDistribucion : Consulta hermanos vinculados
+MotorDistribucion --> BDHermanos : Obtiene IDs de alumnos de la familia
+BDHermanos --> MotorDistribucion : Retorna lista de alumnos
+MotorDistribucion --> BDEstadoCuenta : Consulta adeudos de todos los alumnos
+BDEstadoCuenta --> MotorDistribucion : Retorna matriz consolidada
+MotorDistribucion --> PantallaFamiliar : Muestra adeudos juntos
+Actor --> PantallaFamiliar : Selecciona conceptos de varios hermanos y paga
+PantallaFamiliar --> MotorDistribucion : Envía pago global
+MotorDistribucion --> BDEstadoCuenta : Distribuye monto y liquida
+BDEstadoCuenta --> MotorDistribucion : Confirmación
+MotorDistribucion --> PantallaFamiliar : Genera recibo único consolidado
+PantallaFamiliar --> Actor : Muestra recibo familiar
+@enduml

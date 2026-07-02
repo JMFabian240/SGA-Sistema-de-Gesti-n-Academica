@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Reportes" as Pantalla
+control "Generador Reportes" as Generador
+entity "Registro Pagos" as BDPagos
+Admin --> Pantalla : Solicita reporte mensual
+Pantalla --> Generador : Define mes y año
+Generador --> BDPagos : Extrae ingresos mensuales
+BDPagos --> Generador : Retorna matriz financiera
+Generador --> Pantalla : Genera consolidado
+Pantalla --> Admin : Muestra/Descarga reporte
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor ingresa al módulo de Registro de Calificaciones.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Busca y selecciona a un alumno de Bachillerato.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: carga la retícula de materias correspondientes al grado del alumno con la plantilla Bimestral.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el bimestre a evaluar (ej. Bimestre 1).
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: El actor ingresa las calificaciones numéricas para cada materia.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Hace clic en 'Guardar Evaluación'.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida las notas y las guarda,...
+    activate Control
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: valida las notas y las guarda, actualizando el perfil académico del alumno en curso.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

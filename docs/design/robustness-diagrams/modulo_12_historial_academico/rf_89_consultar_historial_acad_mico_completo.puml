@@ -1,0 +1,14 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Admin / Gestor" as Actor
+boundary "Pantalla Expediente" as Pantalla
+control "Gestor Certificados" as Gestor
+entity "Historial Completo" as BDAcademico
+Actor --> Pantalla : Solicita Kárdex o Certificado Completo
+Pantalla --> Gestor : Inicia consolidación
+Gestor --> BDAcademico : Extrae todos los ciclos cursados
+BDAcademico --> Gestor : Retorna vida académica del alumno
+Gestor --> Pantalla : Genera documento oficial
+Pantalla --> Actor : Descarga o imprime Kárdex
+@enduml

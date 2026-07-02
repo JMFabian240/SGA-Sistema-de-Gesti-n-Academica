@@ -1,0 +1,44 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El usuario accede al módulo de pagos.
+    Administrador -> Boundary: Busca y selecciona al alumno.
+    Boundary -> Control: Procesar acción
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: muestra los recargos registrados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona el recargo a modificar.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: muestra la información del recargo.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario selecciona **Modificar recargo**.
+    Boundary -> Control: Procesar acción
+    Administrador -> Boundary: Ingresa el nuevo monto y el motivo de la modificación.
+    Boundary -> Control: Procesar acción
+    Boundary -> Control: valida la información....
+    activate Control
+    Control --> Boundary: valida la información.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: muestra un resumen de los cambios.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El usuario confirma la operación.
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: actualiza el recargo y recalcula el adeudo.
+    Boundary --> Administrador: Muestra resultado
+    Control -> Entity: Query/Update
+    activate Entity
+    Entity --> Control: Exito
+    deactivate Entity
+    Control --> Boundary: registra la modificación en el historial y muestra un mensaje de éxito.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Alumnos.
+    Administrador -> Boundary: Se ubica en la barra de búsqueda del directorio de alumnos.
+    Administrador -> Boundary: El actor ingresa un parámetro de búsqueda: nombre parcial o completo, matrícula o CURP del alumno.
+    Administrador -> Boundary: El actor ejecuta la búsqueda presionando Enter o el botón de buscar.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: procesa la consulta y despliega una lista con los resultados coincidentes.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el expediente deseado haciendo clic sobre él.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: despliega una vista detallada con todos los datos del alumno y la información de contacto del tutor correspondiente.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

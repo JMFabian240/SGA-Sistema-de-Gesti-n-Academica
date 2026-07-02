@@ -1,0 +1,12 @@
+# RF-18, RF-19: Registrar perfil de padre o tutor
+
+| Campo | Descripción |
+| :---- | :---- |
+| **Nombre** | RF-18, RF-19: Registrar perfil de padre o tutor |
+| **Actor** | Administrador y Gestor Administrativo |
+| **Objetivo** | Crear de forma independiente el perfil de un padre o tutor en el sistema, capturando datos personales, de contacto, fiscales y de vinculación escolar para su posterior asociación con alumnos. |
+| **Flujo Principal** | 1. El actor ingresa al módulo de Gestión de Padres/Tutores.<br>2. Selecciona la opción "Registrar nuevo padre/tutor".<br>3. El sistema despliega el formulario de registro.<br>4. El actor ingresa datos personales y de contacto: nombre completo, dirección, teléfono y correo electrónico.<br>5. El actor ingresa datos fiscales: RFC y régimen fiscal.<br>6. El actor indica si el tutor requiere factura electrónica (sí/no).<br>7. El actor selecciona el tipo de pago habitual (transferencia, depósito o tarjeta).<br>8. El actor ingresa la CURP del alumno asociado y el RVOE del nivel escolar.<br>9. El actor hace clic en "Guardar perfil".<br>10. El sistema valida campos obligatorios y que el RFC no esté duplicado.<br>11. El sistema almacena el perfil y muestra: "Perfil de tutor registrado correctamente. Ya puede vincularse con alumnos". |
+| **Flujo Alterno** | <b>A.</b> RFC duplicado:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 10, el sistema detecta el RFC ya registrado en otro perfil.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema muestra: "El RFC ya se encuentra registrado. Verifique o busque el perfil existente".<br>&nbsp;&nbsp;&nbsp;&nbsp;3. El actor corrige o cancela para buscar el perfil existente.<br><br><b>B.</b> Campos obligatorios incompletos:<br>&nbsp;&nbsp;&nbsp;&nbsp;1. En el paso 10, faltan campos obligatorios.<br>&nbsp;&nbsp;&nbsp;&nbsp;2. El sistema resalta los campos en rojo y muestra: "Complete todos los campos obligatorios".<br>&nbsp;&nbsp;&nbsp;&nbsp;3. El actor completa la información y reintenta. |
+| **Precondiciones** | El actor debe tener sesión activa con privilegios de Administrador o Gestor Administrativo. |
+| **Postcondiciones** | • El perfil del padre/tutor queda registrado y disponible para vinculación con alumnos. • La acción queda registrada en la bitácora de auditoría (RF-08). |
+| **Reglas de negocio involucradas** | • El registro está habilitado para Administrador y Gestor Administrativo.<br>• El RFC es único por perfil; no se permiten dos tutores con el mismo RFC.<br>• La indicación de requerimiento de factura electrónica es obligatoria (afecta el flujo de CFDI). |

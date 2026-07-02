@@ -1,0 +1,20 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor "Administrador" as Admin
+boundary "Pantalla Configuración" as Pantalla
+control "Gestor Preferencias" as Gestor
+entity "Parámetros Sistema" as BDPrefs
+Admin --> Pantalla : Navega a configuración global
+Pantalla --> Gestor : Solicita reglas actuales
+Gestor --> BDPrefs : Lee días morosidad y plantillas
+BDPrefs --> Gestor : Retorna configuración
+Gestor --> Pantalla : Despliega formulario
+Admin --> Pantalla : Modifica umbrales de días o textos de aviso
+Admin --> Pantalla : Clic "Guardar configuración"
+Pantalla --> Gestor : Envía nuevos valores
+Gestor --> BDPrefs : Actualiza reglas
+BDPrefs --> Gestor : Confirma cambios
+Gestor --> Pantalla : Éxito
+Pantalla --> Admin : Muestra "Configuración guardada"
+@enduml

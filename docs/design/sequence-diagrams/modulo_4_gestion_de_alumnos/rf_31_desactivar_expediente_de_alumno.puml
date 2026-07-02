@@ -1,0 +1,21 @@
+@startuml
+actor Administrador
+participant "PantallaUI" as Boundary
+participant "Controlador" as Control
+database "BaseDeDatos" as Entity
+
+    Administrador -> Boundary: El actor (Administrador o Gestor) ingresa al módulo de Gestión de Alumnos.
+    Administrador -> Boundary: Utiliza la barra de búsqueda para localizar al alumno por nombre o matrícula.
+    Control --> Boundary: muestra el expediente correspondiente en la lista de resultados.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor selecciona el expediente y elige la opción 'Desactivar expediente' o 'Dar de baja'.
+    Control --> Boundary: despliega un cuadro de confirmación: '¿Está seguro de que desea desactivar el expediente de este alumno• El historial académico y financiero se conservará para consultas futuras'.
+    Boundary --> Administrador: Muestra resultado
+    Administrador -> Boundary: El actor hace clic en 'Confirmar'.
+    Boundary -> Control: Procesar acción
+    Control --> Boundary: cambia el estado del expediente a 'Inactivo' y lo excluye de los listados activos de alumnos.
+    Boundary --> Administrador: Muestra resultado
+    Control --> Boundary: registra la acción en la bitácora de auditoría y muestra el mensaje de éxito: 'Expediente desactivado correctamente'.
+    Boundary --> Administrador: Muestra resultado
+
+@enduml

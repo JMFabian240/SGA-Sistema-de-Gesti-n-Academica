@@ -1,0 +1,23 @@
+﻿@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Admin / Gestor" as Actor
+boundary "Pantalla\nAjuste Recargos" as PantallaRecargo
+control "Gestor\nFinanciero" as GestorFA
+entity "Estado\nCuenta" as EstadoCuenta
+entity "Log\nAuditoría" as Bitacora
+
+Actor --> PantallaRecargo : Selecciona recargo para editar o condonar
+PantallaRecargo --> GestorFA : Solicita modificación
+GestorFA --> PantallaRecargo : Muestra formulario con motivo
+Actor --> PantallaRecargo : Ingresa nuevo monto y motivo
+Actor --> PantallaRecargo : Clic "Aplicar ajuste"
+PantallaRecargo --> GestorFA : Envía modificación
+GestorFA --> EstadoCuenta : Actualiza recargo y recalcula total
+EstadoCuenta --> GestorFA : Adeudo recalculado
+GestorFA --> Bitacora : Guarda motivo y monto anterior
+Bitacora --> GestorFA : Log registrado
+GestorFA --> PantallaRecargo : Retorna éxito
+PantallaRecargo --> Actor : Muestra adeudo actualizado
+@enduml
