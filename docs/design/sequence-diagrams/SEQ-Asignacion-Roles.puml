@@ -1,0 +1,43 @@
+@startuml
+actor Administrador
+participant "UsuariosListPage\n(Tabla)" as List
+participant "RolesModal" as Modal
+participant "UsuariosController\n(tRPC Router)" as Router
+database "Roles / UsuarioRol\n(PostgreSQL)" as DB
+
+Administrador -> List: Clic en "Gestionar Roles"
+activate List
+List -> Modal: Abre (isOpen=true)
+activate Modal
+Modal -> Router: getRoles()
+activate Router
+Router -> DB: findMany(Rol)
+activate DB
+DB --> Router: Array de Roles
+deactivate DB
+Router --> Modal: Roles del sistema
+deactivate Router
+Modal --> Administrador: Renderiza Checkboxes (preseleccionados)
+
+Administrador -> Modal: Modifica checks y pulsa "Guardar"
+Modal -> Router: asignarRoles(usuarioId, roles)
+activate Router
+
+alt Validacion OK
+    Router -> DB: $transaction
+    activate DB
+    DB -> DB: deleteMany(usuarioId)
+    DB -> DB: createMany(nuevosRoles)
+    DB --> Router: Success
+    deactivate DB
+    Router --> Modal: { success: true }
+    Modal -> List: refetch() (Recargar usuarios)
+    Modal --> Administrador: Modal se cierra
+else Sin roles asignados
+    Modal --> Administrador: Alert: "Debe tener al menos un rol"
+end
+
+deactivate Router
+deactivate Modal
+deactivate List
+@enduml

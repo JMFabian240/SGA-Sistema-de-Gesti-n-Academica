@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2 } from 'lucide-react';
+import { Plus, Edit2, Shield } from 'lucide-react';
 import { trpc } from '../../../../lib/trpc';
 import { Button } from '../../../../components/ui/Button/Button';
 import { Table, type Column } from '../../../../components/ui/Table/Table';
 import { Badge } from '../../../../components/ui/Badge/Badge';
 import { Spinner } from '../../../../components/ui/Spinner/Spinner';
+import { RolesModal } from '../../components/RolesModal/RolesModal';
 import styles from './UsuariosListPage.module.css';
 
 // Tipo inferido del backend (idealmente importarlo si estuviera disponible en el front)
@@ -12,17 +14,29 @@ type UsuarioRow = {
   usuarioId: number;
   nombreCompleto: string;
   correo: string;
-  roles: { rol: { nombre: string } }[];
+  roles: { rolId: number, rol: { nombre: string } }[];
   activo: boolean;
 };
 
 export function UsuariosListPage() {
   const navigate = useNavigate();
   // El router en el back devuelve algo similar a { usuarios: [...], total: ... }
-  const { data, isLoading } = trpc.usuarios.listarUsuarios.useQuery({
+  const { data, isLoading, refetch } = trpc.usuarios.listarUsuarios.useQuery({
     pagina: 1,
     limite: 50
   });
+
+  const [rolesModalOpen, setRolesModalOpen] = useState(false);
+  const [selectedUserForRoles, setSelectedUserForRoles] = useState<{ id: number, nombre: string, roles: number[] } | null>(null);
+
+  const handleOpenRoles = (row: UsuarioRow) => {
+    setSelectedUserForRoles({
+      id: row.usuarioId,
+      nombre: row.nombreCompleto,
+      roles: row.roles.map(r => r.rolId) // Mapear rolId
+    });
+    setRolesModalOpen(true);
+  };
 
   const columns: Column<UsuarioRow>[] = [
     {
@@ -48,16 +62,29 @@ export function UsuariosListPage() {
     {
       header: 'Acciones',
       accessor: (row) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/usuarios/${row.usuarioId}/editar`);
-          }}
-        >
-          <Edit2 size={16} />
-        </Button>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Gestionar Roles"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenRoles(row);
+            }}
+          >
+            <Shield size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/usuarios/${row.usuarioId}/editar`);
+            }}
+          >
+            <Edit2 size={16} />
+          </Button>
+        </div>
       ),
     }
   ];
@@ -86,6 +113,17 @@ export function UsuariosListPage() {
           />
         )}
       </div>
+
+      {selectedUserForRoles && (
+        <RolesModal
+          isOpen={rolesModalOpen}
+          onClose={() => setRolesModalOpen(false)}
+          usuarioId={selectedUserForRoles.id}
+          nombreUsuario={selectedUserForRoles.nombre}
+          rolesActuales={selectedUserForRoles.roles}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   );
 }

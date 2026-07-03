@@ -31,6 +31,15 @@ import { AuditoriaLayout } from '../modules/auditoria/layouts/AuditoriaLayout/Au
 import { AuditoriaListPage } from '../modules/auditoria/pages/AuditoriaListPage/AuditoriaListPage';
 import { ConfiguracionLayout } from '../modules/configuracion/layouts/ConfiguracionLayout/ConfiguracionLayout';
 import { ConfiguracionFormPage } from '../modules/configuracion/pages/ConfiguracionFormPage/ConfiguracionFormPage';
+import { AlumnosLayout } from '../modules/alumnos/layouts/AlumnosLayout/AlumnosLayout';
+import { AlumnosListPage } from '../modules/alumnos/pages/AlumnosListPage/AlumnosListPage';
+import { AlumnoFormPage } from '../modules/alumnos/pages/AlumnoFormPage/AlumnoFormPage';
+import { TutoresLayout } from '../modules/tutores/layouts/TutoresLayout/TutoresLayout';
+import { TutoresListPage } from '../modules/tutores/pages/TutoresListPage/TutoresListPage';
+import { TutorFormPage } from '../modules/tutores/pages/TutorFormPage/TutorFormPage';
+import { CalificacionesLayout } from '../modules/calificaciones/layouts/CalificacionesLayout/CalificacionesLayout';
+import { CapturaCalificacionesPage } from '../modules/calificaciones/pages/CapturaCalificacionesPage/CapturaCalificacionesPage';
+import { KardexPage } from '../modules/calificaciones/pages/KardexPage/KardexPage';
 import { useAuth } from '../hooks/useAuth';
 
 // HOC para proteger rutas
@@ -138,6 +147,15 @@ export const router = createBrowserRouter([
         ]
       },
       {
+        path: 'calificaciones',
+        element: <CalificacionesLayout />,
+        children: [
+          { index: true, element: <Navigate to="captura" replace /> },
+          { path: 'captura', element: <CapturaCalificacionesPage /> },
+          { path: 'kardex', element: <KardexPage /> }
+        ]
+      },
+      {
         path: 'auditoria',
         element: <AuditoriaLayout />,
         children: [
@@ -149,6 +167,23 @@ export const router = createBrowserRouter([
         element: <ConfiguracionLayout />,
         children: [
           { index: true, element: <ConfiguracionFormPage /> }
+        ]
+      },
+      {
+        path: 'alumnos',
+        element: <AlumnosLayout />,
+        children: [
+          { index: true, element: <AlumnosListPage /> },
+          { path: 'nuevo', element: <AlumnoFormPage /> },
+          { path: ':id/editar', element: <AlumnoFormPage /> }
+        ]
+      },
+      {
+        path: 'tutores',
+        element: <TutoresLayout />,
+        children: [
+          { index: true, element: <TutoresListPage /> },
+          { path: ':id', element: <TutorFormPage /> }
         ]
       }
     ]

@@ -1,0 +1,39 @@
+@startuml
+actor "Admin/Docente" as Actor
+participant "CapturaCalificacionesPage\n(UI Grid)" as UI
+participant "CalificacionesController\n(tRPC Router)" as Router
+database "Calificacion\n(PostgreSQL)" as DB
+
+Actor -> UI: Selecciona Ciclo, Grupo, Materia
+activate UI
+UI -> Router: getAlumnosPorGrupo(filtros)
+activate Router
+Router -> DB: findMany(Inscripciones + Calificaciones)
+activate DB
+DB --> Router: Array datos
+deactivate DB
+Router --> UI: Datos formateados
+deactivate Router
+UI --> Actor: Muestra Grid de alumnos
+deactivate UI
+
+Actor -> UI: Digita "9.5" y quita el foco
+activate UI
+UI -> Router: upsert(alumnoId, materia, ciclo, 9.5)
+activate Router
+
+alt Upsert Exitoso
+    Router -> DB: upsert(Calificacion)
+    activate DB
+    DB --> Router: row guardada
+    deactivate DB
+    Router --> UI: { success: true }
+    UI --> Actor: Icono Check verde (Guardado)
+else Error en Red/BD
+    Router --> UI: TRPCError
+    UI --> Actor: Toast "Fallo al guardar" y restaura valor
+end
+
+deactivate Router
+deactivate UI
+@enduml

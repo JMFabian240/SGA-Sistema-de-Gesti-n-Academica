@@ -1,0 +1,38 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Alumno {
+  -alumnoId: int
+  -nombreCompleto: string
+  -matricula: string
+}
+
+class Materia {
+  -materiaId: int
+  -nombre: string
+}
+
+class Calificacion {
+  -calificacionId: int
+  -alumnoId: int
+  -materiaId: int
+  -ciclo: string
+  -periodoEvaluacion: string
+  -calificacionFinal: decimal
+  +upsert(): boolean
+}
+
+class KardexDTO <<interface>> {
+  -ciclo: string
+  -registros: List<RegistroKardex>
+}
+
+class RegistroKardex <<interface>> {
+  -nivel: string
+  -materia: string
+  -calificacion: decimal
+}
+
+Alumno "1" -- "0..*" Calificacion : "posee"
+Materia "1" -- "0..*" Calificacion : "evalúa"
+@enduml

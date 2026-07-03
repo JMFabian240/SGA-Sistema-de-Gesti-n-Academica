@@ -11,6 +11,13 @@ import {
 // Por simplicidad, aquí simulamos que guardamos un hash (el módulo 'auth' debe tenerlo).
 
 export const usuariosRouter = router({
+  getRoles: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.rol.findMany({
+      where: { eliminadoEn: null },
+      orderBy: { nombre: 'asc' },
+    });
+  }),
+
   listarUsuarios: protectedProcedure
     .input(ListarUsuariosSchema)
     .query(async ({ input, ctx }) => {

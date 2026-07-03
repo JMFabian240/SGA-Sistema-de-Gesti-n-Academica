@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Eye, Filter } from 'lucide-react';
+import { Eye, Filter } from 'lucide-react';
 import { trpc } from '../../../../lib/trpc';
 import { Button } from '../../../../components/ui/Button/Button';
 import { Table, type Column } from '../../../../components/ui/Table/Table';
@@ -73,15 +73,15 @@ export function AuditoriaListPage() {
   const columns: Column<LogRow>[] = [
     { header: 'ID Log', accessor: 'logId' },
     { header: 'Fecha y Hora', accessor: (row) => new Date(row.fechaHora).toLocaleString() },
-    { 
-      header: 'Acción', 
+    {
+      header: 'Acción',
       accessor: (row) => {
         let variant: 'success' | 'warning' | 'danger' | 'default' = 'default';
         if (row.accion === 'INSERT') variant = 'success';
         if (row.accion === 'UPDATE') variant = 'warning';
         if (row.accion === 'DELETE') variant = 'danger';
         return <Badge variant={variant}>{row.accion}</Badge>;
-      } 
+      }
     },
     { header: 'Tabla Afectada', accessor: 'tablaAfectada' },
     { header: 'Registro PK', accessor: 'registroId' },
@@ -99,11 +99,11 @@ export function AuditoriaListPage() {
   return (
     <div className={styles.container}>
       <div className={styles.toolbar} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-        
+
         <div style={{ flex: 1, minWidth: '120px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <label style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Tipo de Acción</label>
-          <select 
-            value={filtrosVisibles.accion} 
+          <select
+            value={filtrosVisibles.accion}
             onChange={(e) => setFiltrosVisibles(prev => ({ ...prev, accion: e.target.value as any }))}
             style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px' }}
           >
@@ -115,28 +115,28 @@ export function AuditoriaListPage() {
         </div>
 
         <div style={{ flex: 1, minWidth: '150px' }}>
-          <Input 
-            label="Tabla Exacta" 
+          <Input
+            label="Tabla Exacta"
             placeholder="Ej. Alumno"
-            value={filtrosVisibles.tablaAfectada} 
+            value={filtrosVisibles.tablaAfectada}
             onChange={(e) => setFiltrosVisibles(prev => ({ ...prev, tablaAfectada: e.target.value }))}
           />
         </div>
 
         <div style={{ flex: 1, minWidth: '150px' }}>
-          <Input 
-            label="Fecha Inicio" 
-            type="date" 
-            value={filtrosVisibles.fechaInicio} 
+          <Input
+            label="Fecha Inicio"
+            type="date"
+            value={filtrosVisibles.fechaInicio}
             onChange={(e) => setFiltrosVisibles(prev => ({ ...prev, fechaInicio: e.target.value }))}
           />
         </div>
-        
+
         <div style={{ flex: 1, minWidth: '150px' }}>
-          <Input 
-            label="Fecha Fin" 
-            type="date" 
-            value={filtrosVisibles.fechaFin} 
+          <Input
+            label="Fecha Fin"
+            type="date"
+            value={filtrosVisibles.fechaFin}
             onChange={(e) => setFiltrosVisibles(prev => ({ ...prev, fechaFin: e.target.value }))}
           />
         </div>
@@ -171,18 +171,18 @@ export function AuditoriaListPage() {
             Mostrando página {data.meta.pagina} de {data.meta.totalPaginas} ({data.meta.total} registros en total)
           </span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              disabled={data.meta.pagina <= 1 || isFetching} 
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={data.meta.pagina <= 1 || isFetching}
               onClick={() => handlePageChange(data.meta.pagina - 1)}
             >
               Anterior
             </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              disabled={data.meta.pagina >= data.meta.totalPaginas || isFetching} 
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={data.meta.pagina >= data.meta.totalPaginas || isFetching}
               onClick={() => handlePageChange(data.meta.pagina + 1)}
             >
               Siguiente
@@ -191,10 +191,10 @@ export function AuditoriaListPage() {
         </div>
       )}
 
-      <DetalleLogModal 
-        isOpen={modalOpen} 
-        onClose={() => setModalOpen(false)} 
-        log={selectedLog} 
+      <DetalleLogModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        log={selectedLog}
       />
     </div>
   );

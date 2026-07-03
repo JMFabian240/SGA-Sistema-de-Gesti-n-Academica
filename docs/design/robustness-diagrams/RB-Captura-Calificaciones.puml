@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador / Docente" as Actor
+boundary "CapturaCalificacionesPage\n(UI Grid)" as UI
+control "CalificacionesController\n(tRPC Router)" as Router
+entity "Calificacion\n(PostgreSQL)" as BD
+
+Actor --> UI : Selecciona ciclo, grupo, materia
+UI --> Router : Pide alumnos y calificaciones previas
+Router --> BD : Consulta (getAlumnosPorGrupo)
+BD --> Router : Retorna datos
+Router --> UI : Renderiza Grid Reactivo
+
+Actor --> UI : Edita calificación (onBlur)
+UI --> Router : upsert(calificacion)
+Router --> BD : upsert()
+BD --> Router : Guardado exitoso
+Router --> UI : Refleja guardado
+@enduml

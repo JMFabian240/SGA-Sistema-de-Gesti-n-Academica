@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador" as Actor
+boundary "KardexPage\n(UI Search & View)" as UI
+control "CalificacionesController\n(tRPC Router)" as Router
+entity "Calificacion\n(PostgreSQL)" as BD
+
+Actor --> UI : Escribe matricula/nombre
+UI --> UI : Filtra alumnos locales (Inscripciones)
+Actor --> UI : Selecciona alumno
+UI --> Router : obtenerKardexCompleto(alumnoId)
+Router --> BD : findMany(Calificaciones)
+BD --> Router : Historial plano
+Router --> UI : Datos
+UI --> UI : reduce(agrupar por ciclo)
+UI --> Actor : Muestra tarjetas por ciclo
+@enduml

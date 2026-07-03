@@ -1,0 +1,28 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Usuario {
+  -usuarioId: int
+  -nombreUsuario: string
+  -activo: boolean
+  +asignarRoles(List<int>): boolean
+}
+
+class Rol {
+  -rolId: int
+  -codigo: string
+  -nombre: string
+  -descripcion: string
+}
+
+class UsuarioRol {
+  -usuarioRolId: int
+  -usuarioId: int
+  -rolId: int
+  -asignadoPor: int
+  -asignadoEn: Date
+}
+
+Usuario "1" *-- "0..*" UsuarioRol : "tiene"
+Rol "1" *-- "0..*" UsuarioRol : "asignado como"
+@enduml
