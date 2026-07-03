@@ -1,9 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout/MainLayout';
 import { AuthLayout } from '../layouts/AuthLayout/AuthLayout';
+import { ProtectedRoute } from './ProtectedRoute';
 
-const Dashboard = () => <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>;
-const Login = () => <h1 className="text-2xl font-bold text-gray-800">Login</h1>;
+import { DashboardPage } from '../modules/dashboard/pages/DashboardPage';
+import { LoginPage } from '../modules/auth/pages/LoginPage';
+import { AlumnosPage } from '../modules/alumnos/pages/AlumnosPage';
+import { TutoresPage } from '../modules/tutores/pages/TutoresPage';
 
 
 export const router = createBrowserRouter([
@@ -11,18 +14,20 @@ export const router = createBrowserRouter([
     path: '/auth',
     element: <AuthLayout />,
     children: [
-      { path: 'login', element: <Login /> }
+      { path: 'login', element: <LoginPage /> }
     ]
   },
   {
     path: '/',
     element: (
-      // <ProtectedRoute>
-      <MainLayout />
-      // </ProtectedRoute>
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Dashboard /> },
+      { index: true, element: <DashboardPage /> },
+      { path: 'alumnos', element: <AlumnosPage /> },
+      { path: 'tutores', element: <TutoresPage /> },
       // Aquí se irán registrando las rutas de cada módulo (modules/pagos/...)
     ],
   },

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 export interface User {
+  rol: any;
+  nombre: any;
   id: string;
   name: string;
   email: string;
