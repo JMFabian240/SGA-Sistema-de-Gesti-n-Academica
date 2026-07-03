@@ -1,8 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, UserSquare2, Users2, Library,
-  ClipboardList, WalletCards, BadgePercent,
-  LineChart, ShieldAlert, Settings, BookOpen
+  Home, Users, Heart, Book, GraduationCap, FileText, FileSignature,
+  CreditCard, Star, BarChart3, Settings, UserCog, History, Shield, LogOut
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import { clsx } from 'clsx';
@@ -11,34 +10,34 @@ const NAVIGATION = [
   {
     category: 'PRINCIPAL',
     items: [
-      { name: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      { name: 'Dashboard', to: '/dashboard', icon: Home },
     ]
   },
   {
     category: 'ACADÉMICO',
     items: [
-      { name: 'Alumnos', to: '/alumnos', icon: Users2 },
-      { name: 'Tutores', to: '/tutores', icon: UserSquare2 },
-      { name: 'Grupos', to: '/grupos', icon: Library },
-      { name: 'Calificaciones', to: '/calificaciones', icon: LineChart },
-      { name: 'Catálogo de Grupos', to: '/catalogos/grupos', icon: BookOpen },
-      { name: 'Inscripciones', to: '/inscripciones', icon: ClipboardList },
+      { name: 'Alumnos', to: '/alumnos', icon: Users },
+      { name: 'Padres & Tutores', to: '/tutores', icon: Heart },
+      { name: 'Grupos & Materias', to: '/grupos', icon: Book },
+      { name: 'Calificaciones', to: '/calificaciones', icon: GraduationCap },
+      { name: 'Historial Académico', to: '/historial', icon: FileText },
+      { name: 'Boletas', to: '/boletas', icon: FileSignature },
     ]
   },
   {
     category: 'FINANZAS',
     items: [
-      { name: 'Pagos', to: '/pagos', icon: WalletCards },
-      { name: 'Becas', to: '/becas', icon: BadgePercent },
-      { name: 'Reportes', to: '/reportes', icon: LineChart },
+      { name: 'Registro de Pagos', to: '/pagos', icon: CreditCard },
+      { name: 'Gestión de Becas', to: '/becas', icon: Star },
+      { name: 'Reportes', to: '/reportes', icon: BarChart3 },
     ]
   },
   {
     category: 'SISTEMA',
     items: [
       { name: 'Configuración', to: '/configuracion', icon: Settings },
-      { name: 'Usuarios', to: '/usuarios', icon: ShieldAlert },
-      { name: 'Auditoría', to: '/auditoria', icon: ClipboardList },
+      { name: 'Usuarios', to: '/usuarios', icon: UserCog },
+      { name: 'Bitácora', to: '/bitacora', icon: History },
     ]
   }
 ];
@@ -47,10 +46,12 @@ export function Sidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logoContainer}>
-        <img src="/logo.png" alt="Logo" className={styles.logoImage} />
+        <div className={styles.logoAvatar}>
+          <Shield size={24} className={styles.logoIcon} />
+        </div>
         <div className={styles.logoText}>
-          <span className={styles.logoTitle}>COLEGIO</span>
-          <span className={styles.logoSubtitle}>San Diego</span>
+          <span className={styles.logoTitle}>San Diego</span>
+          <span className={styles.logoSubtitle}>Colegio Privado</span>
         </div>
       </div>
       <nav className={styles.nav}>
@@ -82,6 +83,9 @@ export function Sidebar() {
           <span className={styles.userName}>Elizabeth Mendoz...</span>
           <span className={styles.userRole}>ADMIN</span>
         </div>
+        <button className={styles.logoutBtn} title="Cerrar sesión">
+          <LogOut size={18} />
+        </button>
       </div>
     </aside>
   );

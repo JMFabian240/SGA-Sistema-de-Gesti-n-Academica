@@ -1,7 +1,7 @@
 .sidebar {
-  width: 260px;
-  background-color: var(--color-primary);
-  color: white;
+  width: 220px;
+  background-color: var(--color-sidebar-bg);
+  color: var(--color-sidebar-text);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -13,14 +13,23 @@
   padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.logoImage {
+.logoAvatar {
   width: 40px;
-  height: 48px;
-  object-fit: contain;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  color: white;
 }
 
 .logoText {
@@ -29,15 +38,15 @@
 }
 
 .logoTitle {
-  font-size: 1.1rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+  font-size: 1rem;
+  font-weight: 700;
   color: white;
+  line-height: 1.2;
 }
 
 .logoSubtitle {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .nav {
@@ -49,13 +58,13 @@
 }
 
 .navGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .navCategory {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 0.5rem;
   padding: 0 1.5rem;
   text-transform: uppercase;
@@ -65,12 +74,12 @@
 .navItem {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 1.5rem;
-  color: rgba(255, 255, 255, 0.75);
+  gap: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   transition: all 0.2s;
   border-left: 3px solid transparent;
 }
@@ -81,13 +90,14 @@
 }
 
 .navItemActive {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-sidebar-active);
   color: white;
-  border-left-color: var(--color-danger);
+  border-left-color: var(--color-primary);
 }
 
 .icon {
   flex-shrink: 0;
+  color: white;
 }
 
 .label {
@@ -99,14 +109,14 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 .avatar {
   width: 32px;
   height: 32px;
-  background-color: var(--color-danger);
+  background-color: var(--color-primary);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -114,17 +124,22 @@
   justify-content: center;
   font-weight: 700;
   font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .userInfo {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .userName {
   font-size: 0.85rem;
   font-weight: 600;
   color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userRole {
@@ -147,6 +162,6 @@
 }
 
 .logoutBtn:hover {
-  color: var(--color-danger);
+  color: white;
   background-color: rgba(255, 255, 255, 0.1);
 }

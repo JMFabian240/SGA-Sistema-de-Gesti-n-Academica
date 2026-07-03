@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:front-end": "npm run dev --workspace=@sga/front-end",
+    "dev:front-end": "npm run dev --workspace=@sga/front",
     "dev:back-end": "npm run dev --workspace=@sga/back-end",
     "dev:tauri": "npm run tauri dev --workspace=@sga/app-tauri",
     "dev": "npm run dev:back-end & npm run dev:front-end",

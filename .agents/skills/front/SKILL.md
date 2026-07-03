@@ -11,6 +11,8 @@ Guía para mantener la consistencia y arquitectura de la capa de UI.
 
 - **React 18** + **Vite** + **TypeScript**
 - **CSS Modules** o Vanilla CSS (sin frameworks de UI estilo Tailwind a menos que se indique).
+  - Usar siempre las variables globales CSS definidas en `index.css` (ej. `var(--color-primary)`, `var(--color-bg)`, `var(--color-text)`, `var(--shadow-sm)`). No usar colores hardcodeados.
+  - Para diseños de layout (Sidebar/Header) basarse en los patrones establecidos ( Sidebar azul oscuro `--color-sidebar-bg`, Header fondo blanco).
 - **TanStack Query** (React Query) para manejo de estado asíncrono y caché del servidor.
 - **React Router** para navegación de vistas.
 - **tRPC** para comunicación fuertemente tipada con el backend.

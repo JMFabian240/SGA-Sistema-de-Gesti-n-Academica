@@ -29,10 +29,14 @@ Este documento detalla los componentes generados e implementados para el módulo
   - `trpc.dashboard.obtenerMetricasInscripcion.useQuery()`
   - `trpc.dashboard.obtenerKpisFinancieros.useQuery()`
 - **KPIs Mostrados (Card UI):**
-  1. Alumnos Activos
-  2. Ingresos del Mes (Formato Moneda MXN)
-  3. Adeudos Vencidos (Formato Moneda MXN)
-  4. Capacidad Total (Lugares)
+  1. Total Alumnos
+  2. Ingresos de Hoy (Formato Moneda MXN)
+  3. Deudores Críticos (Formato Moneda MXN)
+  4. Becas Activas
+- **Paneles Intermedios:**
+  - Últimos Pagos Registrados Hoy (Lista de estados recientes)
+  - Top Deudores Críticos
+- **Panel de Gráficos:**
+  - Gráfica de barras usando `recharts` mostrando ingresos de los últimos 7 días.
 - **Estados:**
   - Mientras las peticiones resuelven, muestra el componente `<Spinner centered size={40} />`.
-  - Muestra una tabla secundaria (Ocupación por Nivel) debajo de los KPIs.

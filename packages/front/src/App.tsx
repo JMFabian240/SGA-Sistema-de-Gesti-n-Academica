@@ -12,7 +12,7 @@ export default function App() {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: 'http://localhost:3001/trpc',
+          url: '/trpc',
           // Pasamos el token en cada request
           headers() {
             const currentToken = useAuth.getState().token;
