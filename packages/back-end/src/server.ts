@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { appRouter } from './router';
 import { createContext } from './context';
@@ -6,6 +7,11 @@ import { createContext } from './context';
 export function buildServer() {
   const server = fastify({
     logger: true,
+  });
+
+  server.register(cors, {
+    origin: true, // Permitir cualquier origen en desarrollo
+    credentials: true,
   });
 
   server.register(fastifyTRPCPlugin, {
@@ -18,6 +24,11 @@ export function buildServer() {
 
   server.get('/', async () => {
     return { status: 'SGA API is running' };
+  });
+
+  server.setErrorHandler((error, request, reply) => {
+    server.log.error(error);
+    reply.status(500).send({ ok: false, message: error.message, stack: error.stack });
   });
 
   return server;

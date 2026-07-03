@@ -1,7 +1,7 @@
 import { buildServer } from './server';
 
 const server = buildServer();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3001;
 
 async function start() {
   try {

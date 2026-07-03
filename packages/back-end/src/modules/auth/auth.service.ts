@@ -9,8 +9,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 export class AuthService {
   static async login(input: LoginInput, ip: string, userAgent: string) {
-    const usuario = await prisma.usuario.findUnique({
-      where: { correo: input.correo },
+    const usuario = await prisma.usuario.findFirst({
+      where: {
+        OR: [
+          { correo: input.identificador },
+          { nombreUsuario: input.identificador }
+        ]
+      },
       include: {
         roles: {
           include: {
@@ -22,17 +27,17 @@ export class AuthService {
     });
 
     if (!usuario) {
-      await this.registrarIntentoLogin(null, input.correo, false, ip, userAgent);
+      await this.registrarIntentoLogin(null, input.identificador, false, ip, userAgent);
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' });
     }
 
     if (!usuario.activo || usuario.eliminadoEn) {
-      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      await this.registrarIntentoLogin(usuario.usuarioId, input.identificador, false, ip, userAgent);
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta desactivada o eliminada' });
     }
 
     if (usuario.bloqueadoHasta && usuario.bloqueadoHasta > new Date()) {
-      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      await this.registrarIntentoLogin(usuario.usuarioId, input.identificador, false, ip, userAgent);
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta bloqueada temporalmente' });
     }
 
@@ -53,7 +58,7 @@ export class AuthService {
         data: { intentosFallidos: intentos, bloqueadoHasta }
       });
 
-      await this.registrarIntentoLogin(usuario.usuarioId, input.correo, false, ip, userAgent);
+      await this.registrarIntentoLogin(usuario.usuarioId, input.identificador, false, ip, userAgent);
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' });
     }
 
@@ -63,7 +68,7 @@ export class AuthService {
       data: { intentosFallidos: 0, bloqueadoHasta: null, ultimoAcceso: new Date() }
     });
 
-    await this.registrarIntentoLogin(usuario.usuarioId, input.correo, true, ip, userAgent);
+    await this.registrarIntentoLogin(usuario.usuarioId, input.identificador, true, ip, userAgent);
 
     // Generar token JWT
     const jti = crypto.randomUUID();

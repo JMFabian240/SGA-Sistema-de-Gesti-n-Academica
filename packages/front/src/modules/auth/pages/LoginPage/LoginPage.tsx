@@ -8,7 +8,7 @@ import { trpc } from '../../../../lib/trpc';
 import styles from './LoginPage.module.css';
 
 export function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
@@ -31,12 +31,12 @@ export function LoginPage() {
     e.preventDefault();
     setError('');
     
-    if (!email || !password) {
-      setError('Por favor, ingresa tu correo y contraseña');
+    if (!identificador || !password) {
+      setError('Por favor, ingresa tu correo/usuario y contraseña');
       return;
     }
     
-    loginMutation.mutate({ correo: email, contrasena: password });
+    loginMutation.mutate({ identificador, contrasena: password });
   };
 
   return (
@@ -48,11 +48,11 @@ export function LoginPage() {
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <Input
-          type="email"
-          label="Correo Electrónico"
-          placeholder="tu@colegio.edu"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          label="Correo o Usuario"
+          placeholder="admin@colegio.edu / admin"
+          value={identificador}
+          onChange={(e) => setIdentificador(e.target.value)}
           leftIcon={<Mail size={18} />}
           disabled={loginMutation.isPending}
         />

@@ -20,7 +20,7 @@ describe('AuthService (Unit)', () => {
       prismaMock.usuario.findUnique.mockResolvedValue(null);
       prismaMock.intentoLogin.create.mockResolvedValue({} as any);
 
-      await expect(AuthService.login({ correo: 'no@existe.com', contrasena: '123' }, '127.0.0.1', 'test'))
+      await expect(AuthService.login({ identificador: 'admin@colegio.edu', contrasena: 'badpass' }, '127.0.0.1', 'jest-test'))
         .rejects.toThrowError(new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' }));
     });
 
@@ -43,7 +43,7 @@ describe('AuthService (Unit)', () => {
       prismaMock.usuario.update.mockResolvedValue({} as any);
       prismaMock.intentoLogin.create.mockResolvedValue({} as any);
 
-      const result = await AuthService.login({ correo: 'test@sga.com', contrasena: '123' }, '127.0.0.1', 'test');
+      const result = await AuthService.login({ identificador: 'admin@colegio.edu', contrasena: '123456' }, '127.0.0.1', 'jest-test');
 
       expect(result).toHaveProperty('token');
       expect(result.usuario).toEqual({
@@ -60,7 +60,7 @@ describe('AuthService (Unit)', () => {
         eliminadoEn: null,
       } as any);
 
-      await expect(AuthService.login({ correo: 'test@sga.com', contrasena: '123' }, '127.0.0.1', 'test'))
+      await expect(AuthService.login({ identificador: 'test@sga.com', contrasena: '123' }, '127.0.0.1', 'test'))
         .rejects.toThrowError(new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta desactivada o eliminada' }));
     });
 
@@ -75,7 +75,7 @@ describe('AuthService (Unit)', () => {
         bloqueadoHasta: futureDate,
       } as any);
 
-      await expect(AuthService.login({ correo: 'test@sga.com', contrasena: '123' }, '127.0.0.1', 'test'))
+      await expect(AuthService.login({ identificador: 'test@sga.com', contrasena: '123' }, '127.0.0.1', 'test'))
         .rejects.toThrowError(new TRPCError({ code: 'UNAUTHORIZED', message: 'Cuenta bloqueada temporalmente' }));
     });
 
@@ -91,7 +91,7 @@ describe('AuthService (Unit)', () => {
 
       (bcrypt.compare as any).mockResolvedValue(false);
       
-      await expect(AuthService.login({ correo: 'test@sga.com', contrasena: 'wrong' }, '127.0.0.1', 'test'))
+      await expect(AuthService.login({ identificador: 'test@sga.com', contrasena: 'wrong' }, '127.0.0.1', 'test'))
         .rejects.toThrowError(new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' }));
 
       expect(prismaMock.usuario.update).toHaveBeenCalledWith({
@@ -112,7 +112,7 @@ describe('AuthService (Unit)', () => {
 
       (bcrypt.compare as any).mockResolvedValue(false);
       
-      await expect(AuthService.login({ correo: 'test@sga.com', contrasena: 'wrong' }, '127.0.0.1', 'test'))
+      await expect(AuthService.login({ identificador: 'test@sga.com', contrasena: 'wrong' }, '127.0.0.1', 'test'))
         .rejects.toThrowError(new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciales inválidas' }));
 
       // Verificar que update haya sido llamado con intentosFallidos: 5 y un bloqueadoHasta válido

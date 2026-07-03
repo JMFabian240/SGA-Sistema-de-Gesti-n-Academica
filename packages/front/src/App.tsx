@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
@@ -8,21 +8,19 @@ import { router } from './router';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
-  const token = useAuth(state => state.token);
-  
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: 'http://localhost:3000/trpc',
+          url: 'http://localhost:3001/trpc',
           // Pasamos el token en cada request
           headers() {
-            return {
-              Authorization: token ? `Bearer ${token}` : undefined,
-            };
+            const currentToken = useAuth.getState().token;
+            return currentToken ? { Authorization: `Bearer ${currentToken}` } : {};
           },
         }),
       ],
+      transformer: undefined
     })
   );
 
