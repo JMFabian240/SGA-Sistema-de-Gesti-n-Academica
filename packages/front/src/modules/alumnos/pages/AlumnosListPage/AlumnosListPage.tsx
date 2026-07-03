@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { trpc } from '../../../../lib/trpc';
 import { Button } from '../../../../components/ui/Button/Button';
 import { Table, type Column } from '../../../../components/ui/Table/Table';
-import { Badge } from '../../../../components/ui/Badge/Badge';
 import { Input } from '../../../../components/ui/Input/Input';
 import { Spinner } from '../../../../components/ui/Spinner/Spinner';
 import { useState } from 'react';
@@ -34,21 +33,18 @@ export function AlumnosListPage() {
   }) || [];
 
   const columns: Column<AlumnoRow>[] = [
-    { header: 'Matrícula', accessor: (row) => row.matricula || <span style={{ color: '#9ca3af' }}>N/A</span> },
-    { header: 'Nombre Completo', accessor: 'nombreCompleto' },
-    { header: 'CURP', accessor: 'curp' },
-    { header: 'Sexo', accessor: 'sexo' },
-    { header: 'Nivel', accessor: (row) => row.nivel?.nombre || <span style={{ color: '#9ca3af' }}>Sin Asignar</span> },
-    {
-      header: 'Estado',
-      accessor: (row) => {
-        let variant: 'success' | 'warning' | 'danger' | 'default' = 'default';
-        if (row.estado === 'ACTIVO') variant = 'success';
-        else if (row.estado === 'BAJA_DEFINITIVA') variant = 'danger';
-        else if (row.estado === 'BAJA_TEMPORAL') variant = 'warning';
-        return <Badge variant={variant}>{row.estado}</Badge>;
-      }
+    { 
+      header: 'Alumno', 
+      accessor: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontWeight: 600 }}>{row.nombreCompleto}</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Matrícula: {row.matricula || 'N/A'}</span>
+        </div>
+      )
     },
+    { header: 'Grupo/Nivel', accessor: (row) => row.nivel?.nombre || 'Sin Asignar' },
+    { header: 'Tutor Principal', accessor: () => <span style={{ color: 'var(--color-text-muted)' }}>Sin asignar</span> },
+    { header: 'Contacto', accessor: () => <span style={{ color: 'var(--color-text-muted)' }}>Tel: -</span> },
     {
       header: 'Acciones',
       accessor: (row) => (
@@ -56,10 +52,9 @@ export function AlumnosListPage() {
           <Button
             variant="secondary"
             size="sm"
-            leftIcon={<Pencil size={16} />}
-            onClick={() => navigate(`/alumnos/${row.alumnoId}/editar`)}
+            onClick={() => navigate(`/alumnos/${row.alumnoId}`)}
           >
-            Editar
+            Ver expediente
           </Button>
         </div>
       )
@@ -68,21 +63,43 @@ export function AlumnosListPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.toolbar}>
-        <div style={{ width: '300px' }}>
-          <Input
-            placeholder="Buscar por nombre, CURP o matrícula..."
-            leftIcon={<Search size={18} />}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Directorio Escolar</h1>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <Button variant="secondary">Importar CSV</Button>
+          <Button onClick={() => navigate('/alumnos/nuevo')} leftIcon={<Plus size={18} />}>
+            Nuevo alumno
+          </Button>
         </div>
-        <Button
-          onClick={() => navigate('/alumnos/nuevo')}
-          leftIcon={<Plus size={20} />}
-        >
-          Registrar Nuevo Alumno
-        </Button>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flex: 1, alignItems: 'center' }}>
+          <div style={{ width: '250px' }}>
+            <Input
+              placeholder="Buscar alumno, matrícula..."
+              leftIcon={<Search size={18} />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <select style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+            <option>Activos</option>
+          </select>
+          <select style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+            <option>Todos los niveles</option>
+          </select>
+          <select style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+            <option>Grado</option>
+          </select>
+          <select style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+            <option>Grupo</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.875rem' }}>
+          <span style={{ color: 'var(--color-text-muted)' }}>Resultados: {filteredAlumnos.length}</span>
+          <Button variant="secondary" size="sm">Exportar</Button>
+        </div>
       </div>
 
       <div className={styles.tableWrapper}>

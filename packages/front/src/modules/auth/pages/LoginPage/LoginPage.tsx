@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
 import { Input } from '../../../../components/ui/Input/Input';
 import { Button } from '../../../../components/ui/Button/Button';
 import { useAuth } from '../../../../hooks/useAuth';
@@ -42,18 +41,18 @@ export function LoginPage() {
   return (
     <div className={styles.loginContainer}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Iniciar Sesión</h2>
-        <p className={styles.description}>Ingresa tus credenciales para acceder al sistema.</p>
+        <img src="/logo.png" alt="Colegio San Diego" className={styles.logoImage} />
+        <h2 className={styles.title}>Bienvenido de vuelta</h2>
+        <p className={styles.description}>Ingresa tus credenciales para acceder</p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <Input
           type="text"
-          label="Correo o Usuario"
-          placeholder="admin@colegio.edu / admin"
+          label="Usuario"
+          placeholder="admin"
           value={identificador}
           onChange={(e) => setIdentificador(e.target.value)}
-          leftIcon={<Mail size={18} />}
           disabled={loginMutation.isPending}
         />
         
@@ -63,7 +62,6 @@ export function LoginPage() {
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          leftIcon={<Lock size={18} />}
           disabled={loginMutation.isPending}
         />
 
@@ -74,7 +72,7 @@ export function LoginPage() {
           className={styles.submitBtn} 
           isLoading={loginMutation.isPending}
         >
-          Acceder al Sistema
+          Iniciar Sesión
         </Button>
       </form>
     </div>

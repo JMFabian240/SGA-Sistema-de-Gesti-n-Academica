@@ -2,23 +2,13 @@
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: var(--color-bg);
+  background-color: var(--color-primary);
+  align-items: center;
+  justify-content: center;
 }
 
 .leftPanel {
   display: none;
-  width: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-info));
-  color: white;
-  padding: 4rem;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-@media (min-width: 1024px) {
-  .leftPanel {
-    display: flex;
-  }
 }
 
 .logo {
@@ -36,19 +26,17 @@
 
 .rightPanel {
   width: 100%;
+  max-width: 450px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
 }
 
-@media (min-width: 1024px) {
-  .rightPanel {
-    width: 50%;
-  }
-}
-
 .formContainer {
   width: 100%;
-  max-width: 400px;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
 }

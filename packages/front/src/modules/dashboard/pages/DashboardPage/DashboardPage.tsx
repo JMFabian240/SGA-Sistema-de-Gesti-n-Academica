@@ -1,8 +1,8 @@
-import React from 'react';
 import { trpc } from '../../../../lib/trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/Card/Card';
 import { Spinner } from '../../../../components/ui/Spinner/Spinner';
-import { Users, AlertCircle, WalletCards, GraduationCap } from 'lucide-react';
+import { Button } from '../../../../components/ui/Button/Button';
+import { Users, AlertCircle, WalletCards, Award } from 'lucide-react';
 import styles from './DashboardPage.module.css';
 
 export function DashboardPage() {
@@ -21,14 +21,20 @@ export function DashboardPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Resumen General</h1>
-        <p className={styles.subtitle}>Métricas principales del colegio en tiempo real.</p>
+        <div className={styles.titleWrapper}>
+          <h1 className={styles.title}>Dashboard</h1>
+          <p className={styles.subtitle}>Resumen operativo y financiero del día</p>
+        </div>
+        <Button className={styles.pagoRapidoBtn} style={{ backgroundColor: 'var(--color-danger)', color: 'white' }}>
+          <WalletCards size={18} style={{ marginRight: '8px' }} />
+          Pago Rápido
+        </Button>
       </div>
 
       <div className={styles.grid}>
         <Card>
           <CardContent className={styles.kpiCard}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)', color: 'var(--color-primary)' }}>
+            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-primary)' }}>
               <Users size={24} />
             </div>
             <div className={styles.kpiData}>
@@ -54,7 +60,7 @@ export function DashboardPage() {
 
         <Card>
           <CardContent className={styles.kpiCard}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)' }}>
+            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-danger)' }}>
               <AlertCircle size={24} />
             </div>
             <div className={styles.kpiData}>
@@ -68,8 +74,8 @@ export function DashboardPage() {
 
         <Card>
           <CardContent className={styles.kpiCard}>
-            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-info)' }}>
-              <GraduationCap size={24} />
+            <div className={styles.kpiIconWrapper} style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-warning)' }}>
+              <Award size={24} />
             </div>
             <div className={styles.kpiData}>
               <span className={styles.kpiLabel}>Capacidad Total</span>

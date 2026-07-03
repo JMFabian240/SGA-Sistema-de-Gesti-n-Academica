@@ -9,6 +9,15 @@
 .header {
   margin-bottom: 2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logoImage {
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 1.5rem;
 }
 
 .title {
@@ -33,6 +42,12 @@
 .submitBtn {
   margin-top: 0.5rem;
   width: 100%;
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.submitBtn:hover {
+  background-color: var(--color-danger-hover);
 }
 
 .errorAlert {
