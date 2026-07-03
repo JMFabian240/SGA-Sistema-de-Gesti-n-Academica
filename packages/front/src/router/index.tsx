@@ -29,6 +29,8 @@ import { DeudoresReportePage } from '../modules/reportes/pages/DeudoresReportePa
 import { AsistenciaReportePage } from '../modules/reportes/pages/AsistenciaReportePage/AsistenciaReportePage';
 import { AuditoriaLayout } from '../modules/auditoria/layouts/AuditoriaLayout/AuditoriaLayout';
 import { AuditoriaListPage } from '../modules/auditoria/pages/AuditoriaListPage/AuditoriaListPage';
+import { ConfiguracionLayout } from '../modules/configuracion/layouts/ConfiguracionLayout/ConfiguracionLayout';
+import { ConfiguracionFormPage } from '../modules/configuracion/pages/ConfiguracionFormPage/ConfiguracionFormPage';
 import { useAuth } from '../hooks/useAuth';
 
 // HOC para proteger rutas
@@ -140,6 +142,13 @@ export const router = createBrowserRouter([
         element: <AuditoriaLayout />,
         children: [
           { index: true, element: <AuditoriaListPage /> }
+        ]
+      },
+      {
+        path: 'configuracion',
+        element: <ConfiguracionLayout />,
+        children: [
+          { index: true, element: <ConfiguracionFormPage /> }
         ]
       }
     ]
