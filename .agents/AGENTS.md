@@ -96,4 +96,4 @@ Las skills de diseño han sido analizadas y están diseñadas para complementars
 - No modificar más de un paquete a la vez sin avisar
 
 ## Reglas de Git y Commits
-- **CRÍTICO - MENSAJES DE COMMIT:** Al momento de realizar un commit, el agente **TIENE** la obligación de que el mensaje sea descriptivo, detallado (explicando el contexto y archivos modificados) y **siempre en español**.
+- **CRÍTICO - MENSAJES DE COMMIT:** Al momento de realizar un commit, el agente **TIENE** la obligación de redactar el mensaje explicando **exclusivamente el contexto y propósito de los cambios**, omitiendo por completo la lista de archivos modificados. Todo el mensaje debe estar **siempre en español**.
