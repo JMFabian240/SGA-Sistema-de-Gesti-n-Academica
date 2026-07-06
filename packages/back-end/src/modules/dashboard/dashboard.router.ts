@@ -77,4 +77,31 @@ export const dashboardRouter = router({
         ingresos: item.ingresos
       }));
     }),
+
+  obtenerUltimosPagos: gestorProcedure
+    .query(async ({ ctx }) => {
+      const inicioHoy = new Date();
+      inicioHoy.setHours(0, 0, 0, 0);
+
+      const pagos = await ctx.prisma.pago.findMany({
+        where: {
+          fechaPago: {
+            gte: inicioHoy
+          }
+        },
+        include: {
+          alumno: true
+        },
+        orderBy: {
+          registradoEn: 'desc'
+        },
+        take: 5
+      });
+
+      return pagos.map(p => ({
+        name: p.alumno.nombreCompleto,
+        type: 'Colegiatura',
+        amount: `$${Number(p.montoTotal).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+      }));
+    }),
 });
