@@ -76,6 +76,32 @@ export class GruposService {
   }
 
   static async deleteCiclo(cicloId: number) {
+    // 1. No se puede eliminar ningún ciclo escolar que ya tenga registrado un pago.
+    const pagoExistente = await prisma.aplicacionPago.findFirst({
+      where: {
+        calendarioPago: { cicloId }
+      }
+    });
+
+    if (pagoExistente) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'No se puede eliminar el ciclo escolar porque ya tiene registrado al menos un pago.'
+      });
+    }
+
+    // 2. Solo se puede eliminar un ciclo escolar si no tiene alumnos inscritos (se cubren tanto activos como inactivos).
+    const inscripcionExistente = await prisma.inscripcionCiclo.findFirst({
+      where: { cicloId }
+    });
+
+    if (inscripcionExistente) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'No se puede eliminar el ciclo escolar porque tiene alumnos inscritos.'
+      });
+    }
+
     const deleted = await GruposRepository.deleteCiclo(cicloId);
     return {
       ...deleted,

@@ -151,21 +151,19 @@ export function CicloFormModal({ isOpen, onClose, cicloId, initialData }: Props)
           />
         </div>
 
-        {isEditing && (
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-gray-100">
-            <input
-              type="checkbox"
-              id="activo-checkbox"
-              checked={activo}
-              onChange={(e) => setActivo(e.target.checked)}
-              disabled={isSaving}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-            />
-            <label htmlFor="activo-checkbox" className="text-sm font-medium text-gray-700 select-none cursor-pointer">
-              Marcar como Ciclo Escolar Activo
-            </label>
-          </div>
-        )}
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-gray-100">
+          <input
+            type="checkbox"
+            id="activo-checkbox"
+            checked={activo}
+            onChange={(e) => setActivo(e.target.checked)}
+            disabled={isSaving}
+            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+          />
+          <label htmlFor="activo-checkbox" className="text-sm font-medium text-gray-700 select-none cursor-pointer">
+            Marcar como Ciclo Escolar Activo
+          </label>
+        </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>

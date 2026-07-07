@@ -62,6 +62,18 @@ export function ConfiguracionPage() {
   const [tarifaSuccess, setTarifaSuccess] = useState(false);
   const [editandoTarifas, setEditandoTarifas] = useState(false);
 
+  // Filtrado de niveles según periodicidad del ciclo
+  const selectedCiclo = ciclos?.find((c: any) => c.cicloId === selectedCicloId);
+  const isSemestral = selectedCiclo?.periodicidad === 'SEMESTRAL';
+  const filteredNiveles = niveles?.filter((n: any) => 
+    isSemestral ? n.codigo === 'BAC' : n.codigo !== 'BAC'
+  );
+
+  // Desactivar modo edición al cambiar de ciclo
+  useEffect(() => {
+    setEditandoTarifas(false);
+  }, [selectedCicloId]);
+
   // Set default selected cycle when list loads
   useEffect(() => {
     if (ciclos && ciclos.length > 0 && !selectedCicloId) {
@@ -102,14 +114,14 @@ export function ConfiguracionPage() {
   };
 
   const handleSaveTarifas = async () => {
-    if (!selectedCicloId || !niveles) return;
+    if (!selectedCicloId || !filteredNiveles) return;
 
     // Validación de montos negativos o inválidos
     let hasNegative = false;
     let hasInvalid = false;
     const conceptos = ['INSCRIPCION', 'ARANCEL', 'MATERIAL', 'LIBROS', 'UNIFORME', 'COLEGIATURA'];
 
-    for (const n of niveles) {
+    for (const n of filteredNiveles) {
       for (const c of conceptos) {
         const key = `${n.nivelId}_${c}`;
         const val = tarifaValores[key];
@@ -137,7 +149,7 @@ export function ConfiguracionPage() {
     setTarifaSuccess(false);
 
     try {
-      for (const n of niveles) {
+      for (const n of filteredNiveles) {
         for (const c of conceptos) {
           const key = `${n.nivelId}_${c}`;
           const val = tarifaValores[key];
@@ -409,11 +421,11 @@ export function ConfiguracionPage() {
                           <th className="py-3 font-semibold text-center">Materiales ($)</th>
                           <th className="py-3 font-semibold text-center">Libros ($)</th>
                           <th className="py-3 font-semibold text-center">Uniforme ($)</th>
-                          <th className="py-3 font-semibold text-center">Colegiatura ($)</th>
+                          <th className="py-3 font-semibold text-center">Colegiatura ($ / Mes)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {niveles?.map((n: any) => (
+                        {filteredNiveles?.map((n: any) => (
                           <tr key={n.nivelId}>
                             <td className="py-4 font-bold text-navy-800">{n.nombre}</td>
                             {['INSCRIPCION', 'ARANCEL', 'MATERIAL', 'LIBROS', 'UNIFORME', 'COLEGIATURA'].map((c) => (
@@ -441,25 +453,31 @@ export function ConfiguracionPage() {
                       <Check size={16} /> Tarifas guardadas con éxito
                     </span>
                   )}
-                  {editandoTarifas ? (
-                    <Button
-                      onClick={handleSaveTarifas}
-                      isLoading={guardandoTarifas}
-                      disabled={loadingTarifas}
-                      variant="primary"
-                      className="rounded-xl px-6 py-2 font-medium"
-                    >
-                      Guardar Montos
-                    </Button>
+                  {selectedCiclo?.activo ? (
+                    editandoTarifas ? (
+                      <Button
+                        onClick={handleSaveTarifas}
+                        isLoading={guardandoTarifas}
+                        disabled={loadingTarifas}
+                        variant="primary"
+                        className="rounded-xl px-6 py-2 font-medium"
+                      >
+                        Guardar Montos
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => setEditandoTarifas(true)}
+                        disabled={loadingTarifas}
+                        variant="primary"
+                        className="rounded-xl px-6 py-2 font-medium"
+                      >
+                        Modificar Montos
+                      </Button>
+                    )
                   ) : (
-                    <Button
-                      onClick={() => setEditandoTarifas(true)}
-                      disabled={loadingTarifas}
-                      variant="primary"
-                      className="rounded-xl px-6 py-2 font-medium"
-                    >
-                      Modificar Montos
-                    </Button>
+                    <span className="text-gray-400 text-xs font-semibold uppercase italic bg-gray-50 border border-gray-150 px-3 py-2 rounded-xl">
+                      Solo lectura (Ciclo Inactivo)
+                    </span>
                   )}
                 </div>
               </div>

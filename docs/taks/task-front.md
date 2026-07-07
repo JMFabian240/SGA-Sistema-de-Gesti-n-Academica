@@ -11,8 +11,8 @@ Este documento detalla el estado actual de la migración del sistema hacia **`fr
 | **Arquitectura Base & Ruteo** | **Completado** | Layout principal con sidebar dinámico, ruteo protegido por autenticación, estado global en Zustand y cliente tRPC centralizado. |
 | **Autenticación (Auth)** | **Completado** | Formulario premium de inicio de sesión (`LoginPage`), validación de credenciales en el backend, guardado seguro de JWT en `localStorage` y persistencia de sesión. |
 | **Panel de Inicio (Dashboard)** | **Completado** | Conexión real a `metricasInscripcion`, `kpisFinancieros`, query de ingresos de los últimos 7 días y la lista dinámica de **"Últimos Pagos Registrados Hoy"**. Cero datos mockeados. |
-| **Catálogo de Alumnos** | **Completado** | Listado de alumnos con paginación, filtros de búsqueda, visualización de estado de adeudos, y CRUD completo (crear, editar, eliminar lógicamente). |
-| **Catálogo de Tutores** | **Completado** | Listado completo, asociación a alumnos, CRUD, validación estricta de RFC y datos fiscales en la misma vista, y control de saldo a favor. |
+| **Catálogo de Alumnos** | **En Proceso (Detalles)** | Listado de alumnos con paginación, filtros de búsqueda, visualización de estado de adeudos, y CRUD completo (crear, editar, eliminar lógicamente). |
+| **Catálogo de Tutores** | **En Proceso (Detalles)** | Listado completo, asociación a alumnos, CRUD, validación estricta de RFC y datos fiscales en la misma vista, y control de saldo a favor. |
 
 ---
 
