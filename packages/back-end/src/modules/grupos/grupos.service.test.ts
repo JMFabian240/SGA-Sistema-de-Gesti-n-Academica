@@ -38,6 +38,70 @@ describe('GruposService (Unit)', () => {
     });
   });
 
+  describe('Grados', () => {
+    it('getGrados y createGrado', async () => {
+      prismaMock.grado.findMany.mockResolvedValue([{ gradoId: 1, nombre: '1º Grado', numero: 1 }] as any);
+      const result = await GruposService.getGrados();
+      expect(result).toHaveLength(1);
+      expect(prismaMock.grado.findMany).toHaveBeenCalledWith({
+        where: { eliminadoEn: null },
+        orderBy: { numero: 'asc' }
+      });
+
+      prismaMock.grado.create.mockResolvedValue({ gradoId: 1 } as any);
+      await GruposService.createGrado({ nivelId: 1, numero: 1, nombre: '1º Grado' });
+      expect(prismaMock.grado.create).toHaveBeenCalled();
+    });
+
+    it('updateGrado', async () => {
+      prismaMock.grado.update.mockResolvedValue({} as any);
+      await GruposService.updateGrado({ gradoId: 1, nombre: 'Primero' });
+      expect(prismaMock.grado.update).toHaveBeenCalledWith(expect.objectContaining({
+        where: { gradoId: 1 },
+        data: expect.objectContaining({ nombre: 'Primero' })
+      }));
+    });
+
+    it('deleteGrado debería fallar si hay grupos, alumnos o materias asociadas', async () => {
+      // 1. Simular grupo asociado
+      prismaMock.grupo.findFirst.mockResolvedValue({ grupoId: 1 } as any);
+      await expect(GruposService.deleteGrado(1)).rejects.toThrowError(
+        'No se puede eliminar el grado porque tiene grupos asociados.'
+      );
+
+      // Reset
+      prismaMock.grupo.findFirst.mockResolvedValue(null);
+
+      // 2. Simular alumno asociado
+      prismaMock.alumno.findFirst.mockResolvedValue({ alumnoId: 1 } as any);
+      await expect(GruposService.deleteGrado(1)).rejects.toThrowError(
+        'No se puede eliminar el grado porque tiene alumnos asociados.'
+      );
+
+      // Reset
+      prismaMock.alumno.findFirst.mockResolvedValue(null);
+
+      // 3. Simular materia asociada
+      prismaMock.materia.findFirst.mockResolvedValue({ materiaId: 1 } as any);
+      await expect(GruposService.deleteGrado(1)).rejects.toThrowError(
+        'No se puede eliminar el grado porque tiene materias asociadas.'
+      );
+    });
+
+    it('deleteGrado debería tener éxito si no hay dependencias', async () => {
+      prismaMock.grupo.findFirst.mockResolvedValue(null);
+      prismaMock.alumno.findFirst.mockResolvedValue(null);
+      prismaMock.materia.findFirst.mockResolvedValue(null);
+      prismaMock.grado.update.mockResolvedValue({} as any);
+
+      await GruposService.deleteGrado(1);
+      expect(prismaMock.grado.update).toHaveBeenCalledWith(expect.objectContaining({
+        where: { gradoId: 1 },
+        data: expect.objectContaining({ eliminadoEn: expect.any(Date) })
+      }));
+    });
+  });
+
   describe('Ciclos Escolares', () => {
     it('createCiclo transforma strings de fechas', async () => {
       prismaMock.cicloEscolar.create.mockResolvedValue({ cicloId: 1 } as any);
@@ -93,7 +157,7 @@ describe('GruposService (Unit)', () => {
       await GruposService.getGrupos(1);
       expect(prismaMock.grupo.findMany).toHaveBeenCalledWith(expect.objectContaining({
         where: { eliminadoEn: null, cicloId: 1 },
-        include: { nivel: true, ciclo: true, materias: expect.any(Object) }
+        include: { nivel: true, ciclo: true, grado: true, materias: expect.any(Object) }
       }));
     });
 

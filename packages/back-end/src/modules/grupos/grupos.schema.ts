@@ -12,6 +12,17 @@ export const updateNivelEducativoSchema = createNivelEducativoSchema.partial().e
   nivelId: z.number().int().positive()
 });
 
+// Grado
+export const createGradoSchema = z.object({
+  nivelId: z.number().int().positive(),
+  numero: z.number().int().positive(),
+  nombre: z.string().min(1, 'El nombre del grado es requerido').max(50)
+});
+
+export const updateGradoSchema = createGradoSchema.partial().extend({
+  gradoId: z.number().int().positive()
+});
+
 // Ciclo Escolar
 export const createCicloEscolarSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(20),
@@ -29,7 +40,8 @@ export const updateCicloEscolarSchema = createCicloEscolarSchema.partial().exten
 // Materia
 export const createMateriaSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(80),
-  clave: z.string().min(1, 'La clave es requerida').max(20)
+  clave: z.string().min(1, 'La clave es requerida').max(20),
+  gradoId: z.number().int().positive().optional().nullable()
 });
 
 export const updateMateriaSchema = createMateriaSchema.partial().extend({
@@ -40,6 +52,7 @@ export const updateMateriaSchema = createMateriaSchema.partial().extend({
 export const createGrupoSchema = z.object({
   nivelId: z.number().int().positive(),
   cicloId: z.number().int().positive(),
+  gradoId: z.number().int().positive(),
   nombre: z.string().min(1, 'El nombre es requerido').max(10),
   cupoMaximo: z.number().int().positive()
 });
@@ -75,6 +88,8 @@ export const cerrarCicloGrupoSchema = z.object({
 // Types
 export type CreateNivelEducativoInput = z.infer<typeof createNivelEducativoSchema>;
 export type UpdateNivelEducativoInput = z.infer<typeof updateNivelEducativoSchema>;
+export type CreateGradoInput = z.infer<typeof createGradoSchema>;
+export type UpdateGradoInput = z.infer<typeof updateGradoSchema>;
 export type CreateCicloEscolarInput = z.infer<typeof createCicloEscolarSchema>;
 export type UpdateCicloEscolarInput = z.infer<typeof updateCicloEscolarSchema>;
 export type CreateMateriaInput = z.infer<typeof createMateriaSchema>;

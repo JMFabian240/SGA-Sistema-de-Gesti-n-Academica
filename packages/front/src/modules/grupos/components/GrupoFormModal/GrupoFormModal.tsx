@@ -13,6 +13,7 @@ const schema = z.object({
   cupoMaximo: z.string().min(1, 'Requerido'),
   cicloId: z.string().min(1, 'Requerido'),
   nivelId: z.string().min(1, 'Requerido'),
+  gradoId: z.string().min(1, 'Requerido'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -30,11 +31,17 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
 
   const { data: ciclos } = trpc.grupos.getCiclos.useQuery(undefined, { enabled: isOpen });
   const { data: niveles } = trpc.grupos.getNiveles.useQuery(undefined, { enabled: isOpen });
+  const { data: grados } = trpc.grupos.getGrados.useQuery(undefined, { enabled: isOpen });
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { nombre: '', cupoMaximo: '30', cicloId: '', nivelId: '' },
+    defaultValues: { nombre: '', cupoMaximo: '30', cicloId: '', nivelId: '', gradoId: '' },
   });
+
+  const selectedNivelId = watch('nivelId');
+  const filteredGrados = selectedNivelId
+    ? grados?.filter(g => String(g.nivelId) === selectedNivelId)
+    : grados;
 
   useEffect(() => {
     if (isOpen) {
@@ -44,9 +51,10 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
           cupoMaximo: String(initialData.cupoMaximo || 30),
           cicloId: String(initialData.cicloId),
           nivelId: String(initialData.nivelId),
+          gradoId: String(initialData.gradoId),
         });
       } else {
-        reset({ nombre: '', cupoMaximo: '30', cicloId: '', nivelId: '' });
+        reset({ nombre: '', cupoMaximo: '30', cicloId: '', nivelId: '', gradoId: '' });
       }
     }
   }, [isOpen, initialData, reset]);
@@ -71,6 +79,7 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
       cupoMaximo: parseInt(data.cupoMaximo, 10),
       cicloId: parseInt(data.cicloId, 10),
       nivelId: parseInt(data.nivelId, 10),
+      gradoId: parseInt(data.gradoId, 10),
     };
 
     if (isEditing) {
@@ -130,12 +139,30 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
 
         <div style={{ display: 'flex', gap: '16px' }}>
           <Controller
-            name="cupoMaximo"
+            name="gradoId"
             control={control}
             render={({ field }) => (
-              <Input {...field} type="number" label="Cupo Máximo" error={errors.cupoMaximo?.message} disabled={isSaving} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '14px', fontWeight: 500 }}>Grado</label>
+                <select {...field} disabled={isSaving || !selectedNivelId} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+                  <option value="">
+                    {!selectedNivelId ? 'Selecciona primero un nivel...' : 'Selecciona...'}
+                  </option>
+                  {filteredGrados?.map(g => <option key={g.gradoId} value={g.gradoId}>{g.nombre}</option>)}
+                </select>
+                {errors.gradoId && <span style={{ color: 'red', fontSize: '12px' }}>{errors.gradoId.message}</span>}
+              </div>
             )}
           />
+          <div style={{ flex: 1 }}>
+            <Controller
+              name="cupoMaximo"
+              control={control}
+              render={({ field }) => (
+                <Input {...field} type="number" label="Cupo Máximo" error={errors.cupoMaximo?.message} disabled={isSaving} />
+              )}
+            />
+          </div>
         </div>
 
         <div className={styles.actions}>

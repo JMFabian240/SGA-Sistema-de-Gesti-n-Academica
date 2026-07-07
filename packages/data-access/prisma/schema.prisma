@@ -225,8 +225,27 @@ model NivelEducativo {
   grupos        Grupo[]
   alumnos       Alumno[]
   tarifas       Tarifa[]
+  grados        Grado[]
 
   @@map("nivel_educativo")
+}
+
+model Grado {
+  gradoId       Int       @id @default(autoincrement()) @map("grado_id")
+  nivelId       Int       @map("nivel_id")
+  numero        Int
+  nombre        String    @db.VarChar(50)
+  creadoEn      DateTime? @default(now()) @map("creado_en") @db.Timestamptz
+  actualizadoEn DateTime? @default(now()) @map("actualizado_en") @db.Timestamptz
+  eliminadoEn   DateTime? @map("eliminado_en") @db.Timestamptz
+
+  nivel         NivelEducativo @relation(fields: [nivelId], references: [nivelId], onDelete: NoAction)
+  grupos        Grupo[]
+  alumnos       Alumno[]
+  inscripciones InscripcionCiclo[]
+  materias      Materia[]
+
+  @@map("grado")
 }
 
 model CicloEscolar {
@@ -256,6 +275,7 @@ model Grupo {
   grupoId       Int       @id @default(autoincrement()) @map("grupo_id")
   nivelId       Int       @map("nivel_id")
   cicloId       Int       @map("ciclo_id")
+  gradoId       Int       @map("grado_id")
   nombre        String    @db.VarChar(10)
   cupoMaximo    Int       @map("cupo_maximo")
   creadoEn      DateTime? @default(now()) @map("creado_en") @db.Timestamptz
@@ -263,8 +283,9 @@ model Grupo {
   eliminadoEn   DateTime? @map("eliminado_en") @db.Timestamptz
   cerrado       Boolean?  @default(false)
 
-  nivel         NivelEducativo @relation(fields: [nivelId], references: [nivelId])
-  ciclo         CicloEscolar   @relation(fields: [cicloId], references: [cicloId])
+  nivel         NivelEducativo @relation(fields: [nivelId], references: [nivelId], onDelete: NoAction)
+  ciclo         CicloEscolar   @relation(fields: [cicloId], references: [cicloId], onDelete: NoAction)
+  grado         Grado          @relation(fields: [gradoId], references: [gradoId], onDelete: NoAction)
 
   materias      GrupoMateria[]
   inscripciones InscripcionCiclo[]
@@ -276,10 +297,12 @@ model Materia {
   materiaId     Int       @id @default(autoincrement()) @map("materia_id")
   nombre        String    @db.VarChar(80)
   clave         String    @unique @db.VarChar(20)
+  gradoId       Int?      @map("grado_id")
   creadoEn      DateTime? @default(now()) @map("creado_en") @db.Timestamptz
   actualizadoEn DateTime? @default(now()) @map("actualizado_en") @db.Timestamptz
   eliminadoEn   DateTime? @map("eliminado_en") @db.Timestamptz
 
+  grado          Grado?         @relation(fields: [gradoId], references: [gradoId], onDelete: SetNull)
   gruposMaterias GrupoMateria[]
 
   @@map("materia")
@@ -353,6 +376,7 @@ model Alumno {
   fechaNacimiento    DateTime  @map("fecha_nacimiento") @db.Date
   sexo               String    @db.Char(1)
   nivelId            Int       @map("nivel_id")
+  gradoId            Int?      @map("grado_id")
   estado             EstadoAlumno
   fechaBaja          DateTime? @map("fecha_baja") @db.Date
   motivoBaja         String?   @map("motivo_baja")
@@ -366,7 +390,8 @@ model Alumno {
   actualizadoEn      DateTime? @default(now()) @map("actualizado_en") @db.Timestamptz
   eliminadoEn        DateTime? @map("eliminado_en") @db.Timestamptz
 
-  nivel              NivelEducativo @relation(fields: [nivelId], references: [nivelId])
+  nivel              NivelEducativo @relation(fields: [nivelId], references: [nivelId], onDelete: NoAction)
+  grado              Grado?         @relation(fields: [gradoId], references: [gradoId], onDelete: SetNull)
 
   tutoresAlumnos     TutorAlumno[]
   inscripciones      InscripcionCiclo[]
@@ -437,6 +462,7 @@ model InscripcionCiclo {
   alumnoId         Int       @map("alumno_id")
   cicloId          Int       @map("ciclo_id")
   grupoId          Int?      @map("grupo_id")
+  gradoId          Int?      @map("grado_id")
   planPagoId       Int       @map("plan_pago_id")
   fechaIngreso     DateTime  @map("fecha_ingreso") @db.Date
   esIngresoTardio  Boolean?  @default(false) @map("es_ingreso_tardio")
@@ -447,9 +473,10 @@ model InscripcionCiclo {
   actualizadoEn    DateTime? @default(now()) @map("actualizado_en") @db.Timestamptz
   eliminadoEn      DateTime? @map("eliminado_en") @db.Timestamptz
 
-  alumno           Alumno    @relation(fields: [alumnoId], references: [alumnoId])
-  ciclo            CicloEscolar @relation(fields: [cicloId], references: [cicloId])
-  grupo            Grupo?    @relation(fields: [grupoId], references: [grupoId])
+  alumno           Alumno    @relation(fields: [alumnoId], references: [alumnoId], onDelete: NoAction)
+  ciclo            CicloEscolar @relation(fields: [cicloId], references: [cicloId], onDelete: NoAction)
+  grupo            Grupo?    @relation(fields: [grupoId], references: [grupoId], onDelete: NoAction)
+  grado            Grado?    @relation(fields: [gradoId], references: [gradoId], onDelete: NoAction)
   planPago         PlanPago  @relation(fields: [planPagoId], references: [planPagoId])
 
   @@unique([alumnoId, cicloId])

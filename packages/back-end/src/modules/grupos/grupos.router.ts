@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { GruposService } from './grupos.service';
 import {
   createNivelEducativoSchema, updateNivelEducativoSchema,
+  createGradoSchema, updateGradoSchema,
   createCicloEscolarSchema, updateCicloEscolarSchema,
   createMateriaSchema, updateMateriaSchema,
   createGrupoSchema, updateGrupoSchema,
@@ -16,6 +17,12 @@ export const gruposRouter = router({
   createNivel: gestorProcedure.input(createNivelEducativoSchema).mutation(({ input }) => GruposService.createNivel(input)),
   updateNivel: gestorProcedure.input(updateNivelEducativoSchema).mutation(({ input }) => GruposService.updateNivel(input)),
   deleteNivel: gestorProcedure.input(z.number().int().positive()).mutation(({ input }) => GruposService.deleteNivel(input)),
+
+  // --- Grados ---
+  getGrados: docentProcedure.query(() => GruposService.getGrados()),
+  createGrado: gestorProcedure.input(createGradoSchema).mutation(({ input }) => GruposService.createGrado(input)),
+  updateGrado: gestorProcedure.input(updateGradoSchema).mutation(({ input }) => GruposService.updateGrado(input)),
+  deleteGrado: gestorProcedure.input(z.number().int().positive()).mutation(({ input }) => GruposService.deleteGrado(input)),
 
   // --- Ciclos Escolares ---
   getCiclos: docentProcedure.query(() => GruposService.getCiclos()),

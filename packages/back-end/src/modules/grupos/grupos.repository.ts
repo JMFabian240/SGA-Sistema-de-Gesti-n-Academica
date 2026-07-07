@@ -27,6 +27,32 @@ export class GruposRepository {
     });
   }
 
+  // --- Grados ---
+  static async getGrados() {
+    return prisma.grado.findMany({
+      where: { eliminadoEn: null },
+      orderBy: { numero: 'asc' }
+    });
+  }
+
+  static async createGrado(data: Prisma.GradoUncheckedCreateInput) {
+    return prisma.grado.create({ data });
+  }
+
+  static async updateGrado(gradoId: number, data: Prisma.GradoUncheckedUpdateInput) {
+    return prisma.grado.update({
+      where: { gradoId },
+      data
+    });
+  }
+
+  static async deleteGrado(gradoId: number) {
+    return prisma.grado.update({
+      where: { gradoId },
+      data: { eliminadoEn: new Date() }
+    });
+  }
+
   // --- Ciclos Escolares ---
   static async getCiclos() {
     return prisma.cicloEscolar.findMany({
@@ -124,6 +150,7 @@ export class GruposRepository {
       include: {
         nivel: true,
         ciclo: true,
+        grado: true,
         materias: {
           include: {
             materia: true,

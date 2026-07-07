@@ -2,6 +2,7 @@ import { prisma } from '@sga/data-access';
 import { TRPCError } from '@trpc/server';
 import type {
   CreateNivelEducativoInput, UpdateNivelEducativoInput,
+  CreateGradoInput, UpdateGradoInput,
   CreateCicloEscolarInput, UpdateCicloEscolarInput,
   CreateMateriaInput, UpdateMateriaInput,
   CreateGrupoInput, UpdateGrupoInput,
@@ -27,6 +28,57 @@ export class GruposService {
 
   static async deleteNivel(nivelId: number) {
     return GruposRepository.deleteNivel(nivelId);
+  }
+
+  // --- Grados ---
+  static async getGrados() {
+    return GruposRepository.getGrados();
+  }
+
+  static async createGrado(input: CreateGradoInput) {
+    return GruposRepository.createGrado(input);
+  }
+
+  static async updateGrado(input: UpdateGradoInput) {
+    const { gradoId, ...data } = input;
+    return GruposRepository.updateGrado(gradoId, { ...data, actualizadoEn: new Date() });
+  }
+
+  static async deleteGrado(gradoId: number) {
+    // 1. Validar que no tenga grupos asociados
+    const grupoExistente = await prisma.grupo.findFirst({
+      where: { gradoId, eliminadoEn: null }
+    });
+    if (grupoExistente) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'No se puede eliminar el grado porque tiene grupos asociados.'
+      });
+    }
+
+    // 2. Validar que no tenga alumnos asociados
+    const alumnoExistente = await prisma.alumno.findFirst({
+      where: { gradoId, eliminadoEn: null }
+    });
+    if (alumnoExistente) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'No se puede eliminar el grado porque tiene alumnos asociados.'
+      });
+    }
+
+    // 3. Validar que no tenga materias asociadas
+    const materiaExistente = await prisma.materia.findFirst({
+      where: { gradoId, eliminadoEn: null }
+    });
+    if (materiaExistente) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'No se puede eliminar el grado porque tiene materias asociadas.'
+      });
+    }
+
+    return GruposRepository.deleteGrado(gradoId);
   }
 
   // --- Ciclos Escolares ---
