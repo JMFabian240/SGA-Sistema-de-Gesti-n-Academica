@@ -40,9 +40,15 @@ export class GruposRepository {
   }
 
   static async updateCicloActivo(cicloId: number, data: Prisma.CicloEscolarUncheckedUpdateInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({
+      where: { cicloId },
+      select: { periodicidad: true } as any
+    }) as any;
+    const periodicidad = ciclo?.periodicidad || 'ANUAL';
+
     return prisma.$transaction([
       prisma.cicloEscolar.updateMany({
-        where: { activo: true },
+        where: { activo: true, periodicidad } as any,
         data: { activo: false, actualizadoEn: new Date() }
       }),
       prisma.cicloEscolar.update({

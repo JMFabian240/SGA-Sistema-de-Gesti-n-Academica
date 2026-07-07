@@ -17,7 +17,8 @@ export const createCicloEscolarSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(20),
   fechaInicio: z.string().datetime({ message: 'Formato de fecha inválido' }),
   fechaFin: z.string().datetime({ message: 'Formato de fecha inválido' }),
-  activo: z.boolean().optional()
+  activo: z.boolean().optional(),
+  periodicidad: z.enum(['ANUAL', 'SEMESTRAL']).optional()
 });
 
 export const updateCicloEscolarSchema = createCicloEscolarSchema.partial().extend({

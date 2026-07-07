@@ -99,3 +99,18 @@ Las skills de diseño han sido analizadas y están diseñadas para complementars
 ## Reglas de Git y Commits
 - **CRÍTICO - COMMITS MANUALES:** Bajo NINGUNA circunstancia debes hacer `git commit` o `git push` automáticamente al terminar una tarea. Solo debes hacerlo cuando el usuario te lo pida explícitamente.
 - **CRÍTICO - MENSAJES DE COMMIT:** Al momento de realizar un commit (previa autorización), el agente **TIENE** la obligación de redactar el mensaje explicando **exclusivamente el contexto y propósito de los cambios**, omitiendo por completo la lista de archivos modificados. Todo el mensaje debe estar **siempre en español**.
+
+## Reglas de Codependencia y Cambios en Cascada
+
+### 1. Consistencia Técnica y Tipado E2E
+* **Cambios en Base de Datos**: Si modificas [schema.prisma](file:///c:/Users/josem/Documents/San_Diego/sga/packages/data-access/prisma/schema.prisma), debes regenerar los tipos ejecutando `npx prisma generate` en `packages/data-access`. Debes ajustar de inmediato los archivos `*.schema.ts`, `*.repository.ts` y `*.service.ts` en `packages/back-end` para evitar errores de compilación de TypeScript.
+* **Cambios en la API (tRPC)**: Si alteras o renombras endpoints en `packages/back-end/src/modules/*/` o en [router.ts](file:///c:/Users/josem/Documents/San_Diego/sga/packages/back-end/src/router.ts), debes corregir la ruta relativa de importación de `AppRouter` en los frontends (`packages/front` y `packages/front-end`) y adaptar sus correspondientes llamadas del cliente de tRPC.
+* **Empaquetado de Tauri (Sidecars)**: Al realizar modificaciones en `packages/back-end`, debes compilar de nuevo el binario sidecar ejecutable ejecutando `npm run build:sidecar` en `packages/back-end` para que Tauri empaquete la versión de backend más reciente.
+
+### 2. Consistencia en Cascada de Reglas de Negocio
+* **Registro de Pagos**: Toda edición en las tablas `Pago`, `AplicacionPago`, `CalendarioPago` o `Tutor` (saldo a favor) debe mantener la atomicidad transaccional de caja en el método `registrarPagoTransaccion` de [pagos.repository.ts](file:///c:/Users/josem/Documents/San_Diego/sga/packages/back-end/src/modules/pagos/pagos.repository.ts).
+* **Solicitudes de Beca**: La aprobación de becas implica la inserción atómica de `AsignacionBeca` dentro del método transaccional `resolverSolicitudConAsignacion` de [becas.repository.ts](file:///c:/Users/josem/Documents/San_Diego/sga/packages/back-end/src/modules/becas/becas.repository.ts).
+* **Activación de Ciclos**: Al activar un ciclo escolar en [grupos.repository.ts](file:///c:/Users/josem/Documents/San_Diego/sga/packages/back-end/src/modules/grupos/grupos.repository.ts), se debe desactivar en cascada (`updateMany`) los demás ciclos vigentes con la misma periodicidad.
+* **Mantenimiento Alumno-Tutor**: Vincular un tutor como principal debe remover la bandera `esPrincipal` de otros tutores vinculados al alumno. Dar de baja a un tutor exige validar previamente que no tenga `saldoAFavor > 0`.
+* **Inscripción y Aforo**: Inscribir a un alumno requiere validar el `cupoMaximo` de `Grupo`. Si el aforo está completo, se debe impedir la inscripción.
+
