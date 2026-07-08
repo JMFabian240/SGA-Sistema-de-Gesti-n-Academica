@@ -12,9 +12,91 @@ import type {
 } from './grupos.schema';
 import { GruposRepository } from './grupos.repository';
 
+const CONSTANT_NIVELES = [
+  { codigo: 'PRE', nombre: 'Preescolar', orden: 1 },
+  { codigo: 'PRI', nombre: 'Primaria', orden: 2 },
+  { codigo: 'SEC', nombre: 'Secundaria', orden: 3 },
+  { codigo: 'BAC', nombre: 'Bachillerato', orden: 4 }
+];
+
+const CONSTANT_GRADOS = [
+  // Preescolar
+  { nivelCodigo: 'PRE', numero: 1, nombre: '1º Grado' },
+  { nivelCodigo: 'PRE', numero: 2, nombre: '2º Grado' },
+  { nivelCodigo: 'PRE', numero: 3, nombre: '3º Grado' },
+  // Primaria
+  { nivelCodigo: 'PRI', numero: 1, nombre: '1º Grado' },
+  { nivelCodigo: 'PRI', numero: 2, nombre: '2º Grado' },
+  { nivelCodigo: 'PRI', numero: 3, nombre: '3º Grado' },
+  { nivelCodigo: 'PRI', numero: 4, nombre: '4º Grado' },
+  { nivelCodigo: 'PRI', numero: 5, nombre: '5º Grado' },
+  { nivelCodigo: 'PRI', numero: 6, nombre: '6º Grado' },
+  // Secundaria
+  { nivelCodigo: 'SEC', numero: 1, nombre: '1º Grado' },
+  { nivelCodigo: 'SEC', numero: 2, nombre: '2º Grado' },
+  { nivelCodigo: 'SEC', numero: 3, nombre: '3º Grado' },
+  // Bachillerato
+  { nivelCodigo: 'BAC', numero: 1, nombre: '1º Semestre' },
+  { nivelCodigo: 'BAC', numero: 2, nombre: '2º Semestre' },
+  { nivelCodigo: 'BAC', numero: 3, nombre: '3º Semestre' },
+  { nivelCodigo: 'BAC', numero: 4, nombre: '4º Semestre' },
+  { nivelCodigo: 'BAC', numero: 5, nombre: '5º Semestre' },
+  { nivelCodigo: 'BAC', numero: 6, nombre: '6º Semestre' }
+];
+
 export class GruposService {
+  private static initialized = false;
+
+  static async ensureNivelesYGrados() {
+    if (this.initialized || process.env.NODE_ENV === 'test') return;
+
+    try {
+      // 1. Obtener niveles existentes
+      let dbNiveles = await prisma.nivelEducativo.findMany({ where: { eliminadoEn: null } });
+
+      for (const cn of CONSTANT_NIVELES) {
+        let exist = dbNiveles.find(n => n.codigo === cn.codigo);
+        if (!exist) {
+          exist = await prisma.nivelEducativo.create({
+            data: { codigo: cn.codigo, nombre: cn.nombre, orden: cn.orden }
+          });
+          dbNiveles.push(exist);
+        }
+      }
+
+      // 2. Obtener grados existentes
+      const dbGrados = await prisma.grado.findMany({ where: { eliminadoEn: null } });
+
+      for (const cg of CONSTANT_GRADOS) {
+        const associatedNivel = dbNiveles.find(n => n.codigo === cg.nivelCodigo);
+        if (!associatedNivel) continue;
+
+        const exist = dbGrados.find(g => g.nivelId === associatedNivel.nivelId && g.numero === cg.numero);
+        if (!exist) {
+          await prisma.grado.create({
+            data: {
+              nivelId: associatedNivel.nivelId,
+              numero: cg.numero,
+              nombre: cg.nombre
+            }
+          });
+        } else if (exist.nombre !== cg.nombre) {
+          await prisma.grado.update({
+            where: { gradoId: exist.gradoId },
+            data: { nombre: cg.nombre }
+          });
+        }
+      }
+
+      this.initialized = true;
+    } catch (error) {
+      console.error('Error al inicializar niveles y grados constantes:', error);
+    }
+  }
+
   // --- Niveles Educativos ---
   static async getNiveles() {
+    await this.ensureNivelesYGrados();
     return GruposRepository.getNiveles();
   }
 
@@ -33,6 +115,7 @@ export class GruposService {
 
   // --- Grados ---
   static async getGrados() {
+    await this.ensureNivelesYGrados();
     return GruposRepository.getGrados();
   }
 
@@ -168,12 +251,114 @@ export class GruposService {
   }
 
   static async createMateria(input: CreateMateriaInput) {
-    return GruposRepository.createMateria(input);
+    let { clave, grupoId, ...data } = input;
+    
+    let gradoId = data.gradoId;
+    if (grupoId) {
+      const grupo = await prisma.grupo.findUnique({
+        where: { grupoId, eliminadoEn: null }
+      });
+      if (grupo) {
+        gradoId = grupo.gradoId;
+      }
+    }
+
+    if (!clave) {
+      let prefix = data.nombre
+        .trim()
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Z0-9]/g, '')
+        .substring(0, 4);
+
+      if (prefix.length < 3) {
+        prefix = (prefix + 'MAT').substring(0, 3);
+      }
+
+      let count = 1;
+      clave = `${prefix}-${String(count).padStart(3, '0')}`;
+      let exists = await prisma.materia.findFirst({
+        where: { clave, eliminadoEn: null }
+      });
+
+      while (exists) {
+        count++;
+        clave = `${prefix}-${String(count).padStart(3, '0')}`;
+        exists = await prisma.materia.findFirst({
+          where: { clave, eliminadoEn: null }
+        });
+      }
+    }
+
+    const materia = await GruposRepository.createMateria({ 
+      ...data, 
+      gradoId,
+      clave 
+    });
+
+    if (grupoId) {
+      await prisma.grupoMateria.create({
+        data: {
+          grupoId,
+          materiaId: materia.materiaId,
+          docenteId: data.docenteId || null
+        }
+      });
+    }
+
+    return materia;
   }
 
   static async updateMateria(input: UpdateMateriaInput) {
-    const { materiaId, ...data } = input;
-    return GruposRepository.updateMateria(materiaId, { ...data, actualizadoEn: new Date() });
+    const { materiaId, grupoId, ...data } = input;
+
+    let gradoId = data.gradoId;
+    if (grupoId) {
+      const grupo = await prisma.grupo.findUnique({
+        where: { grupoId, eliminadoEn: null }
+      });
+      if (grupo) {
+        gradoId = grupo.gradoId;
+      }
+    }
+
+    const updatedMateria = await GruposRepository.updateMateria(materiaId, { 
+      ...data, 
+      ...(gradoId !== undefined && { gradoId }), 
+      actualizadoEn: new Date() 
+    });
+
+    if (grupoId) {
+      const existRelation = await prisma.grupoMateria.findFirst({
+        where: { materiaId, grupoId }
+      });
+      if (!existRelation) {
+        // Eliminar relaciones anteriores
+        await prisma.grupoMateria.deleteMany({
+          where: { materiaId }
+        });
+        
+        await prisma.grupoMateria.create({
+          data: {
+            grupoId,
+            materiaId,
+            docenteId: data.docenteId || null
+          }
+        });
+      } else if (data.docenteId !== undefined) {
+        await prisma.grupoMateria.update({
+          where: { grupoMateriaId: existRelation.grupoMateriaId },
+          data: { docenteId: data.docenteId || null }
+        });
+      }
+    } else if (grupoId === null) {
+      await prisma.grupoMateria.deleteMany({
+        where: { materiaId }
+      });
+    }
+
+    return updatedMateria;
   }
 
   static async deleteMateria(materiaId: number) {
@@ -439,6 +624,28 @@ export class GruposService {
       }
 
       return { success: true, count };
+    });
+  }
+
+  static async getDocentes() {
+    return prisma.usuario.findMany({
+      where: {
+        eliminadoEn: null,
+        activo: true,
+        roles: {
+          some: {
+            rol: { codigo: 'DOCENTE' },
+            eliminadoEn: null
+          }
+        }
+      },
+      select: {
+        usuarioId: true,
+        nombreCompleto: true
+      },
+      orderBy: {
+        nombreCompleto: 'asc'
+      }
     });
   }
 }

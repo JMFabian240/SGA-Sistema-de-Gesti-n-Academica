@@ -1,4 +1,4 @@
-import { router, gestorProcedure } from '../../trpc';
+import { router, gestorProcedure, docentProcedure } from '../../trpc';
 import { z } from 'zod';
 import { InscripcionesService } from './inscripciones.service';
 import { 
@@ -40,7 +40,7 @@ export const inscripcionesRouter = router({
     .mutation(({ input }) => InscripcionesService.deleteVentana(input)),
 
   // --- Inscripciones de Alumnos ---
-  getInscripciones: gestorProcedure
+  getInscripciones: docentProcedure
     .input(z.object({
       cicloId: z.number().int().positive().optional()
     }).optional())

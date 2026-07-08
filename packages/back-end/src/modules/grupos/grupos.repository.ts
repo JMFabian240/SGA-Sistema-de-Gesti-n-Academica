@@ -118,16 +118,28 @@ export class GruposRepository {
   static async getMaterias() {
     return prisma.materia.findMany({
       where: { eliminadoEn: null },
-      include: { grado: true },
+      include: { 
+        grado: { 
+          include: { 
+            nivel: true 
+          } 
+        }, 
+        docente: true, // docente relation
+        gruposMaterias: {
+          include: {
+            grupo: true
+          }
+        }
+      },
       orderBy: { nombre: 'asc' }
     });
   }
 
-  static async createMateria(data: Prisma.MateriaCreateInput) {
+  static async createMateria(data: Prisma.MateriaUncheckedCreateInput) {
     return prisma.materia.create({ data });
   }
 
-  static async updateMateria(materiaId: number, data: Prisma.MateriaUpdateInput) {
+  static async updateMateria(materiaId: number, data: Prisma.MateriaUncheckedUpdateInput) {
     return prisma.materia.update({
       where: { materiaId },
       data

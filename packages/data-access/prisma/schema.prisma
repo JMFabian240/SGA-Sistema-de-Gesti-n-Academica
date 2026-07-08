@@ -120,6 +120,7 @@ model Usuario {
   calificacionesRegistradas Calificacion[]
   asistenciasRegistradas    Asistencia[]
   documentosSubidos         Documento[]
+  materiasDocente           Materia[] @relation("MateriaDocente")
 
   @@map("usuario")
 }
@@ -298,11 +299,14 @@ model Materia {
   nombre        String    @db.VarChar(80)
   clave         String    @unique @db.VarChar(20)
   gradoId       Int?      @map("grado_id")
+  tipo          String    @default("curricular") @db.VarChar(20)
+  docenteId     Int?      @map("docente_id")
   creadoEn      DateTime? @default(now()) @map("creado_en") @db.Timestamptz
   actualizadoEn DateTime? @default(now()) @map("actualizado_en") @db.Timestamptz
   eliminadoEn   DateTime? @map("eliminado_en") @db.Timestamptz
 
   grado          Grado?         @relation(fields: [gradoId], references: [gradoId], onDelete: SetNull)
+  docente        Usuario?       @relation("MateriaDocente", fields: [docenteId], references: [usuarioId], onDelete: SetNull)
   gruposMaterias GrupoMateria[]
 
   @@map("materia")

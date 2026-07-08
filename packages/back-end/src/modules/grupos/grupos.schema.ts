@@ -40,8 +40,11 @@ export const updateCicloEscolarSchema = createCicloEscolarSchema.partial().exten
 // Materia
 export const createMateriaSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(80),
-  clave: z.string().min(1, 'La clave es requerida').max(20),
-  gradoId: z.number().int().positive().optional().nullable()
+  clave: z.string().max(20).optional(),
+  gradoId: z.number().int().positive().optional().nullable(),
+  grupoId: z.number().int().positive().optional().nullable(),
+  tipo: z.enum(['curricular', 'extracurricular', 'taller']).optional(),
+  docenteId: z.number().int().positive().optional().nullable()
 });
 
 export const updateMateriaSchema = createMateriaSchema.partial().extend({

@@ -22,9 +22,12 @@ type Props = {
   onClose: () => void;
   grupoId?: number;
   initialData?: any;
+  defaultCicloId?: number;
+  defaultNivelId?: number;
+  defaultGradoId?: number;
 };
 
-export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props) {
+export function GrupoFormModal({ isOpen, onClose, grupoId, initialData, defaultCicloId, defaultNivelId, defaultGradoId }: Props) {
   const utils = trpc.useUtils();
   const isEditing = !!grupoId;
 
@@ -42,6 +45,8 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
     ? grados?.filter(g => String(g.nivelId) === selectedNivelId)
     : grados;
 
+  const hideSelectors = !!(defaultCicloId && defaultNivelId && defaultGradoId);
+
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
@@ -53,10 +58,16 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
           gradoId: String(initialData.gradoId),
         });
       } else {
-        reset({ nombre: '', cupoMaximo: '30', cicloId: '', nivelId: '', gradoId: '' });
+        reset({
+          nombre: '',
+          cupoMaximo: '30',
+          cicloId: defaultCicloId ? String(defaultCicloId) : '',
+          nivelId: defaultNivelId ? String(defaultNivelId) : '',
+          gradoId: defaultGradoId ? String(defaultGradoId) : '',
+        });
       }
     }
-  }, [isOpen, initialData, reset]);
+  }, [isOpen, initialData, reset, defaultCicloId, defaultNivelId, defaultGradoId]);
 
   const createMutation = trpc.grupos.createGrupo.useMutation({
     onSuccess: () => {
@@ -97,7 +108,7 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
       title={isEditing ? 'Editar Grupo' : 'Nuevo Grupo'}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={hideSelectors ? 'hidden' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
           <Controller
             name="cicloId"
             control={control}
@@ -142,7 +153,7 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
           render={({ field }) => (
             <Input 
               {...field} 
-              label="Nombre del Grupo (Ej. 1ro A Primaria)" 
+              label="Nombre del Grupo (Ej. A, B)" 
               error={errors.nombre?.message} 
               disabled={isSaving} 
             />
@@ -150,26 +161,28 @@ export function GrupoFormModal({ isOpen, onClose, grupoId, initialData }: Props)
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Controller
-            name="gradoId"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Grado</label>
-                <select 
-                  {...field} 
-                  disabled={isSaving || !selectedNivelId} 
-                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 sm:text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {!selectedNivelId ? 'Selecciona primero un nivel...' : 'Selecciona...'}
-                  </option>
-                  {filteredGrados?.map(g => <option key={g.gradoId} value={g.gradoId}>{g.nombre}</option>)}
-                </select>
-                {errors.gradoId && <span className="text-xs text-red-600">{errors.gradoId.message}</span>}
-              </div>
-            )}
-          />
+          <div className={hideSelectors ? 'hidden' : 'flex flex-col gap-1'}>
+            <Controller
+              name="gradoId"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">Grado</label>
+                  <select 
+                    {...field} 
+                    disabled={isSaving || !selectedNivelId} 
+                    className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 sm:text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {!selectedNivelId ? 'Selecciona primero un nivel...' : 'Selecciona...'}
+                    </option>
+                    {filteredGrados?.map(g => <option key={g.gradoId} value={g.gradoId}>{g.nombre}</option>)}
+                  </select>
+                  {errors.gradoId && <span className="text-xs text-red-600">{errors.gradoId.message}</span>}
+                </div>
+              )}
+            />
+          </div>
           <Controller
             name="cupoMaximo"
             control={control}

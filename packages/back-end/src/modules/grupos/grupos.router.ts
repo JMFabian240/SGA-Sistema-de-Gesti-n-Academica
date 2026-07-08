@@ -33,6 +33,7 @@ export const gruposRouter = router({
 
   // --- Materias ---
   getMaterias: docentProcedure.query(() => GruposService.getMaterias()),
+  getDocentes: docentProcedure.query(() => GruposService.getDocentes()),
   createMateria: gestorProcedure.input(createMateriaSchema).mutation(({ input }) => GruposService.createMateria(input)),
   updateMateria: gestorProcedure.input(updateMateriaSchema).mutation(({ input }) => GruposService.updateMateria(input)),
   deleteMateria: gestorProcedure.input(z.number().int().positive()).mutation(({ input }) => GruposService.deleteMateria(input)),
