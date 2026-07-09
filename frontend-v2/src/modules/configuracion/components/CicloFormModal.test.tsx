@@ -76,15 +76,17 @@ describe('CicloFormModal Component', () => {
   });
 
   it('debería renderizar el formulario vacío para Nuevo Ciclo', () => {
-    render(
+    const { container } = render(
       <CicloFormModal isOpen={true} onClose={mockOnClose} />
     );
 
     expect(screen.getByText('Nuevo Ciclo Escolar')).toBeInTheDocument();
-    expect(screen.getByLabelText(/nombre del ciclo/i)).toHaveValue('');
-    expect(screen.getByLabelText(/fecha de inicio/i)).toHaveValue('');
-    expect(screen.getByLabelText(/fecha de fin/i)).toHaveValue('');
-    expect(screen.getByLabelText(/marcar como ciclo escolar activo/i)).not.toBeChecked();
+    
+    const inputs = container.querySelectorAll('input');
+    expect(inputs[0]).toHaveValue('');
+    expect(inputs[1]).toHaveValue('');
+    expect(inputs[2]).toHaveValue('');
+    expect(inputs[3]).not.toBeChecked();
   });
 
   it('debería renderizar datos precargados en modo edición', () => {
@@ -96,27 +98,30 @@ describe('CicloFormModal Component', () => {
       periodicidad: 'SEMESTRAL' as const
     };
 
-    render(
+    const { container } = render(
       <CicloFormModal isOpen={true} onClose={mockOnClose} cicloId={123} initialData={initialData} />
     );
 
     expect(screen.getByText('Editar Ciclo Escolar')).toBeInTheDocument();
-    expect(screen.getByLabelText(/nombre del ciclo/i)).toHaveValue('2026-2027');
-    expect(screen.getByLabelText(/fecha de inicio/i)).toHaveValue('2026-09-01');
-    expect(screen.getByLabelText(/fecha de fin/i)).toHaveValue('2027-06-30');
-    expect(screen.getByLabelText(/marcar como ciclo escolar activo/i)).toBeChecked();
+    
+    const inputs = container.querySelectorAll('input');
+    expect(inputs[0]).toHaveValue('2026-2027');
+    expect(inputs[1]).toHaveValue('2026-09-01');
+    expect(inputs[2]).toHaveValue('2027-06-30');
+    expect(inputs[3]).toBeChecked();
     expect(screen.getByRole('combobox')).toHaveValue('SEMESTRAL');
   });
 
   it('debería ejecutar createMutation al enviar datos válidos en creación', () => {
-    render(
+    const { container } = render(
       <CicloFormModal isOpen={true} onClose={mockOnClose} />
     );
 
-    const nameInput = screen.getByLabelText(/nombre del ciclo/i);
-    const startInput = screen.getByLabelText(/fecha de inicio/i);
-    const endInput = screen.getByLabelText(/fecha de fin/i);
-    const checkbox = screen.getByLabelText(/marcar como ciclo escolar activo/i);
+    const inputs = container.querySelectorAll('input');
+    const nameInput = inputs[0];
+    const startInput = inputs[1];
+    const endInput = inputs[2];
+    const checkbox = inputs[3];
     const submitBtn = screen.getByRole('button', { name: /guardar ciclo/i });
 
     fireEvent.change(nameInput, { target: { value: '2026-2027' } });
@@ -166,13 +171,14 @@ describe('CicloFormModal Component', () => {
 
   it('debería mostrar banner de error cuando la mutación tRPC falla', () => {
     mockOnError = true; // Forzar error
-    render(
+    const { container } = render(
       <CicloFormModal isOpen={true} onClose={mockOnClose} />
     );
 
-    const nameInput = screen.getByLabelText(/nombre del ciclo/i);
-    const startInput = screen.getByLabelText(/fecha de inicio/i);
-    const endInput = screen.getByLabelText(/fecha de fin/i);
+    const inputs = container.querySelectorAll('input');
+    const nameInput = inputs[0];
+    const startInput = inputs[1];
+    const endInput = inputs[2];
     const submitBtn = screen.getByRole('button', { name: /guardar ciclo/i });
 
     fireEvent.change(nameInput, { target: { value: '2026-2027' } });

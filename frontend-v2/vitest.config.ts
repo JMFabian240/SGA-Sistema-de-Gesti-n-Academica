@@ -9,6 +9,11 @@ export default mergeConfig(
       globals: true,
       environment: 'happy-dom',
       setupFiles: './src/tests/setup.ts',
+      server: {
+        deps: {
+          inline: [/react-hook-form/, /@hookform\/resolvers/]
+        }
+      }
     },
     resolve: {
       alias: {
