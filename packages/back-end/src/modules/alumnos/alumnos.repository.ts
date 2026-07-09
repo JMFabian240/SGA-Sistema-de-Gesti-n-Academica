@@ -9,9 +9,17 @@ export class AlumnosRepository {
       where: { eliminadoEn: null },
       include: {
         nivel: true,
+        grado: true,
         tutoresAlumnos: {
-          include: {
-            tutor: true
+          where: { esPrincipal: true, tutor: { eliminadoEn: null } },
+          include: { tutor: true }
+        },
+        inscripciones: {
+          where: { estadoEnCiclo: 'INSCRITO', ciclo: { activo: true }, eliminadoEn: null },
+          include: { 
+            grupo: {
+              include: { grado: true }
+            }
           }
         }
       },
@@ -24,7 +32,9 @@ export class AlumnosRepository {
       where: { alumnoId },
       include: {
         nivel: true,
+        grado: true,
         tutoresAlumnos: {
+          where: { tutor: { eliminadoEn: null } },
           include: {
             tutor: {
               include: {
@@ -36,7 +46,9 @@ export class AlumnosRepository {
         inscripciones: {
           include: {
             ciclo: true,
-            grupo: true,
+            grupo: {
+              include: { grado: true }
+            },
             planPago: true
           }
         }
@@ -77,6 +89,13 @@ export class AlumnosRepository {
     return prisma.tutorAlumno.findUnique({
       where: { tutorId_alumnoId: { tutorId, alumnoId } }
     });
+  }
+
+  static async hasTutorPrincipal(alumnoId: number) {
+    const tutor = await prisma.tutorAlumno.findFirst({
+      where: { alumnoId, esPrincipal: true }
+    });
+    return !!tutor;
   }
 
   static async updateTutorAlumnoRelation(tutorAlumnoId: number, esPrincipal: boolean, parentesco: string) {

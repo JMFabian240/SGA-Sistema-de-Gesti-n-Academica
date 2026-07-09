@@ -1,6 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { httpBatchLink } from '@trpc/client';
+import { httpLink } from '@trpc/client';
 import { trpc } from './lib/trpc';
 import { router } from './router';
 
@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 
 const trpcClient = trpc.createClient({
   links: [
-    httpBatchLink({
+    httpLink({
       url: API_URL,
       headers() {
         const token = localStorage.getItem('auth_token');

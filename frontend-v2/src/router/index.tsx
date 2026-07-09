@@ -6,7 +6,9 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage';
 import { LoginPage } from '../modules/auth/pages/LoginPage';
 import { AlumnosPage } from '../modules/alumnos/pages/AlumnosPage';
+import { ExpedienteAlumnoPage } from '../modules/alumnos/pages/ExpedienteAlumnoPage';
 import { TutoresPage } from '../modules/tutores/pages/TutoresPage';
+import { ExpedienteTutorPage } from '../modules/tutores/pages/ExpedienteTutorPage';
 import { ConfiguracionPage } from '../modules/configuracion/pages/ConfiguracionPage';
 import { GruposListPage } from '../modules/grupos/pages/GruposListPage';
 import { MateriasListPage } from '../modules/grupos/pages/MateriasListPage';
@@ -32,7 +34,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'alumnos', element: <AlumnosPage /> },
+      { path: 'alumnos/:id', element: <ExpedienteAlumnoPage /> },
       { path: 'tutores', element: <TutoresPage /> },
+      { path: 'tutores/:id', element: <ExpedienteTutorPage /> },
       { path: 'grupos', element: <GruposListPage /> },
       { path: 'materias', element: <MateriasListPage /> },
       { path: 'configuracion', element: <ConfiguracionPage /> },
