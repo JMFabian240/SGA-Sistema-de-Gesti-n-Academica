@@ -371,6 +371,43 @@ export class GruposService {
   }
 
   static async createGrupo(input: CreateGrupoInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({
+      where: { cicloId: input.cicloId, eliminadoEn: null }
+    });
+
+    if (!ciclo) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Ciclo escolar no encontrado.' });
+    }
+
+    // GAP 3: Extraer el semestre o grado a partir de la propiedad nombre (ej. "1A" -> 1)
+    const match = input.nombre.match(/^(\d+)/);
+    if (match) {
+      const numeroGrado = parseInt(match[1], 10);
+      const gradosPermitidos = ciclo.gradosPermitidos as Record<string, number[]> | null;
+      
+      let gradoPermitido = false;
+      if (gradosPermitidos) {
+        // Find if this number exists in any of the allowed levels
+        for (const nivel of Object.values(gradosPermitidos)) {
+          // Buscamos el ID del grado en DB
+          const gradosDb = await prisma.grado.findMany({
+            where: { gradoId: { in: nivel }, eliminadoEn: null }
+          });
+          if (gradosDb.some(g => g.numero === numeroGrado)) {
+            gradoPermitido = true;
+            break;
+          }
+        }
+      }
+
+      if (!gradoPermitido) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `El grado/semestre ${numeroGrado} extraído del grupo "${input.nombre}" no está habilitado en los grados permitidos del ciclo escolar.`
+        });
+      }
+    }
+
     return GruposRepository.createGrupo(input);
   }
 

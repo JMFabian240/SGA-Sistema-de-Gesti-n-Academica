@@ -68,6 +68,24 @@ export class InscripcionesService {
       });
     }
 
+    // GAP 3: Validar materias reprobadas del ciclo anterior
+    const reprobadas = await prisma.calificacion.findFirst({
+      where: {
+        alumnoId: input.alumnoId,
+        OR: [
+          { valorNumerico: { lt: 6.0 } },
+          { valorCualitativo: 'NA' }
+        ]
+      }
+    });
+
+    if (reprobadas) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'El alumno tiene materias reprobadas y no puede ser inscrito.'
+      });
+    }
+
     // Validar cupo del grupo si se proporciona grupoId
     if (input.grupoId) {
       const grupo = await prisma.grupo.findUnique({
@@ -94,9 +112,58 @@ export class InscripcionesService {
       }
     }
 
-    return InscripcionesRepository.createInscripcion({
-      ...input,
-      fechaIngreso: new Date(input.fechaIngreso)
+    const planPago = await prisma.planPago.findUnique({ where: { planPagoId: input.planPagoId } });
+    if (!planPago || planPago.eliminadoEn) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Plan de pago no encontrado.' });
+    }
+
+    return prisma.$transaction(async (tx) => {
+      // 1. Crear Inscripcion
+      const inscripcion = await tx.inscripcionCiclo.create({
+        data: {
+          ...input,
+          fechaIngreso: new Date(input.fechaIngreso)
+        },
+        include: { alumno: true, grupo: true }
+      });
+
+      // 2. Generar Adeudos (GAP 2)
+      const meses10 = ['Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
+      const meses12 = ['Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto'];
+      
+      const mesesToUse = planPago.meses === 12 ? meses12 : meses10;
+      const adeudos = [];
+      
+      for (let i = 0; i < mesesToUse.length; i++) {
+        const mesStr = mesesToUse[i];
+        let monto = Number(planPago.montoMensual);
+        
+        if (planPago.meses === 12) {
+          if (mesStr === 'Diciembre') {
+            monto = planPago.montoDiciembre ? Number(planPago.montoDiciembre) : monto * 2;
+          } else if (mesStr === 'Julio') {
+            monto = 0;
+          }
+        }
+        
+        const fechaVencimiento = new Date(input.fechaIngreso);
+        fechaVencimiento.setMonth(fechaVencimiento.getMonth() + i + 1);
+        
+        adeudos.push({
+          alumnoId: input.alumnoId,
+          cicloId: input.cicloId,
+          concepto: `Colegiatura ${mesStr}`,
+          mes: mesStr,
+          fechaVencimiento,
+          montoOriginal: monto,
+          saldoPendiente: monto,
+          estadoCobro: monto === 0 ? 'PAGADO' : 'PENDIENTE'
+        });
+      }
+      
+      await tx.calendarioPago.createMany({ data: adeudos as any });
+      
+      return inscripcion;
     });
   }
 

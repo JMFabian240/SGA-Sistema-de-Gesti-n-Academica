@@ -49,6 +49,6 @@ A continuación se listan los módulos que se encuentran implementados en el bac
 * [ ] **Filtro de Ingresos:** Selección de rangos de fechas para auditar la captación en caja por cajero y método de pago.
 
 ### 6. Administración y Configuración General
-* [ ] **Administración de Usuarios y Roles (RBAC):** CRUD de usuarios internos (Gestores, Cajeros, Docentes, Administradores) y asignación multirrol.
+* [x] **Administración de Usuarios y Roles (RBAC):** CRUD de usuarios internos (Gestores, Docentes, Administradores) y asignación multirrol.
 * [ ] **Bitácora de Auditoría:** Buscador de logs de seguridad del backend (acciones sensibles de usuarios, cambios de saldo, eliminaciones lógicas).
 * [ ] **Parámetros Globales:** Configuración del porcentaje de recargos por mora y días de gracia de adeudos.

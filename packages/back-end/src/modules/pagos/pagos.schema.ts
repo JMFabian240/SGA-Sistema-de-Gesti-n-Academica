@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const createTarifaSchema = z.object({
   cicloId: z.number().int().positive(),
   nivelId: z.number().int().positive(),
-  concepto: z.string().min(1).max(15),
+  concepto: z.string().min(1).max(100),
   monto: z.number().nonnegative('El monto no puede ser negativo'),
   descripcion: z.string().optional(),
   activa: z.boolean().optional()
@@ -18,7 +18,7 @@ export const updateTarifaSchema = createTarifaSchema.partial().extend({
 export const createCalendarioPagoSchema = z.object({
   alumnoId: z.number().int().positive(),
   cicloId: z.number().int().positive(),
-  concepto: z.string().min(1).max(25),
+  concepto: z.string().min(1).max(100),
   mes: z.string().max(15).optional(),
   fechaVencimiento: z.string().datetime(),
   montoOriginal: z.number().positive(),

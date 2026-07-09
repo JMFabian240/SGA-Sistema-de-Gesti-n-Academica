@@ -429,7 +429,7 @@ model Tarifa {
   tarifaId      Int       @id @default(autoincrement()) @map("tarifa_id")
   cicloId       Int       @map("ciclo_id")
   nivelId       Int       @map("nivel_id")
-  concepto      String    @db.VarChar(15)
+  concepto      String    @db.VarChar(100)
   monto         Decimal   @db.Decimal(12,2)
   descripcion   String?
   activa        Boolean?  @default(true)
@@ -490,7 +490,7 @@ model CalendarioPago {
   calendarioPagoId Int       @id @default(autoincrement()) @map("calendario_pago_id")
   alumnoId         Int       @map("alumno_id")
   cicloId          Int       @map("ciclo_id")
-  concepto         String    @db.VarChar(25)
+  concepto         String    @db.VarChar(100)
   mes              String?   @db.VarChar(15)
   fechaVencimiento DateTime  @map("fecha_vencimiento") @db.Date
   montoOriginal    Decimal   @map("monto_original") @db.Decimal(12,2)
