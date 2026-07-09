@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UsuariosListPage } from './UsuariosListPage';
 import { BrowserRouter } from 'react-router-dom';
@@ -150,7 +149,7 @@ describe('UsuariosListPage Component', () => {
     // El filtro de estado es el segundo combobox en el componente
     const comboboxes = screen.getAllByRole('combobox');
     const statusSelect = comboboxes[1];
-    
+
     fireEvent.change(statusSelect, { target: { value: 'inactivo' } });
 
     expect(screen.queryByText('Juan Perez')).not.toBeInTheDocument();
@@ -190,7 +189,7 @@ describe('UsuariosListPage Component', () => {
 
     const shieldBtn = screen.getByTestId('shield-icon').closest('button');
     expect(shieldBtn).toBeInTheDocument();
-    
+
     if (shieldBtn) {
       fireEvent.click(shieldBtn);
     }
