@@ -4,11 +4,22 @@ export class AuthRepository {
   static async findUsuarioByIdentifier(identificador: string) {
     return prisma.usuario.findFirst({
       where: {
-        OR: [
-          { correo: identificador },
-          { nombreUsuario: identificador }
-        ]
+        nombreUsuario: identificador
       },
+      include: {
+        roles: {
+          include: {
+            rol: true
+          }
+        },
+        permisosModulos: true
+      }
+    });
+  }
+
+  static async findById(usuarioId: number) {
+    return prisma.usuario.findUnique({
+      where: { usuarioId },
       include: {
         roles: {
           include: {

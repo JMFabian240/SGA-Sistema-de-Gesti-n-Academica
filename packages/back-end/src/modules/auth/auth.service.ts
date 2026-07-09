@@ -69,8 +69,24 @@ export class AuthService {
         id: usuario.usuarioId,
         nombre: usuario.nombreCompleto,
         roles: usuario.roles.map(r => r.rol.nombre),
-        debeCambiarPwd: usuario.debeCambiarPwd
+        debeCambiarPwd: usuario.debeCambiarPwd,
+        permisosModulos: usuario.permisosModulos
       }
+    };
+  }
+
+  static async obtenerPerfil(usuarioId: number) {
+    const usuario = await AuthRepository.findById(usuarioId);
+    if (!usuario) throw new TRPCError({ code: 'NOT_FOUND', message: 'Usuario no encontrado' });
+    
+    return {
+      id: usuario.usuarioId,
+      nombre: usuario.nombreCompleto,
+      name: usuario.nombreCompleto,
+      role: usuario.roles[0]?.rol?.nombre || 'Desconocido',
+      roles: usuario.roles.map(r => r.rol.nombre),
+      debeCambiarPwd: usuario.debeCambiarPwd,
+      permisosModulos: usuario.permisosModulos
     };
   }
 
