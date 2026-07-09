@@ -1,4 +1,4 @@
-import { router, gestorProcedure } from '../../trpc';
+import { router, protectedProcedure, hasModulePermission } from '../../trpc';
 import { z } from 'zod';
 import { PagosService } from './pagos.service';
 import { 
@@ -7,10 +7,13 @@ import {
   registrarPagoSchema 
 } from './pagos.schema';
 
+const lectura = protectedProcedure.use(hasModulePermission('Pagos', false));
+const escritura = protectedProcedure.use(hasModulePermission('Pagos', true));
+
 export const pagosRouter = router({
   
   // --- Tarifas ---
-  getTarifas: gestorProcedure
+  getTarifas: lectura
     .input(z.object({
       cicloId: z.number().int().positive().optional(),
       nivelId: z.number().int().positive().optional()
@@ -19,40 +22,40 @@ export const pagosRouter = router({
       return PagosService.getTarifas(input?.cicloId, input?.nivelId);
     }),
 
-  createTarifa: gestorProcedure
+  createTarifa: escritura
     .input(createTarifaSchema)
     .mutation(({ input }) => PagosService.createTarifa(input)),
 
-  updateTarifa: gestorProcedure
+  updateTarifa: escritura
     .input(updateTarifaSchema)
     .mutation(({ input }) => PagosService.updateTarifa(input)),
 
-  deleteTarifa: gestorProcedure
+  deleteTarifa: escritura
     .input(z.number().int().positive())
     .mutation(({ input }) => PagosService.deleteTarifa(input)),
 
   // --- Adeudos (Calendario de Pagos) ---
-  getAdeudos: gestorProcedure
+  getAdeudos: lectura
     .input(z.object({
       alumnoId: z.number().int().positive(),
       estadoCobro: z.enum(['PENDIENTE', 'PAGADO', 'VENCIDO', 'CANCELADO']).optional()
     }))
     .query(({ input }) => PagosService.getAdeudosAlumno(input.alumnoId, input.estadoCobro)),
 
-  createAdeudo: gestorProcedure
+  createAdeudo: escritura
     .input(createCalendarioPagoSchema)
     .mutation(({ input }) => PagosService.createAdeudo(input)),
 
-  updateAdeudo: gestorProcedure
+  updateAdeudo: escritura
     .input(updateCalendarioPagoSchema)
     .mutation(({ input }) => PagosService.updateAdeudo(input)),
 
   // --- Registro de Pagos ---
-  registrarPago: gestorProcedure
+  registrarPago: escritura
     .input(registrarPagoSchema)
     .mutation(({ input, ctx }) => {
       // Tomar el registradorId directamente del token JWT decodificado en ctx
-      const registradorId = ctx.user?.usuarioId;
+      const registradorId = (ctx as any).user?.usuarioId;
       if (!registradorId) throw new Error("No user in context");
       
       return PagosService.registrarPago(input, registradorId);

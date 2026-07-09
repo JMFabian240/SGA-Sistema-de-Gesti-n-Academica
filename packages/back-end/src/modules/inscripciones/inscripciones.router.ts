@@ -1,4 +1,4 @@
-import { router, gestorProcedure, docentProcedure } from '../../trpc';
+import { router, protectedProcedure, hasModulePermission } from '../../trpc';
 import { z } from 'zod';
 import { InscripcionesService } from './inscripciones.service';
 import { 
@@ -7,54 +7,57 @@ import {
   createInscripcionSchema, updateInscripcionSchema 
 } from './inscripciones.schema';
 
+const lectura = protectedProcedure.use(hasModulePermission('Alumnos', false));
+const escritura = protectedProcedure.use(hasModulePermission('Alumnos', true));
+
 export const inscripcionesRouter = router({
   
   // --- Planes de Pago ---
-  getPlanesPago: gestorProcedure.query(() => InscripcionesService.getPlanesPago()),
+  getPlanesPago: lectura.query(() => InscripcionesService.getPlanesPago()),
 
-  createPlanPago: gestorProcedure
+  createPlanPago: escritura
     .input(createPlanPagoSchema)
     .mutation(({ input }) => InscripcionesService.createPlanPago(input)),
 
-  updatePlanPago: gestorProcedure
+  updatePlanPago: escritura
     .input(updatePlanPagoSchema)
     .mutation(({ input }) => InscripcionesService.updatePlanPago(input)),
 
-  deletePlanPago: gestorProcedure
+  deletePlanPago: escritura
     .input(z.number().int().positive())
     .mutation(({ input }) => InscripcionesService.deletePlanPago(input)),
 
   // --- Ventanas de Inscripción ---
-  getVentanas: gestorProcedure.query(() => InscripcionesService.getVentanas()),
+  getVentanas: lectura.query(() => InscripcionesService.getVentanas()),
 
-  createVentana: gestorProcedure
+  createVentana: escritura
     .input(createVentanaInscripcionSchema)
     .mutation(({ input }) => InscripcionesService.createVentana(input)),
 
-  updateVentana: gestorProcedure
+  updateVentana: escritura
     .input(updateVentanaInscripcionSchema)
     .mutation(({ input }) => InscripcionesService.updateVentana(input)),
 
-  deleteVentana: gestorProcedure
+  deleteVentana: escritura
     .input(z.number().int().positive())
     .mutation(({ input }) => InscripcionesService.deleteVentana(input)),
 
   // --- Inscripciones de Alumnos ---
-  getInscripciones: docentProcedure
+  getInscripciones: lectura
     .input(z.object({
       cicloId: z.number().int().positive().optional()
     }).optional())
     .query(({ input }) => InscripcionesService.getInscripciones(input?.cicloId)),
 
-  createInscripcion: gestorProcedure
+  createInscripcion: escritura
     .input(createInscripcionSchema)
     .mutation(({ input }) => InscripcionesService.createInscripcion(input)),
 
-  updateInscripcion: gestorProcedure
+  updateInscripcion: escritura
     .input(updateInscripcionSchema)
     .mutation(({ input }) => InscripcionesService.updateInscripcion(input)),
 
-  deleteInscripcion: gestorProcedure
+  deleteInscripcion: escritura
     .input(z.number().int().positive())
     .mutation(({ input }) => InscripcionesService.deleteInscripcion(input))
 });
