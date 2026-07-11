@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { trpc } from '../../../lib/trpc';
-import { ChevronLeft, User, Crown, Mail, Phone, BookOpen, Users, Link2Off, Plus, Calculator, Trash2 } from 'lucide-react';
+import { ChevronLeft, User, Crown, Mail, Phone, BookOpen, Users, Link2Off, Plus, Calculator, Trash2, UploadCloud, Eye } from 'lucide-react';
 import { useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { VincularTutorModal } from '../components/VincularTutorModal';
 import { InscribirAlumnoModal } from '../components/InscribirAlumnoModal';
 import { AsignarPlanPagoModal } from '../components/AsignarPlanPagoModal';
@@ -17,7 +18,7 @@ export function ExpedienteAlumnoPage() {
 
   const alumnoId = parseInt(id || '0', 10);
   
-  const { data: alumno, isLoading, error } = trpc.alumnos.getById.useQuery(alumnoId, {
+  const { data: alumno, isLoading, error, isSuccess } = trpc.alumnos.getById.useQuery(alumnoId, {
     enabled: !!alumnoId,
   });
 
@@ -47,6 +48,62 @@ export function ExpedienteAlumnoPage() {
       window.alert(err.message || 'Error al quitar el plan de pagos.');
     }
   });
+
+  const adjuntarMutation = trpc.pagos.adjuntarComprobante.useMutation({
+    onSuccess: () => {
+      toast.success('Comprobante adjuntado con éxito');
+      utils.alumnos.getById.invalidate(alumnoId);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al adjuntar comprobante');
+    }
+  });
+
+  const handleAdjuntar = (pagoId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('El archivo es demasiado grande (máx 5MB)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      adjuntarMutation.mutate({
+        pagoId,
+        alumnoId,
+        comprobanteBase64: reader.result as string,
+        comprobanteNombre: file.name,
+        comprobanteMime: file.type
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVerComprobante = async (pagoId: number) => {
+    const toastId = toast.loading('Cargando comprobante...');
+    try {
+      const data = await utils.pagos.getComprobanteBase64.fetch({ pagoId });
+      toast.dismiss(toastId);
+      
+      const base64Data = data.base64.split(',')[1];
+      const binaryStr = window.atob(base64Data);
+      const len = binaryStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+      
+      const blob = new Blob([bytes], { type: data.mime });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      
+      // Cleanup de la URL (opcional, aunque si se recarga se borra sola, un timeout simple sirve)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (error: any) {
+      toast.dismiss(toastId);
+      toast.error(error.message || 'Error al visualizar el comprobante');
+    }
+  };
 
   const handleQuitarPlan = (inscripcionId: number) => {
     if (window.confirm('¿Estás seguro que deseas quitar el plan de pagos? Esto borrará el calendario de recibos generado (siempre y cuando no tengan pagos aplicados).')) {
@@ -292,6 +349,8 @@ export function ExpedienteAlumnoPage() {
                     <th className="px-6 py-3 font-semibold text-gray-700">Concepto</th>
                     <th className="px-6 py-3 font-semibold text-gray-700">Vencimiento</th>
                     <th className="px-6 py-3 font-semibold text-gray-700">Monto</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Referencia</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Comprobante</th>
                     <th className="px-6 py-3 font-semibold text-gray-700">Estado</th>
                   </tr>
                 </thead>
@@ -305,6 +364,33 @@ export function ExpedienteAlumnoPage() {
                       </td>
                       <td className="px-6 py-3 font-semibold text-gray-900">
                         ${Number(pago.montoOriginal).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-3 text-gray-600">
+                        {pago.aplicacionesPago?.[0]?.pago?.observaciones || '-'}
+                      </td>
+                      <td className="px-6 py-3">
+                        {pago.aplicacionesPago?.[0]?.pago && (
+                          pago.aplicacionesPago[0].pago.documentos && pago.aplicacionesPago[0].pago.documentos.length > 0 ? (
+                            <button 
+                              onClick={() => handleVerComprobante(pago.aplicacionesPago[0].pago.pagoId)}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                              title="Ver Comprobante"
+                            >
+                              <Eye size={16} /> Ver
+                            </button>
+                          ) : (
+                            <label className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-600 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-600 transition-colors text-sm font-medium" title="Adjuntar comprobante a este pago">
+                              <UploadCloud size={16} /> Adjuntar
+                              <input 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*,.pdf"
+                                onChange={(e) => handleAdjuntar(pago.aplicacionesPago[0].pago.pagoId, e)}
+                              />
+                            </label>
+                          )
+                        )}
+                        {!pago.aplicacionesPago?.[0]?.pago && <span className="text-gray-400">-</span>}
                       </td>
                       <td className="px-6 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${

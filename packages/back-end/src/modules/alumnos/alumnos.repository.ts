@@ -54,7 +54,22 @@ export class AlumnosRepository {
         },
         calendariosPagos: {
           orderBy: { fechaVencimiento: 'asc' },
-          where: { eliminadoEn: null }
+          where: { eliminadoEn: null },
+          include: {
+            aplicacionesPago: {
+              include: {
+                pago: {
+                  include: {
+                    documentos: {
+                      select: {
+                        documentoId: true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });

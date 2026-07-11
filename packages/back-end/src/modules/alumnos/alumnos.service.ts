@@ -32,7 +32,7 @@ export class AlumnosService {
    */
   static async createAlumno(input: CreateAlumnoInput) {
     // Verificar si el CURP o la matrícula ya están en uso
-    const existing = await AlumnosRepository.findAlumnoByCurpOrMatricula(input.curp, input.matricula);
+    const existing = await AlumnosRepository.findAlumnoByCurpOrMatricula(input.curp || '', input.matricula);
 
     if (existing) {
       throw new TRPCError({

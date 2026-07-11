@@ -431,6 +431,7 @@ model Pago {
   montoTotal       Decimal           @map("monto_total") @db.Decimal(12, 2)
   metodoPago       MetodoPago        @map("metodo_pago")
   aplicadoASaldo   Boolean?          @default(false) @map("aplicado_a_saldo")
+  requiereFactura  Boolean?          @default(false) @map("requiere_factura")
   observaciones    String?
   registradoPor    Int               @map("registrado_por")
   registradoEn     DateTime?         @default(now()) @map("registrado_en") @db.Timestamptz(6)
@@ -672,6 +673,7 @@ enum EstadoAlumno {
 }
 
 enum MetodoPago {
+  EFECTIVO
   DEPOSITO
   TRANSFERENCIA
   TARJETA_DEBITO
