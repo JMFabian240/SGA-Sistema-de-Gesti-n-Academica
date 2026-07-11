@@ -40,6 +40,8 @@ async function main() {
         where: { nombreUsuario },
         update: {
           passwordHash,
+          intentosFallidos: 0,
+          bloqueadoHasta: null,
         },
         create: {
           nombreUsuario,
