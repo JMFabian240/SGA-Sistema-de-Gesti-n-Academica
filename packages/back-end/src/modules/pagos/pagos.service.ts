@@ -2,16 +2,16 @@ import { TRPCError } from '@trpc/server';
 import fs from 'fs';
 import path from 'path';
 import { prisma } from '@sga/data-access';
-import type { 
-  CreateTarifaInput, UpdateTarifaInput, 
-  CreateCalendarioPagoInput, UpdateCalendarioPagoInput, 
+import type {
+  CreateTarifaInput, UpdateTarifaInput,
+  CreateCalendarioPagoInput, UpdateCalendarioPagoInput,
   RegistrarPagoInput, CreateCargoExtraordinarioInput,
   AdjuntarComprobanteInput
 } from './pagos.schema';
 import { PagosRepository } from './pagos.repository';
 
 export class PagosService {
-  
+
   // --- Tarifas ---
   static async getTarifas(cicloId?: number, nivelId?: number) {
     return PagosRepository.getTarifas(cicloId, nivelId);
@@ -31,8 +31,25 @@ export class PagosService {
   }
 
   // --- Calendario de Pagos (Adeudos) ---
-  static async getAdeudosAlumno(alumnoId: number, estadoCobro?: 'PENDIENTE' | 'PAGADO' | 'VENCIDO' | 'CANCELADO') {
-    return PagosRepository.getAdeudosAlumno(alumnoId, estadoCobro);
+  static calcularEstadoAbono(adeudo: any) {
+    if (adeudo.estadoCobro === 'PENDIENTE' && Number(adeudo.montoPagado) > 0 && Number(adeudo.saldoPendiente) > 0) {
+      return { ...adeudo, estadoCobro: 'ABONO' };
+    }
+    return adeudo;
+  }
+
+  static async getAdeudosAlumno(alumnoId: number, estadoCobro?: 'PENDIENTE' | 'PAGADO' | 'VENCIDO' | 'CANCELADO' | 'ABONO') {
+    let dbEstado = estadoCobro;
+    if (estadoCobro === 'ABONO') {
+      dbEstado = 'PENDIENTE';
+    }
+    const adeudos = await PagosRepository.getAdeudosAlumno(alumnoId, dbEstado as any);
+    const adeudosMapeados = adeudos.map(this.calcularEstadoAbono);
+    
+    if (estadoCobro === 'ABONO') {
+      return adeudosMapeados.filter((a: any) => a.estadoCobro === 'ABONO');
+    }
+    return adeudosMapeados;
   }
 
   static async createAdeudo(input: CreateCalendarioPagoInput) {
@@ -98,6 +115,7 @@ export class PagosService {
         montoTotal: input.montoTotal,
         metodoPago: input.metodoPago,
         aplicadoASaldo: input.aplicadoASaldo,
+        // @ts-ignore - requiereFactura existe en el esquema Prisma, el cliente podría requerir re-generación
         requiereFactura: input.requiereFactura,
         observaciones: input.observaciones,
         registradoPor: registradorId
@@ -115,13 +133,13 @@ export class PagosService {
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir, { recursive: true });
         }
-        
+
         // Limpiar el base64 si trae prefijo 'data:image/jpeg;base64,'
         const base64Data = input.comprobanteBase64.replace(/^data:([A-Za-z-+/]+);base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const filename = `${Date.now()}-${input.comprobanteNombre}`;
         const rutaCompleta = path.join(uploadsDir, filename);
-        
+
         fs.writeFileSync(rutaCompleta, buffer);
 
         // Guardar el registro Documento en BD
@@ -163,12 +181,12 @@ export class PagosService {
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
-      
+
       const base64Data = input.comprobanteBase64.replace(/^data:([A-Za-z-+/]+);base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
       const filename = `${Date.now()}-${input.comprobanteNombre}`;
       const rutaCompleta = path.join(uploadsDir, filename);
-      
+
       fs.writeFileSync(rutaCompleta, buffer);
 
       const documento = await prisma.documento.create({
