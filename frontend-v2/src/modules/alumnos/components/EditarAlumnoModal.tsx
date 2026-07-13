@@ -57,6 +57,7 @@ export function EditarAlumnoModal({ isOpen, onClose, alumno }: EditarAlumnoModal
   useEffect(() => {
     if (isOpen && alumno) {
       const inscripcion = alumno.inscripciones?.[0];
+      const fallbackGradoId = inscripcion?.grupo?.gradoId || inscripcion?.gradoId || alumno.gradoId;
 
       reset({
         nombreCompleto: alumno.nombreCompleto || '',
@@ -65,7 +66,7 @@ export function EditarAlumnoModal({ isOpen, onClose, alumno }: EditarAlumnoModal
         matricula: alumno.matricula || '',
         curp: alumno.curp || '',
         nivelId: alumno.nivelId?.toString() || '',
-        gradoId: inscripcion?.gradoId?.toString() || '',
+        gradoId: fallbackGradoId?.toString() || '',
         seccionId: inscripcion?.grupoId?.toString() || ''
       });
       setSubmitError(null);
@@ -197,6 +198,7 @@ export function EditarAlumnoModal({ isOpen, onClose, alumno }: EditarAlumnoModal
                 <label className="block text-sm text-gray-600 mb-1">Nivel <span className="text-red-500">*</span></label>
                 <select
                   {...register('nivelId')}
+                  value={watchNivelId || ''}
                   className={`w-full px-3 py-2 rounded-xl border ${errors.nivelId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white`}
                 >
                   <option value="">Selecciona Niv...</option>
@@ -211,6 +213,7 @@ export function EditarAlumnoModal({ isOpen, onClose, alumno }: EditarAlumnoModal
                 <select
                   {...register('gradoId')}
                   disabled={!watchNivelId}
+                  value={watchGradoId || ''}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50"
                 >
                   <option value="">Selecciona Gra...</option>
@@ -224,6 +227,7 @@ export function EditarAlumnoModal({ isOpen, onClose, alumno }: EditarAlumnoModal
                 <select
                   {...register('seccionId')}
                   disabled={!watchGradoId}
+                  value={watch('seccionId') || ''}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50"
                 >
                   <option value="">Selecciona Sec...</option>
