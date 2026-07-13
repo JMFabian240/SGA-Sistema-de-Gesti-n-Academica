@@ -1,19 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Tutores Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken
-  };
-
   it('debería crear un tutor exitosamente sin datos fiscales', async () => {
+    const { ctx } = await createTestContext(['Tutores']);
     const caller = appRouter.createCaller(ctx);
 
     const tutorMock = {
@@ -37,6 +29,7 @@ describe('Tutores Router (Integration)', () => {
   });
 
   it('debería crear un tutor con datos fiscales atómicamente', async () => {
+    const { ctx } = await createTestContext(['Tutores']);
     const caller = appRouter.createCaller(ctx);
 
     const tutorConFiscalMock = {
@@ -67,6 +60,7 @@ describe('Tutores Router (Integration)', () => {
   });
 
   it('debería rechazar si faltan datos requeridos (Zod)', async () => {
+    const { ctx } = await createTestContext(['Tutores']);
     const caller = appRouter.createCaller(ctx);
 
     const invalidTutorMock = {

@@ -1,24 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Inscripciones Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken
-  };
-
   it('debería crear un plan de pago e inscribir a un alumno exitosamente', async () => {
+    const { ctx } = await createTestContext(['Inscripciones', 'Alumnos', 'Pagos']);
     const caller = appRouter.createCaller(ctx);
 
     // 1. Preparar BD con dependencias
-    const nivel = await prisma.nivelEducativo.create({
-      data: { codigo: 'PREP', nombre: 'Preparatoria', orden: 4 }
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'PREP_INS' },
+      update: {},
+      create: { codigo: 'PREP_INS', nombre: 'Preparatoria', orden: 4 }
     });
 
     const ciclo = await prisma.cicloEscolar.create({
@@ -33,7 +27,7 @@ describe('Inscripciones Router (Integration)', () => {
     const alumno = await prisma.alumno.create({
       data: {
         nombreCompleto: 'Alumno Inscripcion',
-        curp: 'ALUMNOINSC12345678',
+        curp: `TS${Date.now()}BCD`,
         fechaNacimiento: new Date('2005-05-15'),
         sexo: 'M',
         estado: 'ACTIVO',
@@ -55,13 +49,17 @@ describe('Inscripciones Router (Integration)', () => {
     const inscripcionResult = await caller.inscripciones.createInscripcion({
       alumnoId: alumno.alumnoId,
       cicloId: ciclo.cicloId,
-      planPagoId: planResult.planPagoId,
       fechaIngreso: new Date('2024-08-15').toISOString(),
       esIngresoTardio: false,
       estadoEnCiclo: 'INSCRITO',
-      estadoFinanciero: 'AL_CORRIENTE'
+      estadoFinanciero: 'NO_APLICA'
     });
     expect(inscripcionResult.inscripcionId).toBeDefined();
+
+    await caller.inscripciones.asignarPlanPago({
+      inscripcionId: inscripcionResult.inscripcionId,
+      planPagoId: planResult.planPagoId
+    });
 
     // 4. Verificar en Base de Datos
     const dbInscripcion = await prisma.inscripcionCiclo.findUnique({
@@ -74,18 +72,21 @@ describe('Inscripciones Router (Integration)', () => {
     });
 
     expect(dbInscripcion).not.toBeNull();
-    expect(dbInscripcion?.alumno.curp).toBe('ALUMNOINSC12345678');
+    expect(dbInscripcion?.alumno.curp).toBe(alumno.curp);
     expect(dbInscripcion?.planPago.meses).toBe(10);
     expect(dbInscripcion?.planPago.montoMensual.toNumber()).toBe(2000);
     expect(dbInscripcion?.estadoEnCiclo).toBe('INSCRITO');
   });
 
   it('debería rechazar inscripción si el plan de pago no existe (Constraint BD)', async () => {
+    const { ctx } = await createTestContext(['Inscripciones', 'Alumnos', 'Pagos']);
     const caller = appRouter.createCaller(ctx);
 
     // Preparar dependencias
-    const nivel = await prisma.nivelEducativo.create({
-      data: { codigo: 'PREP2', nombre: 'Preparatoria 2', orden: 4 }
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'PREP_INS2' },
+      update: {},
+      create: { codigo: 'PREP_INS2', nombre: 'Preparatoria 2', orden: 4 }
     });
 
     const ciclo = await prisma.cicloEscolar.create({
@@ -100,7 +101,7 @@ describe('Inscripciones Router (Integration)', () => {
     const alumno = await prisma.alumno.create({
       data: {
         nombreCompleto: 'Alumno Fallido',
-        curp: 'FALLIDO1234567890',
+        curp: `TS${Date.now()}FGH`,
         fechaNacimiento: new Date('2005-05-15'),
         sexo: 'M',
         estado: 'ACTIVO',
@@ -108,18 +109,21 @@ describe('Inscripciones Router (Integration)', () => {
       }
     });
 
-    const inscripcionInvalida = {
+    const inscripcionValida = {
       alumnoId: alumno.alumnoId,
       cicloId: ciclo.cicloId,
-      planPagoId: 99999, // No existe en BD
       fechaIngreso: new Date('2024-08-15').toISOString(),
       esIngresoTardio: false,
       estadoEnCiclo: 'INSCRITO',
-      estadoFinanciero: 'AL_CORRIENTE'
+      estadoFinanciero: 'NO_APLICA'
     };
 
-    // Prisma lanzará un P2003 (Foreign key constraint violated)
-    await expect(caller.inscripciones.createInscripcion(inscripcionInvalida))
-      .rejects.toThrowError(/Foreign key constraint violated/);
+    const resInscripcion = await caller.inscripciones.createInscripcion(inscripcionValida);
+
+    // Lanzará un error TRPC (NOT_FOUND) porque el planPagoId no existe
+    await expect(caller.inscripciones.asignarPlanPago({
+      inscripcionId: resInscripcion.inscripcionId,
+      planPagoId: 99999
+    })).rejects.toThrowError(/Plan de pago no encontrado/);
   });
 });

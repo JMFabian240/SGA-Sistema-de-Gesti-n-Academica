@@ -105,33 +105,21 @@ describe('InscripcionesService (Unit)', () => {
       })).rejects.toThrowError(new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno ya se encuentra inscrito en este ciclo escolar.' }));
     });
 
-    it('createInscripcion debería crear la inscripción si no existe duplicado y generar adeudos (10 meses)', async () => {
+    it('createInscripcion debería crear la inscripción si no existe duplicado sin generar adeudos', async () => {
       prismaMock.inscripcionCiclo.findUnique.mockResolvedValue(null);
       prismaMock.calificacion.findFirst.mockResolvedValue(null);
-      prismaMock.planPago.findUnique.mockResolvedValue({
-        planPagoId: 1,
-        meses: 10,
-        montoMensual: 1500,
-        eliminadoEn: null
-      } as any);
       prismaMock.inscripcionCiclo.create.mockResolvedValue({ inscripcionId: 5 } as any);
-      prismaMock.calendarioPago.createMany.mockResolvedValue({ count: 10 } as any);
 
       const result = await InscripcionesService.createInscripcion({
-        alumnoId: 1, cicloId: 1, fechaIngreso: '2023-08-01', esIngresoTardio: false, estadoEnCiclo: 'ACTIVO', estadoFinanciero: 'AL_CORRIENTE'
+        alumnoId: 1, cicloId: 1, fechaIngreso: '2023-08-01', esIngresoTardio: false, estadoEnCiclo: 'ACTIVO', estadoFinanciero: 'NO_APLICA'
       });
 
       expect(result.inscripcionId).toBe(5);
       expect(prismaMock.inscripcionCiclo.create).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({ fechaIngreso: expect.any(Date) })
       }));
-      expect(prismaMock.calendarioPago.createMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.arrayContaining([
-            expect.objectContaining({ concepto: 'Colegiatura Septiembre', montoOriginal: 1500 })
-          ])
-        })
-      );
+      // No debería generar adeudos aquí
+      expect(prismaMock.calendarioPago.createMany).not.toHaveBeenCalled();
     });
 
     it('createInscripcion debería rechazar si el grupo seleccionado no existe', async () => {
@@ -169,28 +157,33 @@ describe('InscripcionesService (Unit)', () => {
       })).rejects.toThrowError(new TRPCError({ code: 'FORBIDDEN', message: 'El alumno tiene materias reprobadas y no puede ser inscrito.' }));
     });
 
-    it('createInscripcion debería generar adeudos correctamente para plan de 12 meses (Gap 2)', async () => {
-      prismaMock.inscripcionCiclo.findUnique.mockResolvedValue(null);
-      prismaMock.calificacion.findFirst.mockResolvedValue(null);
+    it('asignarPlanPago debería generar adeudos correctamente para plan de 12 meses (Gap 2)', async () => {
+      prismaMock.inscripcionCiclo.findUnique.mockResolvedValue({
+        inscripcionId: 1,
+        cicloId: 1,
+        alumnoId: 1,
+        fechaIngreso: new Date('2023-08-01'),
+        alumno: { nivelId: 1 }
+      } as any);
       prismaMock.planPago.findUnique.mockResolvedValue({
         planPagoId: 1,
         meses: 12,
-        montoMensual: 2000,
-        montoDiciembre: 4000,
         eliminadoEn: null
       } as any);
-      prismaMock.inscripcionCiclo.create.mockResolvedValue({ inscripcionId: 6 } as any);
+      prismaMock.tarifa.findFirst.mockResolvedValue({
+        monto: 2000
+      } as any);
+      prismaMock.inscripcionCiclo.update.mockResolvedValue({ inscripcionId: 1 } as any);
       prismaMock.calendarioPago.createMany.mockResolvedValue({ count: 12 } as any);
 
-      await InscripcionesService.createInscripcion({
-        alumnoId: 1, cicloId: 1, fechaIngreso: '2023-08-01', esIngresoTardio: false, estadoEnCiclo: 'ACTIVO', estadoFinanciero: 'AL_CORRIENTE'
+      await InscripcionesService.asignarPlanPago({
+        inscripcionId: 1, planPagoId: 1
       });
 
       expect(prismaMock.calendarioPago.createMany).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.arrayContaining([
-            expect.objectContaining({ concepto: 'Colegiatura Diciembre', montoOriginal: 4000 }),
-            expect.objectContaining({ concepto: 'Colegiatura Julio', montoOriginal: 0 })
+            expect.objectContaining({ concepto: 'Colegiatura Diciembre', montoOriginal: 4000 })
           ])
         })
       );

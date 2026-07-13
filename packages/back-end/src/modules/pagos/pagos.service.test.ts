@@ -126,38 +126,44 @@ describe('PagosService (Unit)', () => {
       prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
       prismaMock.pago.create.mockResolvedValue({ pagoId: 99 } as any);
       prismaMock.calendarioPago.findUnique.mockResolvedValue(mockAdeudo as any);
+      prismaMock.calendarioPago.findMany.mockResolvedValue([]); // Sin adeudos extras para absorber excedente
 
       await expect(PagosService.registrarPago({
         alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 600, aplicadoA: 'CAPITAL' }]
-      }, 2)).rejects.toThrowError(new TRPCError({ code: 'BAD_REQUEST', message: 'El monto aplicado al adeudo Test excede su saldo pendiente.' }));
+      }, 2)).rejects.toThrowError(new TRPCError({ code: 'BAD_REQUEST', message: 'El pago excede el total de todas las deudas pendientes del alumno.' }));
     });
 
-    it('debería generar saldo a favor si montoTotal > aplicaciones', async () => {
-      const mockAdeudo = { calendarioPagoId: 1, saldoPendiente: 500, montoPagado: 0, estadoCobro: 'PENDIENTE' };
+    it('debería aplicar automáticamente el excedente al siguiente adeudo pendiente', async () => {
+      const mockAdeudo1 = { calendarioPagoId: 1, saldoPendiente: 500, montoPagado: 0, estadoCobro: 'PENDIENTE', concepto: 'Mes 1' };
+      const mockAdeudo2 = { calendarioPagoId: 2, saldoPendiente: 800, montoPagado: 0, estadoCobro: 'PENDIENTE', concepto: 'Mes 2' };
+      
       prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
       prismaMock.pago.create.mockResolvedValue({ pagoId: 99 } as any);
-      prismaMock.calendarioPago.findUnique.mockResolvedValue(mockAdeudo as any);
+      
+      // En la lógica, primero busca pendientes, y luego itera por las aplicaciones generadas
+      prismaMock.calendarioPago.findMany.mockResolvedValue([mockAdeudo1, mockAdeudo2] as any);
+      prismaMock.calendarioPago.findUnique.mockImplementation(((args: any) => {
+        if (args.where.calendarioPagoId === 1) return Promise.resolve(mockAdeudo1);
+        if (args.where.calendarioPagoId === 2) return Promise.resolve(mockAdeudo2);
+        return Promise.resolve(null);
+      }) as any);
 
       await PagosService.registrarPago({
         alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 500, aplicadoA: 'CAPITAL' }] // Sobran 500
       }, 2);
 
-      // Verificamos Tutor Update
-      expect(prismaMock.tutor.update).toHaveBeenCalledWith(expect.objectContaining({
-        where: { tutorId: 1 },
-        data: { saldoAFavor: { increment: 500 } }
-      }));
-      
-      // Verificamos Movimiento de Saldo
-      expect(prismaMock.movimientoSaldo.create).toHaveBeenCalledWith(expect.objectContaining({
+      // Verificamos que se creó una aplicación extra para el adeudo 2
+      expect(prismaMock.aplicacionPago.create).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({
-          tutorId: 1,
-          tipo: 'INGRESO',
-          monto: 500
+          calendarioPagoId: 2,
+          montoAplicado: 500
         })
       }));
+      
+      // Tutor Update no debe llamarse porque saldo a favor es 0
+      expect(prismaMock.tutor.update).not.toHaveBeenCalled();
     });
   });
 

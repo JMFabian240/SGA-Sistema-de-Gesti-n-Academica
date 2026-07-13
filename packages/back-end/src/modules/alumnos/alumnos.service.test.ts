@@ -7,6 +7,7 @@ import { EstadoAlumno } from '@prisma/client';
 describe('AlumnosService (Unit)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
   });
 
   describe('getAlumnos', () => {

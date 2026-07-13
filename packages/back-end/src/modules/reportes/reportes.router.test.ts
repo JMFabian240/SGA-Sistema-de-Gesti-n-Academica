@@ -12,6 +12,11 @@ vi.mock('jsonwebtoken', () => ({
 describe('Reportes Router (Unit)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prismaMock.logAuditoria.create.mockResolvedValue({} as any);
+    prismaMock.usuarioPermisoModulo.findUnique.mockResolvedValue({
+      activo: true,
+      nivel: 'LECTURA_Y_ESCRITURA'
+    } as any);
   });
 
   const ctxMock = {

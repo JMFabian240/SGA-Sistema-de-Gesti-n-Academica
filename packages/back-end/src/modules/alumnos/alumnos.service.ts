@@ -1,9 +1,9 @@
 import { prisma } from '@sga/data-access';
 import { TRPCError } from '@trpc/server';
 import { AlumnosRepository } from './alumnos.repository';
-import type { 
-  CreateAlumnoInput, UpdateAlumnoInput, 
-  LinkTutorInput, UnlinkTutorInput 
+import type {
+  CreateAlumnoInput, UpdateAlumnoInput,
+  LinkTutorInput, UnlinkTutorInput
 } from './alumnos.schema';
 
 export class AlumnosService {
@@ -70,14 +70,14 @@ export class AlumnosService {
           // Crear la inscripción académica sin plan de pagos financiero
           await tx.inscripcionCiclo.create({
             data: {
-              alumnoId: alumno.alumnoId,
-              cicloId: cicloActivo.cicloId,
-              grupoId: grupoId,
+              alumno: { connect: { alumnoId: alumno.alumnoId } },
+              ciclo: { connect: { cicloId: cicloActivo.cicloId } },
+              grupo: { connect: { grupoId: grupoId } },
+              grado: { connect: { gradoId: gradoId } },
               fechaIngreso: new Date(),
               estadoEnCiclo: 'INSCRITO',
               estadoFinanciero: 'NO_APLICA',
-              gradoId: gradoId
-            }
+            } as any
           });
         }
       }
@@ -180,8 +180,8 @@ export class AlumnosService {
 
     if (existingRel) {
       return AlumnosRepository.updateTutorAlumnoRelation(
-        existingRel.tutorAlumnoId, 
-        Boolean(finalEsPrincipal), 
+        existingRel.tutorAlumnoId,
+        Boolean(finalEsPrincipal),
         input.parentesco
       );
     }

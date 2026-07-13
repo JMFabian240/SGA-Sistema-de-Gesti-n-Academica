@@ -15,11 +15,19 @@ describe('Usuarios Router (Unit)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     prismaMock.logAuditoria.create.mockResolvedValue({} as any);
+    prismaMock.usuarioPermisoModulo.findUnique.mockResolvedValue({
+      activo: true,
+      nivel: 'LECTURA_Y_ESCRITURA'
+    } as any);
   });
 
   const ctxMock = {
     prisma: prismaMock as any,
-    user: { usuarioId: 99, jti: 'test-jti' },
+    user: { 
+      usuarioId: 99, 
+      jti: 'test-jti',
+      permisoModulo: { activo: true, nivel: 'LECTURA_ESCRITURA' }
+    },
     req: {} as any,
     res: {} as any,
     token: 'fake-token'
@@ -56,15 +64,15 @@ describe('Usuarios Router (Unit)', () => {
         caller.usuarios.crearUsuario({
           nombreUsuario: 'duplicado',
           nombreCompleto: 'Usuario Duplicado',
-          correo: 'duplicado@test.com',
           password: 'password123',
-          roles: [1]
+          rolId: 1
         })
-      ).rejects.toThrowError(new TRPCError({ code: 'CONFLICT', message: 'El nombre de usuario o correo ya está registrado' }));
+      ).rejects.toThrowError(new TRPCError({ code: 'CONFLICT', message: 'El nombre de usuario ya está registrado' }));
     });
 
     it('debería crear el usuario y sus roles transaccionalmente', async () => {
       prismaMock.usuario.findFirst.mockResolvedValue(null);
+      prismaMock.rol.findMany.mockResolvedValue([{ rolId: 2, codigo: 'DOCENTE' }] as any);
       
       // Simular $transaction ejecutando el callback
       prismaMock.$transaction.mockImplementation(async (callback) => {
@@ -76,10 +84,9 @@ describe('Usuarios Router (Unit)', () => {
 
       const result = await caller.usuarios.crearUsuario({
         nombreUsuario: 'nuevo',
-        nombreCompleto: 'Nuevo Usuario',
-        correo: 'nuevo@test.com',
+        nombreCompleto: 'Nuevo Usuario Lindo',
         password: 'password123',
-        roles: [2]
+        rolId: 2
       });
 
       expect(result.success).toBe(true);

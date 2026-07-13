@@ -1,36 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Becas Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken,
-    user: { usuarioId: 1, rol: 'ADMIN' }
-  };
-
   it('debería crear beca, solicitarla y resolverla atómicamente', async () => {
+    const { ctx } = await createTestContext(['Becas']);
     const caller = appRouter.createCaller(ctx);
 
     // 1. Preparar dependencias en BD
-    // Usuario para que sea el solicitador/resolutor
-    await prisma.usuario.create({
-      data: {
-        usuarioId: 1,
-        nombreUsuario: 'admin_becas',
-        nombreCompleto: 'Admin Becas',
-        correo: 'admin.becas@test.com',
-        passwordHash: 'hash_falso',
-      }
-    });
-
-    const nivel = await prisma.nivelEducativo.create({
-      data: { codigo: 'PRE', nombre: 'Preescolar', orden: 1 }
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'PRE_BECAS' },
+      update: {},
+      create: { codigo: 'PRE_BECAS', nombre: 'Preescolar', orden: 1 }
     });
 
     const ciclo = await prisma.cicloEscolar.create({
@@ -45,7 +27,7 @@ describe('Becas Router (Integration)', () => {
     const alumno = await prisma.alumno.create({
       data: {
         nombreCompleto: 'Alumno Beca',
-        curp: 'ALUMNOBECA12345678',
+        curp: `TS${Date.now()}DEF`,
         fechaNacimiento: new Date('2015-05-15'),
         sexo: 'M',
         estado: 'ACTIVO',
@@ -93,11 +75,12 @@ describe('Becas Router (Integration)', () => {
 
     expect(dbAsignacion).not.toBeNull();
     expect(dbAsignacion?.beca.porcentaje.toNumber()).toBe(50);
-    expect(dbAsignacion?.alumno.curp).toBe('ALUMNOBECA12345678');
+    expect(dbAsignacion?.alumno.curp).toBe(alumno.curp);
     expect(dbAsignacion?.solicitud?.estado).toBe('ACTIVA');
   });
 
   it('debería rechazar porcentaje de beca mayor a 100 (Zod)', async () => {
+    const { ctx } = await createTestContext(['Becas']);
     const caller = appRouter.createCaller(ctx);
 
     const becaInvalida = {

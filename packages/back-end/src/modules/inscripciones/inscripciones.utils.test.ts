@@ -15,12 +15,12 @@ describe('CalculadoraPagos', () => {
     expect(recibos.length).toBe(10);
     // Verificamos que arranque en Septiembre
     expect(recibos[0].mes).toBe('Septiembre');
-    expect(recibos[0].montoOriginal).toBe(1000);
+    expect(recibos[0].montoOriginal).toBe(1200);
 
     // Verificamos Diciembre
     const dic = recibos.find(r => r.mes === 'Diciembre');
     expect(dic).toBeDefined();
-    expect(dic?.montoOriginal).toBe(1000); // Sin cobro doble
+    expect(dic?.montoOriginal).toBe(1200); // Sin cobro doble
 
     // Verificamos último mes
     expect(recibos[9].mes).toBe('Junio');

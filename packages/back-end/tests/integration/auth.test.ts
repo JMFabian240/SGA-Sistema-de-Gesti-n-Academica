@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
 import bcrypt from 'bcryptjs';
@@ -23,11 +23,12 @@ describe('Auth Router (Integration)', () => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash('ContrasenaSegura123!', salt);
     
+    const uniqueUser = `admin_test_${Date.now()}`;
+
     await prisma.usuario.create({
       data: {
-        nombreUsuario: 'admin_test',
+        nombreUsuario: uniqueUser,
         nombreCompleto: 'Admin Test',
-        correo: 'admin@test.com',
         passwordHash: hash,
         activo: true
       }
@@ -43,7 +44,7 @@ describe('Auth Router (Integration)', () => {
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.auth.login({
-      identificador: 'admin@test.com',
+      identificador: uniqueUser,
       contrasena: 'ContrasenaSegura123!'
     });
 

@@ -1,24 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Alumnos Router (Integration)', () => {
   it('debería crear un alumno con su tutor atómicamente', async () => {
-    const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-    const ctx = {
-      req: { headers: {} } as any,
-      res: {} as any,
-      prisma: prisma,
-      token: validToken
-    };
+    const { ctx } = await createTestContext(['Alumnos']);
     const caller = appRouter.createCaller(ctx);
 
-    await prisma.nivelEducativo.create({
-      data: {
-        nivelId: 1,
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'SEC_TEST1' },
+      update: {},
+      create: {
         nombre: 'Secundaria',
-        codigo: 'SEC',
+        codigo: 'SEC_TEST1',
         orden: 1
       }
     });
@@ -36,10 +31,10 @@ describe('Alumnos Router (Integration)', () => {
       apellidoMaterno: 'Lopez',
       nombreCompleto: 'Pedrito Perez Lopez',
       fechaNacimiento: new Date('2010-05-15').toISOString(),
-      curp: 'PELP100515HDFRRN01',
+      curp: `TS${Date.now()}ABC`,
       sexo: 'M' as const,
       sangre: 'O+',
-      nivelId: 1,
+      nivelId: nivel.nivelId,
       estado: 'ACTIVO' as const,
       tutor: tutorMock
     };
@@ -58,27 +53,24 @@ describe('Alumnos Router (Integration)', () => {
     });
 
     expect(dbAlumno).not.toBeNull();
-    expect(dbAlumno?.curp).toBe('PELP100515HDFRRN01');
+    expect(dbAlumno?.curp).toBe(alumnoMock.curp);
   });
 
   it('debería rechazar si la CURP ya existe', async () => {
-    const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-    const ctx = {
-      req: { headers: {} } as any,
-      res: {} as any,
-      prisma: prisma,
-      token: validToken
-    };
+    const { ctx } = await createTestContext(['Alumnos']);
     const caller = appRouter.createCaller(ctx);
 
-    await prisma.nivelEducativo.create({
-      data: {
-        nivelId: 1,
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'SEC_TEST2' },
+      update: {},
+      create: {
         nombre: 'Secundaria',
-        codigo: 'SEC',
+        codigo: 'SEC_TEST2',
         orden: 1
       }
     });
+
+    const curpDuplicada = `DP${Date.now()}XYZ`;
 
     const alumnoMock = {
       nombre: 'Pedrito',
@@ -86,10 +78,10 @@ describe('Alumnos Router (Integration)', () => {
       apellidoMaterno: 'Lopez',
       nombreCompleto: 'Pedrito Perez Lopez',
       fechaNacimiento: new Date('2010-05-15').toISOString(),
-      curp: 'DUPLICADA123456789',
+      curp: curpDuplicada,
       sexo: 'M' as const,
       sangre: 'O+',
-      nivelId: 1,
+      nivelId: nivel.nivelId,
       estado: 'ACTIVO' as const,
       tutor: {
         nombreCompleto: 'Maria',

@@ -87,20 +87,60 @@ export class PagosService {
     // Calcular suma de aplicaciones para validar contra el monto total
     const totalAplicado = input.aplicaciones.reduce((acc, app) => acc + app.montoAplicado, 0);
 
-    // No permitir que el montoTotal sea mayor a lo que se va a aplicar.
-    // Esto evita que paguen de más (saldos a favor)
-    if (input.montoTotal > totalAplicado) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'El monto total del pago no puede exceder el saldo adeudado de los conceptos seleccionados.'
-      });
-    }
-
-    if (input.montoTotal < totalAplicado) {
+    // Buscar todos los adeudos pendientes del alumno para aplicar excedentes si los hay
+    let surplus = input.montoTotal - totalAplicado;
+    
+    if (surplus < 0) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: 'El monto total del pago es menor que la suma de las aplicaciones indicadas.'
       });
+    }
+
+    if (surplus > 0) {
+      // Buscar adeudos pendientes ordenados por fecha
+      const pendientes = await prisma.calendarioPago.findMany({
+        where: {
+          alumnoId: input.alumnoId,
+          eliminadoEn: null,
+          estadoCobro: 'PENDIENTE'
+        },
+        orderBy: { fechaVencimiento: 'asc' }
+      });
+
+      for (const adeudo of pendientes) {
+        if (surplus <= 0) break;
+
+        // Verificar si ya viene en las aplicaciones explícitas y cuánto se le aplicó
+        const appImplicita = input.aplicaciones.find(a => a.calendarioPagoId === adeudo.calendarioPagoId);
+        const yaAplicado = appImplicita ? appImplicita.montoAplicado : 0;
+        
+        // Cuánto le falta por pagar a este adeudo
+        const faltaPorPagar = Number(adeudo.saldoPendiente) - yaAplicado;
+
+        if (faltaPorPagar > 0) {
+          const aplicarAhora = Math.min(surplus, faltaPorPagar);
+          
+          if (appImplicita) {
+            appImplicita.montoAplicado += aplicarAhora;
+          } else {
+            input.aplicaciones.push({
+              calendarioPagoId: adeudo.calendarioPagoId,
+              montoAplicado: aplicarAhora,
+              aplicadoA: 'CAPITAL' // Concepto por defecto para excedentes automáticos
+            });
+          }
+          surplus -= aplicarAhora;
+        }
+      }
+
+      // Si aún sobra dinero después de cubrir todos los adeudos
+      if (surplus > 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'El pago excede el total de todas las deudas pendientes del alumno.'
+        });
+      }
     }
 
     // Por regla de negocio impuesta, el saldo a favor generado será siempre 0
