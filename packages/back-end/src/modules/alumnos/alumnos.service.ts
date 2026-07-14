@@ -185,7 +185,7 @@ export class AlumnosService {
 
       if (cicloActivo && (gradoId !== undefined || grupoId !== undefined || nivelId !== undefined)) {
         const inscripcionActiva = await tx.inscripcionCiclo.findFirst({
-          where: { alumnoId, cicloId: cicloActivo.cicloId, eliminadoEn: null }
+          where: { alumnoId, estadoEnCiclo: 'INSCRITO', eliminadoEn: null }
         });
 
         const finalGradoId = gradoId !== undefined ? gradoId : existing.gradoId;
@@ -217,11 +217,51 @@ export class AlumnosService {
             await tx.inscripcionCiclo.update({
               where: { inscripcionId: inscripcionActiva.inscripcionId },
               data: {
+                cicloId: cicloActivo.cicloId,
                 gradoId: finalGradoId,
                 grupoId: finalGrupoId,
                 actualizadoEn: new Date()
               }
             });
+
+            // Re-calcular los pagos pendientes o en abono con la nueva tarifa
+            if (nivelId !== undefined || grupoId !== undefined || gradoId !== undefined) {
+              const tarifa = await tx.tarifa.findFirst({
+                where: {
+                  cicloId: cicloActivo.cicloId,
+                  nivelId: finalNivelId,
+                  concepto: 'COLEGIATURA',
+                  activa: true,
+                  eliminadoEn: null
+                }
+              });
+              
+              const tarifaMensualBase = tarifa ? Number(tarifa.monto) : 0;
+
+              const pagosPendientes = await tx.calendarioPago.findMany({
+                where: {
+                  alumnoId,
+                  estadoCobro: { in: ['PENDIENTE', 'ABONO'] },
+                  eliminadoEn: null
+                }
+              });
+
+              for (const pago of pagosPendientes) {
+                const nuevoMontoOriginal = tarifaMensualBase;
+                const nuevoSaldoPendiente = Math.max(0, nuevoMontoOriginal - Number(pago.montoPagado || 0) + Number(pago.montoRecargo || 0));
+                
+                await tx.calendarioPago.update({
+                  where: { calendarioPagoId: pago.calendarioPagoId },
+                  data: {
+                    cicloId: cicloActivo.cicloId,
+                    montoOriginal: nuevoMontoOriginal,
+                    saldoPendiente: nuevoSaldoPendiente,
+                    estadoCobro: nuevoSaldoPendiente === 0 ? 'PAGADO' : pago.estadoCobro,
+                    actualizadoEn: new Date()
+                  }
+                });
+              }
+            }
           } else {
             await tx.inscripcionCiclo.create({
               data: {

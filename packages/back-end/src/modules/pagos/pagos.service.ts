@@ -39,24 +39,18 @@ export class PagosService {
   }
 
   static async getAdeudosAlumno(alumnoId: number, estadoCobro?: 'PENDIENTE' | 'PAGADO' | 'VENCIDO' | 'CANCELADO' | 'ABONO') {
-    let dbEstado = estadoCobro;
-    if (estadoCobro === 'ABONO') {
-      dbEstado = 'PENDIENTE';
-    }
-    const adeudos = await PagosRepository.getAdeudosAlumno(alumnoId, dbEstado as any);
-    const adeudosMapeados = adeudos.map(this.calcularEstadoAbono);
-    
-    if (estadoCobro === 'ABONO') {
-      return adeudosMapeados.filter((a: any) => a.estadoCobro === 'ABONO');
-    }
-    return adeudosMapeados;
+    const adeudos = await PagosRepository.getAdeudosAlumno(alumnoId, estadoCobro as any);
+    return adeudos.map(this.calcularEstadoAbono);
   }
 
   static async createAdeudo(input: CreateCalendarioPagoInput) {
+    let estado = input.saldoPendiente <= 0 ? 'PAGADO' : 'PENDIENTE';
+    if (input.montoPagado && input.montoPagado > 0 && input.saldoPendiente > 0) estado = 'ABONO';
+    
     return PagosRepository.createAdeudo({
       ...input,
       fechaVencimiento: new Date(input.fechaVencimiento),
-      estadoCobro: input.saldoPendiente > 0 ? 'PENDIENTE' : 'PAGADO'
+      estadoCobro: estado as any
     });
   }
 
@@ -176,7 +170,8 @@ export class PagosService {
         }
 
         const saldoPendiente = Math.round((nuevaTarifa - montoParaEsteAdeudo) * 100) / 100;
-        const estadoCobro = saldoPendiente <= 0 ? 'PAGADO' : 'PENDIENTE';
+        let estadoCobro = saldoPendiente <= 0 ? 'PAGADO' : 'PENDIENTE';
+        if (montoParaEsteAdeudo > 0 && saldoPendiente > 0) estadoCobro = 'ABONO';
         
         await tx.calendarioPago.update({
           where: { calendarioPagoId: adeudo.calendarioPagoId },
@@ -184,7 +179,7 @@ export class PagosService {
             montoOriginal: nuevaTarifa,
             montoPagado: montoParaEsteAdeudo,
             saldoPendiente: saldoPendiente,
-            estadoCobro,
+            estadoCobro: estadoCobro as any,
             liquidadoAt: estadoCobro === 'PAGADO' ? new Date() : null,
             actualizadoEn: new Date()
           }

@@ -674,7 +674,6 @@ enum EstadoAlumno {
 
 enum MetodoPago {
   EFECTIVO
-  DEPOSITO
   TRANSFERENCIA
   TARJETA_DEBITO
   TARJETA_CREDITO
@@ -683,6 +682,7 @@ enum MetodoPago {
 enum EstadoCobro {
   PENDIENTE
   PAGADO
+  ABONO
   VENCIDO
   CANCELADO
 }
