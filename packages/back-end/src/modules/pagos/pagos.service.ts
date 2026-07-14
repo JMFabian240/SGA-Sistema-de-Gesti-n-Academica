@@ -69,7 +69,163 @@ export class PagosService {
     });
   }
 
-  // --- Registro de Pagos y Cargos Extraordinarios ---
+  static async recalcularCalendario(alumnoId: number, usuarioId: number) {
+    return prisma.$transaction(async (tx) => {
+      // 1. Encontrar inscripción activa
+      const inscripcion = await tx.inscripcionCiclo.findFirst({
+        where: { alumnoId, estadoEnCiclo: 'INSCRITO', eliminadoEn: null, ciclo: { activo: true } },
+        include: { ciclo: true, alumno: true }
+      });
+      if (!inscripcion) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno no tiene inscripción activa en un ciclo activo.' });
+      }
+
+      // 2. Encontrar tarifa activa de COLEGIATURA para su nivel
+      const tarifa = await tx.tarifa.findFirst({
+        where: {
+          cicloId: inscripcion.cicloId,
+          nivelId: inscripcion.alumno.nivelId,
+          concepto: 'COLEGIATURA',
+          activa: true,
+          eliminadoEn: null
+        }
+      });
+      if (!tarifa) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay tarifa de COLEGIATURA activa para este nivel y ciclo.' });
+      }
+      const nuevaTarifa = Number(tarifa.monto);
+
+      // 3. Obtener adeudos PENDIENTE para el ciclo actual, concepto COLEGIATURA
+      const adeudos = await tx.calendarioPago.findMany({
+        where: {
+          alumnoId,
+          cicloId: inscripcion.cicloId,
+          concepto: 'COLEGIATURA',
+          estadoCobro: 'PENDIENTE',
+          eliminadoEn: null
+        },
+        orderBy: { fechaVencimiento: 'asc' },
+        include: {
+          aplicacionesPago: {
+            orderBy: { creadoEn: 'asc' }
+          }
+        }
+      });
+
+      interface AppPoolItem {
+        pagoId: number;
+        montoAplicado: number;
+        aplicadoA: string;
+      }
+      let appPool: AppPoolItem[] = [];
+
+      for (const adeudo of adeudos) {
+        for (const app of adeudo.aplicacionesPago) {
+          appPool.push({
+             pagoId: app.pagoId,
+             montoAplicado: Number(app.montoAplicado),
+             aplicadoA: app.aplicadoA
+          });
+        }
+
+        if (adeudo.aplicacionesPago.length > 0) {
+          await tx.aplicacionPago.deleteMany({
+            where: { calendarioPagoId: adeudo.calendarioPagoId }
+          });
+        }
+
+        let montoParaEsteAdeudo = 0;
+        let nuevasApps = [];
+        let nuevoPool: AppPoolItem[] = [];
+
+        for (const app of appPool) {
+          const faltaParaLlenar = nuevaTarifa - montoParaEsteAdeudo;
+          if (faltaParaLlenar > 0) {
+            if (app.montoAplicado <= faltaParaLlenar) {
+              nuevasApps.push({ ...app });
+              montoParaEsteAdeudo += app.montoAplicado;
+            } else {
+              nuevasApps.push({
+                pagoId: app.pagoId,
+                montoAplicado: faltaParaLlenar,
+                aplicadoA: app.aplicadoA
+              });
+              montoParaEsteAdeudo += faltaParaLlenar;
+              nuevoPool.push({
+                pagoId: app.pagoId,
+                montoAplicado: app.montoAplicado - faltaParaLlenar,
+                aplicadoA: app.aplicadoA
+              });
+            }
+          } else {
+            nuevoPool.push(app);
+          }
+        }
+
+        appPool = nuevoPool;
+
+        for (const nuevaApp of nuevasApps) {
+          await tx.aplicacionPago.create({
+            data: {
+              pagoId: nuevaApp.pagoId,
+              calendarioPagoId: adeudo.calendarioPagoId,
+              montoAplicado: nuevaApp.montoAplicado,
+              aplicadoA: nuevaApp.aplicadoA
+            }
+          });
+        }
+
+        const saldoPendiente = Math.round((nuevaTarifa - montoParaEsteAdeudo) * 100) / 100;
+        const estadoCobro = saldoPendiente <= 0 ? 'PAGADO' : 'PENDIENTE';
+        
+        await tx.calendarioPago.update({
+          where: { calendarioPagoId: adeudo.calendarioPagoId },
+          data: {
+            montoOriginal: nuevaTarifa,
+            montoPagado: montoParaEsteAdeudo,
+            saldoPendiente: saldoPendiente,
+            estadoCobro,
+            liquidadoAt: estadoCobro === 'PAGADO' ? new Date() : null,
+            actualizadoEn: new Date()
+          }
+        });
+      }
+
+      // Si sobra dinero al final, va al saldo a favor
+      if (appPool.length > 0) {
+        let saldoAFavorExtra = appPool.reduce((acc, curr) => acc + curr.montoAplicado, 0);
+        const alumno = await tx.alumno.findUnique({ 
+          where: { alumnoId }, 
+          include: { tutoresAlumnos: { where: { esPrincipal: true } } } 
+        });
+        const tutorId = alumno?.tutoresAlumnos?.[0]?.tutorId;
+        
+        if (tutorId) {
+          await tx.tutor.update({
+            where: { tutorId },
+            data: { saldoAFavor: { increment: saldoAFavorExtra } }
+          });
+          
+          for (const app of appPool) {
+             await tx.movimientoSaldo.create({
+               data: {
+                 tutorId,
+                 pagoId: app.pagoId,
+                 tipo: 'INGRESO',
+                 monto: app.montoAplicado,
+                 descripcion: 'Saldo a favor generado por recálculo de tarifas (reducción).',
+                 creadoPor: usuarioId
+               }
+             });
+          }
+        }
+      }
+
+      return { success: true, message: 'Calendario recalculado exitosamente' };
+    });
+  }
+
+
   static async createCargoExtraordinario(input: CreateCargoExtraordinarioInput) {
     return PagosRepository.createAdeudo({
       alumnoId: input.alumnoId,

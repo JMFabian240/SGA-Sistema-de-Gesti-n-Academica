@@ -59,6 +59,16 @@ export function ExpedienteAlumnoPage() {
     }
   });
 
+  const recalcularMutation = trpc.pagos.recalcularCalendario.useMutation({
+    onSuccess: () => {
+      toast.success('Calendario recalculado con éxito');
+      utils.alumnos.getById.invalidate(alumnoId);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al recalcular el calendario');
+    }
+  });
+
   const handleAdjuntar = (pagoId: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -336,9 +346,22 @@ export function ExpedienteAlumnoPage() {
       {/* Calendario de Pagos */}
       {(alumno.calendariosPagos && alumno.calendariosPagos.length > 0) && (
         <div className="mt-8">
-          <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-4 px-1">
-            <Calculator size={20} />
-            <h2>Calendario de Pagos</h2>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+              <Calculator size={20} />
+              <h2>Calendario de Pagos</h2>
+            </div>
+            <button
+              onClick={() => {
+                if (window.confirm('¿Estás seguro de recalcular el calendario? Se ajustarán los montos pendientes a la tarifa actual.')) {
+                  recalcularMutation.mutate({ alumnoId });
+                }
+              }}
+              disabled={recalcularMutation.isLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 font-medium rounded-lg hover:bg-indigo-100 transition-colors text-sm disabled:opacity-50"
+            >
+              <Calculator size={16} /> Actualizar Calendario
+            </button>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">

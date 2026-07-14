@@ -60,6 +60,15 @@ export const pagosRouter = router({
       return PagosService.registrarPago(input, registradorId);
     }),
 
+  recalcularCalendario: escritura
+    .input(z.object({ alumnoId: z.number().int().positive() }))
+    .mutation(({ input, ctx }) => {
+      const registradorId = (ctx as any).user?.usuarioId;
+      if (!registradorId) throw new Error("No user in context");
+      
+      return PagosService.recalcularCalendario(input.alumnoId, registradorId);
+    }),
+
   // --- Comprobantes Adjuntos ---
   adjuntarComprobante: escritura
     .input(adjuntarComprobanteSchema)

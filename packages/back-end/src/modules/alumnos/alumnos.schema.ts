@@ -24,6 +24,7 @@ export const createAlumnoSchema = z.object({
   observaciones: z.string().optional(),
   gradoId: z.number().int().positive().optional(),
   grupoId: z.number().int().positive().optional(),
+  planPagoId: z.number().int().positive().optional(),
 });
 
 export const updateAlumnoSchema = createAlumnoSchema.partial().extend({

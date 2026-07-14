@@ -73,8 +73,8 @@ describe('Inscripciones Router (Integration)', () => {
 
     expect(dbInscripcion).not.toBeNull();
     expect(dbInscripcion?.alumno.curp).toBe(alumno.curp);
-    expect(dbInscripcion?.planPago.meses).toBe(10);
-    expect(dbInscripcion?.planPago.montoMensual.toNumber()).toBe(2000);
+    expect(dbInscripcion?.planPago?.meses).toBe(10);
+    expect(dbInscripcion?.planPago?.montoMensual.toNumber()).toBe(2000);
     expect(dbInscripcion?.estadoEnCiclo).toBe('INSCRITO');
   });
 

@@ -41,7 +41,7 @@ export class AlumnosService {
       });
     }
 
-    const { fechaNacimiento, personasAutorizadas, gradoId, grupoId, ...rest } = input;
+    const { fechaNacimiento, personasAutorizadas, gradoId, grupoId, planPagoId, ...rest } = input;
 
     return prisma.$transaction(async (tx) => {
       // 1. Crear el alumno básico
@@ -67,18 +67,44 @@ export class AlumnosService {
         });
 
         if (cicloActivo) {
-          // Crear la inscripción académica sin plan de pagos financiero
-          await tx.inscripcionCiclo.create({
+          // Crear la inscripción académica
+          const inscripcion = await tx.inscripcionCiclo.create({
             data: {
               alumno: { connect: { alumnoId: alumno.alumnoId } },
               ciclo: { connect: { cicloId: cicloActivo.cicloId } },
               grupo: { connect: { grupoId: grupoId } },
               grado: { connect: { gradoId: gradoId } },
+              planPago: input.planPagoId ? { connect: { planPagoId: input.planPagoId } } : undefined,
               fechaIngreso: new Date(),
               estadoEnCiclo: 'INSCRITO',
-              estadoFinanciero: 'NO_APLICA',
+              estadoFinanciero: input.planPagoId ? 'AL_CORRIENTE' : 'NO_APLICA',
             } as any
           });
+
+          if (input.planPagoId) {
+            const planPago = await tx.planPago.findUnique({ where: { planPagoId: input.planPagoId } });
+            if (planPago && !planPago.eliminadoEn) {
+              const tarifa = await tx.tarifa.findFirst({
+                where: {
+                  cicloId: cicloActivo.cicloId,
+                  nivelId: input.nivelId,
+                  concepto: 'COLEGIATURA',
+                  activa: true,
+                  eliminadoEn: null
+                }
+              });
+              const tarifaMensualBase = tarifa ? Number(tarifa.monto) : 0;
+              const { CalculadoraPagos } = require('../inscripciones/inscripciones.utils');
+              const planBase = { meses: planPago.meses };
+              const adeudosCalculados = CalculadoraPagos.generarCalendario(planBase, tarifaMensualBase, new Date(inscripcion.fechaIngreso));
+              const adeudosParaInsertar = adeudosCalculados.map((a: any) => ({
+                alumnoId: alumno.alumnoId,
+                cicloId: cicloActivo.cicloId,
+                ...a
+              }));
+              await tx.calendarioPago.createMany({ data: adeudosParaInsertar as any });
+            }
+          }
         }
       }
 
@@ -111,7 +137,63 @@ export class AlumnosService {
       updateData.grado = { connect: { gradoId } };
     }
 
-    return AlumnosRepository.updateAlumno(alumnoId, updateData);
+    return prisma.$transaction(async (tx) => {
+      // 1. Actualizar el alumno
+      const alumno = await tx.alumno.update({
+        where: { alumnoId },
+        data: updateData
+      });
+
+      // 2. Determinar si hay un ciclo activo para el nivel y actualizar/crear inscripción
+      const finalNivelId = nivelId !== undefined ? nivelId : existing.nivelId;
+      if (!finalNivelId) return alumno;
+
+      const nivel = await tx.nivelEducativo.findUnique({
+        where: { nivelId: finalNivelId }
+      });
+      const periodicidad = nivel?.codigo === 'BAC' ? 'SEMESTRAL' : 'ANUAL';
+
+      const cicloActivo = await tx.cicloEscolar.findFirst({
+        where: { activo: true, eliminadoEn: null, periodicidad },
+        orderBy: { fechaInicio: 'desc' }
+      });
+
+      if (cicloActivo && (gradoId !== undefined || grupoId !== undefined || nivelId !== undefined)) {
+        const inscripcionActiva = await tx.inscripcionCiclo.findFirst({
+          where: { alumnoId, cicloId: cicloActivo.cicloId, eliminadoEn: null }
+        });
+
+        const finalGradoId = gradoId !== undefined ? gradoId : existing.gradoId;
+        const finalGrupoId = grupoId !== undefined ? grupoId : inscripcionActiva?.grupoId;
+
+        if (finalGradoId && finalGrupoId) {
+          if (inscripcionActiva) {
+            await tx.inscripcionCiclo.update({
+              where: { inscripcionId: inscripcionActiva.inscripcionId },
+              data: {
+                gradoId: finalGradoId,
+                grupoId: finalGrupoId,
+                actualizadoEn: new Date()
+              }
+            });
+          } else {
+            await tx.inscripcionCiclo.create({
+              data: {
+                alumnoId,
+                cicloId: cicloActivo.cicloId,
+                gradoId: finalGradoId,
+                grupoId: finalGrupoId,
+                fechaIngreso: new Date(),
+                estadoEnCiclo: 'INSCRITO',
+                estadoFinanciero: 'NO_APLICA'
+              } as any
+            });
+          }
+        }
+      }
+
+      return alumno;
+    });
   }
 
   /**

@@ -12,9 +12,9 @@ const nuevoAlumnoSchema = z.object({
   matricula: z.string().min(1, 'Obligatorio'),
   curp: z.string().length(18, 'Debe ser de 18 caracteres').optional().or(z.literal('')),
   nivelId: z.string().min(1, 'Obligatorio'),
-  // Campos extraídos del diseño pero que se ignorarán al enviar si el back no los requiere
-  gradoId: z.string().optional(),
-  seccionId: z.string().optional()
+  gradoId: z.string().min(1, 'Obligatorio'),
+  seccionId: z.string().min(1, 'Obligatorio'),
+  planPagoId: z.string().optional()
 });
 
 type NuevoAlumnoForm = z.infer<typeof nuevoAlumnoSchema>;
@@ -39,13 +39,15 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
       curp: '',
       nivelId: '',
       gradoId: '',
-      seccionId: ''
+      seccionId: '',
+      planPagoId: ''
     }
   });
 
   const { data: niveles } = trpc.grupos.getNiveles.useQuery(undefined, { enabled: isOpen });
   const { data: grados } = trpc.grupos.getGrados.useQuery(undefined, { enabled: isOpen });
   const { data: grupos } = trpc.grupos.getGrupos.useQuery(undefined, { enabled: isOpen });
+  const { data: planesPago } = trpc.inscripciones.getPlanesPago.useQuery(undefined, { enabled: isOpen });
   const createAlumnoMutation = trpc.alumnos.create.useMutation();
 
   const watchNivelId = watch('nivelId');
@@ -76,6 +78,7 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
         nivelId: parseInt(data.nivelId, 10),
         gradoId: data.gradoId ? parseInt(data.gradoId, 10) : undefined,
         grupoId: data.seccionId ? parseInt(data.seccionId, 10) : undefined,
+        planPagoId: data.planPagoId ? parseInt(data.planPagoId, 10) : undefined,
         estado: 'ACTIVO'
       });
 
@@ -194,31 +197,49 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
                 {errors.nivelId && <span className="text-xs text-red-500 mt-1">{errors.nivelId.message}</span>}
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Grado</label>
+                <label className="block text-sm text-gray-600 mb-1">Grado <span className="text-red-500">*</span></label>
                 <select
                   {...register('gradoId')}
                   disabled={!watchNivelId}
-
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50"
+                  className={`w-full px-3 py-2 rounded-xl border ${errors.gradoId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
                 >
                   <option value="">Selecciona Gra...</option>
                   {gradosFiltrados?.map(g => (
                     <option key={g.gradoId} value={g.gradoId.toString()}>{g.nombre}</option>
                   ))}
                 </select>
+                {errors.gradoId && <span className="text-xs text-red-500 mt-1">{errors.gradoId.message}</span>}
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Grupo</label>
+                <label className="block text-sm text-gray-600 mb-1">Grupo <span className="text-red-500">*</span></label>
                 <select
                   {...register('seccionId')}
                   disabled={!watchGradoId}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50"
+                  className={`w-full px-3 py-2 rounded-xl border ${errors.seccionId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
                 >
                   <option value="">Selecciona Sec...</option>
                   {gruposFiltrados?.map(g => (
                     <option key={g.grupoId} value={g.grupoId.toString()}>{g.nombre}</option>
                   ))}
                 </select>
+                {errors.seccionId && <span className="text-xs text-red-500 mt-1">{errors.seccionId.message}</span>}
+              </div>
+            </div>
+
+            {/* Plan de Pago (Opcional) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Plan de Pagos (Opcional)</label>
+                <select
+                  {...register('planPagoId')}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white"
+                >
+                  <option value="">Selecciona un plan (opcional)</option>
+                  {planesPago?.map(p => (
+                    <option key={p.planPagoId} value={p.planPagoId.toString()}>{p.nombre} ({p.meses} meses)</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Se generará la deuda automáticamente si lo seleccionas.</p>
               </div>
             </div>
 

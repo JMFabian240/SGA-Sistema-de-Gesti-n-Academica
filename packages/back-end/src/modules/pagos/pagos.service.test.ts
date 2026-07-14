@@ -86,7 +86,7 @@ describe('PagosService (Unit)', () => {
   describe('Registro de Pagos', () => {
     it('debería rechazar si montoTotal es menor a las aplicaciones', async () => {
       await expect(PagosService.registrarPago({
-        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 500, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
+        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 500, metodoPago: 'TRANSFERENCIA', requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 1000, aplicadoA: 'CAPITAL' }]
       }, 1)).rejects.toThrowError(new TRPCError({ code: 'BAD_REQUEST', message: 'El monto total del pago es menor que la suma de las aplicaciones indicadas.' }));
     });
@@ -100,7 +100,7 @@ describe('PagosService (Unit)', () => {
       prismaMock.calendarioPago.update.mockResolvedValue({} as any);
 
       const result = await PagosService.registrarPago({
-        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
+        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'TRANSFERENCIA', requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 1000, aplicadoA: 'CAPITAL' }]
       }, 2);
 
@@ -129,7 +129,7 @@ describe('PagosService (Unit)', () => {
       prismaMock.calendarioPago.findMany.mockResolvedValue([]); // Sin adeudos extras para absorber excedente
 
       await expect(PagosService.registrarPago({
-        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
+        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'TRANSFERENCIA', requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 600, aplicadoA: 'CAPITAL' }]
       }, 2)).rejects.toThrowError(new TRPCError({ code: 'BAD_REQUEST', message: 'El pago excede el total de todas las deudas pendientes del alumno.' }));
     });
@@ -150,7 +150,7 @@ describe('PagosService (Unit)', () => {
       }) as any);
 
       await PagosService.registrarPago({
-        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'EFECTIVO' as MetodoPago, requiereFactura: false, aplicadoASaldo: false,
+        alumnoId: 1, tutorId: 1, fechaPago: '2023-01-01', montoTotal: 1000, metodoPago: 'TRANSFERENCIA', requiereFactura: false, aplicadoASaldo: false,
         aplicaciones: [{ calendarioPagoId: 1, montoAplicado: 500, aplicadoA: 'CAPITAL' }] // Sobran 500
       }, 2);
 

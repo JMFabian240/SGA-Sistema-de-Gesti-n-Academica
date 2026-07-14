@@ -29,7 +29,7 @@ export function AlumnosPage() {
 
   // Filters state
   const [searchTerm, setSearchTerm] = useState('');
-  const [estadoFilter, setEstadoFilter] = useState('Activos');
+  const [estadoFilter, setEstadoFilter] = useState('ACTIVO');
   const [nivelFilter, setNivelFilter] = useState('Todos los niveles');
   const [gradoFilter, setGradoFilter] = useState('Todos los grados');
   const [grupoFilter, setGrupoFilter] = useState('Todos los grupos');
@@ -50,8 +50,7 @@ export function AlumnosPage() {
       const matchesSearch = fullName.includes(term) || matricula.includes(term);
 
       // Estado
-      const isActive = a.estado === 'ACTIVO';
-      const matchesEstado = estadoFilter === 'Activos' ? isActive : (estadoFilter === 'Inactivos' ? !isActive : true);
+      const matchesEstado = estadoFilter === 'Todos' ? true : a.estado === estadoFilter;
 
       // Nivel, Grado, Grupo
       const inscripcionActual = a.inscripciones?.[0];
@@ -152,8 +151,10 @@ export function AlumnosPage() {
               className="text-sm px-4 py-2 border border-gray-200 rounded-full outline-none bg-white hover:bg-gray-50 transition-colors"
             >
               <option value="Todos">Todos los estados</option>
-              <option value="Activos">Activos</option>
-              <option value="Inactivos">Inactivos</option>
+              <option value="ACTIVO">Activo</option>
+              <option value="BAJA_TEMPORAL">Baja Temporal</option>
+              <option value="BAJA_DEFINITIVA">Baja Definitiva</option>
+              <option value="TRANSICION_PENDIENTE">Transición Pendiente</option>
             </select>
 
             <select
