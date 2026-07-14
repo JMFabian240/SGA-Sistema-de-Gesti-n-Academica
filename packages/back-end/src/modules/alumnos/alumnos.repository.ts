@@ -76,12 +76,21 @@ export class AlumnosRepository {
   }
 
   static async findAlumnoByCurpOrMatricula(curp: string, matricula?: string | null) {
+    const orConditions: any[] = [];
+    if (curp && curp.trim() !== '') {
+      orConditions.push({ curp });
+    }
+    if (matricula && matricula.trim() !== '') {
+      orConditions.push({ matricula });
+    }
+
+    if (orConditions.length === 0) {
+      return null;
+    }
+
     return prisma.alumno.findFirst({
       where: {
-        OR: [
-          { curp },
-          ...(matricula ? [{ matricula }] : [])
-        ]
+        OR: orConditions
       }
     });
   }
@@ -115,6 +124,12 @@ export class AlumnosRepository {
       where: { alumnoId, esPrincipal: true }
     });
     return !!tutor;
+  }
+
+  static async getTutorCount(alumnoId: number) {
+    return prisma.tutorAlumno.count({
+      where: { alumnoId }
+    });
   }
 
   static async updateTutorAlumnoRelation(tutorAlumnoId: number, esPrincipal: boolean, parentesco: string) {

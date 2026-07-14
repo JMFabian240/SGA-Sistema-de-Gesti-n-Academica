@@ -27,27 +27,31 @@ export class AlumnosService {
     return alumno;
   }
 
-  /**
-   * Registra a un nuevo alumno
-   */
   static async createAlumno(input: CreateAlumnoInput) {
     // Verificar si el CURP o la matrícula ya están en uso
-    const existing = await AlumnosRepository.findAlumnoByCurpOrMatricula(input.curp || '', input.matricula);
+    const curpStr = input.curp?.trim() || null;
+    const matriculaStr = input.matricula?.trim() || null;
 
-    if (existing) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Ya existe un alumno con ese CURP o Matrícula'
-      });
+    if (curpStr || matriculaStr) {
+      const existing = await AlumnosRepository.findAlumnoByCurpOrMatricula(curpStr || '', matriculaStr);
+
+      if (existing) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Ya existe un alumno con ese CURP o Matrícula'
+        });
+      }
     }
 
-    const { fechaNacimiento, personasAutorizadas, gradoId, grupoId, planPagoId, ...rest } = input;
+    const { fechaNacimiento, personasAutorizadas, gradoId, grupoId, planPagoId, curp, matricula, ...rest } = input;
 
     return prisma.$transaction(async (tx) => {
       // 1. Crear el alumno básico
       const alumno = await tx.alumno.create({
         data: {
           ...rest,
+          curp: curpStr,
+          matricula: matriculaStr,
           fechaNacimiento: new Date(fechaNacimiento),
           personasAutorizadas: personasAutorizadas ?? null,
           gradoId: gradoId || null
@@ -67,6 +71,25 @@ export class AlumnosService {
         });
 
         if (cicloActivo) {
+          // Validar capacidad del grupo
+          const grupoTarget = await tx.grupo.findUnique({
+            where: { grupoId },
+            include: {
+              _count: {
+                select: { inscripciones: { where: { estadoEnCiclo: 'INSCRITO', eliminadoEn: null } } }
+              }
+            }
+          });
+
+          if (grupoTarget && grupoTarget.cupoMaximo) {
+            if (grupoTarget._count.inscripciones >= grupoTarget.cupoMaximo) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'El grupo seleccionado ah alcansado el limite de su capacidad maxima. Seleccione o cree otro grupo'
+              });
+            }
+          }
+
           // Crear la inscripción académica
           const inscripcion = await tx.inscripcionCiclo.create({
             data: {
@@ -125,6 +148,8 @@ export class AlumnosService {
 
     const updateData: any = {
       ...data,
+      ...(data.curp !== undefined && { curp: data.curp?.trim() || null }),
+      ...(data.matricula !== undefined && { matricula: data.matricula?.trim() || null }),
       ...(fechaNacimiento && { fechaNacimiento: new Date(fechaNacimiento) }),
       ...(fechaBaja && { fechaBaja: new Date(fechaBaja) }),
       actualizadoEn: new Date()
@@ -167,6 +192,27 @@ export class AlumnosService {
         const finalGrupoId = grupoId !== undefined ? grupoId : inscripcionActiva?.grupoId;
 
         if (finalGradoId && finalGrupoId) {
+          // Validar capacidad del grupo si el alumno está entrando a un nuevo grupo
+          if (grupoId !== undefined && (!inscripcionActiva || inscripcionActiva.grupoId !== finalGrupoId)) {
+            const grupoTarget = await tx.grupo.findUnique({
+              where: { grupoId: finalGrupoId },
+              include: {
+                _count: {
+                  select: { inscripciones: { where: { estadoEnCiclo: 'INSCRITO', eliminadoEn: null } } }
+                }
+              }
+            });
+
+            if (grupoTarget && grupoTarget.cupoMaximo) {
+              if (grupoTarget._count.inscripciones >= grupoTarget.cupoMaximo) {
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'El grupos seleccionado ah alcansado el limite de su capacidad maxima. Seleccione o cree otro grupo'
+                });
+              }
+            }
+          }
+
           if (inscripcionActiva) {
             await tx.inscripcionCiclo.update({
               where: { inscripcionId: inscripcionActiva.inscripcionId },
@@ -266,6 +312,15 @@ export class AlumnosService {
         Boolean(finalEsPrincipal),
         input.parentesco
       );
+    }
+
+    // Regla de negocio: Un alumno solo puede tener un tutor vinculado
+    const tutorCount = await AlumnosRepository.getTutorCount(input.alumnoId);
+    if (tutorCount >= 1) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'El alumno ya tiene un tutor vinculado. Solo se permite un tutor por alumno.'
+      });
     }
 
     return AlumnosRepository.createTutorAlumnoRelation({

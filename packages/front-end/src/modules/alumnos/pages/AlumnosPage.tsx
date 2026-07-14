@@ -19,7 +19,7 @@ export function AlumnosPage() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
   const { data: alumnos, isLoading, refetch } = trpc.alumnos.getAll.useQuery();
-  const deleteAlumnoMutation = trpc.alumnos.delete.useMutation();
+  const updateAlumnoMutation = trpc.alumnos.update.useMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alumnoParaTutor, setAlumnoParaTutor] = useState<number | null>(null);
@@ -261,17 +261,17 @@ export function AlumnosPage() {
                           </button>
                           <button
                             onClick={async () => {
-                              if (window.confirm('¿Estás seguro de que deseas eliminar este alumno? Esta acción no se puede deshacer.')) {
+                              if (window.confirm('¿Estás seguro de que deseas dar de baja temporal a este alumno?')) {
                                 try {
-                                  await deleteAlumnoMutation.mutateAsync(a.alumnoId);
+                                  await updateAlumnoMutation.mutateAsync({ alumnoId: a.alumnoId, estado: 'BAJA_TEMPORAL' } as any);
                                   utils.alumnos.getAll.invalidate();
                                 } catch (error: any) {
-                                  alert(error.message || 'Error al eliminar alumno');
+                                  alert(error.message || 'Error al actualizar alumno');
                                 }
                               }
                             }}
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                            title="Eliminar alumno"
+                            title="Dar de baja temporal"
                           >
                             <Trash2 size={16} />
                           </button>

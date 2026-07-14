@@ -13,7 +13,7 @@ const nuevoAlumnoSchema = z.object({
   curp: z.string().length(18, 'Debe ser de 18 caracteres').optional().or(z.literal('')),
   nivelId: z.string().min(1, 'Obligatorio'),
   gradoId: z.string().min(1, 'Obligatorio'),
-  seccionId: z.string().min(1, 'Obligatorio'),
+  seccionId: z.string().optional(),
   planPagoId: z.string().optional()
 });
 
@@ -211,7 +211,7 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
                 {errors.gradoId && <span className="text-xs text-red-500 mt-1">{errors.gradoId.message}</span>}
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Grupo <span className="text-red-500">*</span></label>
+                <label className="block text-sm text-gray-600 mb-1">Grupo</label>
                 <select
                   {...register('seccionId')}
                   disabled={!watchGradoId}

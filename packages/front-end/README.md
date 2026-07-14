@@ -1,6 +1,6 @@
-# SGA - Frontend V2 (Sistema de Gestión Académica)
+# SGA - Front-end (Sistema de Gestión Académica)
 
-Este paquete contiene la nueva versión del frontend para el Sistema de Gestión Académica (SGA) del Colegio San Diego, reescrito desde cero utilizando una arquitectura moderna, escalable y con un enfoque modular.
+Este paquete contiene la nueva versión del front-end para el Sistema de Gestión Académica (SGA) del Colegio San Diego, reescrito desde cero utilizando una arquitectura moderna, escalable y con un enfoque modular.
 
 ## 🛠️ Tecnologías Principales (Tech Stack)
 
@@ -84,4 +84,4 @@ Al ser parte del entorno general del sistema SGA, el frontend requiere estar con
 *   **Error: "A React Element from an older version of React was rendered..."**
     Si esto ocurre, se debe a múltiples copias de la dependencia `react` colisionando entre el backend/monorepo y el frontend. Está solucionado forzando un `dedupe: ['react', 'react-dom']` en la resolución interna de `vite.config.ts`.
 *   **Conexión fallida al Backend (Failed to Fetch):**
-    El cliente `trpc` (`src/lib/trpc.ts` y `src/App.tsx`) asume que el backend está corriendo en `http://localhost:3001/trpc`. Puedes sobrescribir esta ruta creando un archivo `.env` en la raíz de `frontend-v2` e insertando: `VITE_API_URL=http://tu-url:puerto/trpc`.
+    El cliente `trpc` (`src/lib/trpc.ts` y `src/App.tsx`) asume que el backend está corriendo en `http://localhost:3001/trpc`. Puedes sobrescribir esta ruta creando un archivo `.env` en la raíz de `front-end` e insertando: `VITE_API_URL=http://tu-url:puerto/trpc`.

@@ -1,8 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { trpc } from '../../../lib/trpc';
 import { ChevronLeft, User, Crown, Mail, Phone, BookOpen, Users, Link2Off, Plus, Calculator, Trash2, UploadCloud, Eye } from 'lucide-react';
-import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { VincularTutorModal } from '../components/VincularTutorModal';
 import { InscribirAlumnoModal } from '../components/InscribirAlumnoModal';
@@ -12,6 +11,8 @@ export function ExpedienteAlumnoPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const utils = trpc.useUtils();
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editData, setEditData] = useState<any>({});
   const [isVincularModalOpen, setIsVincularModalOpen] = useState(false);
   const [isInscribirModalOpen, setIsInscribirModalOpen] = useState(false);
   const [isAsignarPlanModalOpen, setIsAsignarPlanModalOpen] = useState(false);
@@ -20,6 +21,17 @@ export function ExpedienteAlumnoPage() {
 
   const { data: alumno, isLoading, error } = trpc.alumnos.getById.useQuery(alumnoId, {
     enabled: !!alumnoId,
+  });
+
+  const updateAlumnoMutation = trpc.alumnos.update.useMutation({
+    onSuccess: () => {
+      setIsEditingInfo(false);
+      utils.alumnos.getById.invalidate(alumnoId);
+      toast.success('Estado/Información actualizada');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al actualizar');
+    }
   });
 
   const unlinkTutorMutation = trpc.alumnos.unlinkTutor.useMutation({
@@ -121,6 +133,32 @@ export function ExpedienteAlumnoPage() {
     }
   };
 
+  const handleToggleEstado = () => {
+    if (!alumno) return;
+    let nextEstado = 'BAJA_TEMPORAL';
+    if (alumno.estado === 'BAJA_TEMPORAL') nextEstado = 'BAJA_DEFINITIVA';
+    else if (alumno.estado === 'BAJA_DEFINITIVA') nextEstado = 'ACTIVO';
+
+    if (window.confirm(`¿Estás seguro de cambiar el estatus a ${nextEstado.replace('_', ' ')}?`)) {
+      updateAlumnoMutation.mutate({
+        alumnoId,
+        estado: nextEstado
+      } as any);
+    }
+  };
+
+  const getEstadoButtonConfig = () => {
+    if (!alumno) return null;
+    switch (alumno.estado) {
+      case 'ACTIVO': return { label: 'Dar de baja temporal', color: 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200' };
+      case 'BAJA_TEMPORAL': return { label: 'Dar de baja definitiva', color: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300' };
+      case 'BAJA_DEFINITIVA': return { label: 'Reactivar alumno', color: 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200' };
+      default: return null;
+    }
+  };
+
+  const btnConfig = getEstadoButtonConfig();
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full min-h-[400px]">
@@ -151,6 +189,29 @@ export function ExpedienteAlumnoPage() {
     });
   };
 
+  const handleEditInfo = () => {
+    if (isEditingInfo) {
+      updateAlumnoMutation.mutate({
+        alumnoId,
+        nombreCompleto: editData.nombreCompleto,
+        fechaNacimiento: new Date(editData.fechaNacimiento).toISOString(),
+        sexo: editData.sexo,
+        matricula: editData.matricula,
+        curp: editData.curp
+      } as any);
+    } else {
+      setEditData({
+        nombreCompleto: alumno.nombreCompleto,
+        fechaNacimiento: new Date(alumno.fechaNacimiento).toISOString().split('T')[0],
+        sexo: alumno.sexo,
+        matricula: alumno.matricula || '',
+        curp: alumno.curp || '',
+        estado: alumno.estado
+      });
+      setIsEditingInfo(true);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto pb-12">
       {/* Header */}
@@ -161,9 +222,20 @@ export function ExpedienteAlumnoPage() {
         >
           <ChevronLeft size={20} />
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-800">{alumno.nombreCompleto}</h1>
-          <p className="text-gray-500">Matrícula: {alumno.matricula || 'Sin matrícula'}</p>
+        <div className="flex-1 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">{alumno.nombreCompleto}</h1>
+            <p className="text-gray-500">Matrícula: {alumno.matricula || 'Sin matrícula'}</p>
+          </div>
+          {btnConfig && (
+            <button
+              onClick={handleToggleEstado}
+              disabled={updateAlumnoMutation.isLoading}
+              className={`px-3 py-1.5 rounded-lg border font-medium text-sm transition-colors ${btnConfig.color} disabled:opacity-50 mt-1`}
+            >
+              {btnConfig.label}
+            </button>
+          )}
         </div>
       </div>
 
@@ -173,32 +245,80 @@ export function ExpedienteAlumnoPage() {
           <User size={20} />
           <h2>Información Personal</h2>
         </div>
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-12">
             <div>
               <p className="text-sm text-gray-500 mb-1">Nombre Completo</p>
-              <p className="font-medium text-gray-900">{alumno.nombreCompleto}</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.nombreCompleto} onChange={e => setEditData({ ...editData, nombreCompleto: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.nombreCompleto}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Fecha de Nacimiento</p>
-              <p className="font-medium text-gray-900">{formatFecha(alumno.fechaNacimiento)}</p>
+              {isEditingInfo ? (
+                <input type="date" value={editData.fechaNacimiento} onChange={e => setEditData({ ...editData, fechaNacimiento: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{formatFecha(alumno.fechaNacimiento)}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Matrícula</p>
-              <p className="font-medium text-gray-900">{alumno.matricula || '-'}</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.matricula} onChange={e => setEditData({ ...editData, matricula: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.matricula || '-'}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Sexo</p>
-              <p className="font-medium text-gray-900">{alumno.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+              {isEditingInfo ? (
+                <select value={editData.sexo} onChange={e => setEditData({ ...editData, sexo: e.target.value })} className="w-full px-2 py-1 border rounded">
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                </select>
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">CURP</p>
-              <p className="font-medium text-gray-900">{alumno.curp || '-'}</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.curp} onChange={e => setEditData({ ...editData, curp: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.curp || '-'}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Nivel Educativo</p>
               <p className="font-medium text-gray-900">{alumno.nivel?.nombre || '-'}</p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Grado</p>
+              <p className="font-medium text-gray-900">{inscripcionActual?.grupo?.grado?.nombre || alumno.grado?.nombre || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Grupo</p>
+              <p className="font-medium text-gray-900">{inscripcionActual?.grupo?.nombre || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Estatus</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.estado} disabled className="w-full px-2 py-1 border rounded bg-gray-100 text-gray-500 cursor-not-allowed" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.estado}</p>
+              )}
+            </div>
+          </div>
+          <div className="absolute bottom-4 right-6">
+            <button
+              onClick={handleEditInfo}
+              disabled={updateAlumnoMutation.isLoading}
+              className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+            >
+              {isEditingInfo ? 'Guardar Información' : 'Modificar Información'}
+            </button>
           </div>
         </div>
       </div>
@@ -210,14 +330,18 @@ export function ExpedienteAlumnoPage() {
             <Users size={20} />
             <h2>Responsables</h2>
           </div>
-          <button
-            onClick={() => setIsVincularModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 font-medium rounded-lg hover:bg-emerald-100 transition-colors text-sm"
-          >
-            <Plus size={16} /> Vincular tutor
-          </button>
         </div>
         <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
+          {(!alumno.tutoresAlumnos || alumno.tutoresAlumnos.length === 0) && (
+            <div className="flex justify-end items-center w-full min-h-[48px]">
+              <button
+                onClick={() => setIsVincularModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 font-medium rounded-lg hover:bg-emerald-100 transition-colors text-sm"
+              >
+                <Plus size={16} /> Vincular tutor
+              </button>
+            </div>
+          )}
           {alumno.tutoresAlumnos && alumno.tutoresAlumnos.length > 0 ? (
             alumno.tutoresAlumnos.map((relacion: any) => (
               <div key={relacion.tutorAlumnoId} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50/50">
@@ -271,7 +395,7 @@ export function ExpedienteAlumnoPage() {
         <div className="flex items-center justify-between mb-4 px-1">
           <div className="flex items-center gap-2 text-emerald-700 font-semibold">
             <BookOpen size={20} />
-            <h2>Inscripciones a Comisiones <span className="text-gray-400 font-normal text-sm ml-1">({alumno.inscripciones?.length || 0})</span></h2>
+            <h2>Inscripciones a Comisiones</h2>
           </div>
           {!inscripcionActual && (
             <button
@@ -417,8 +541,8 @@ export function ExpedienteAlumnoPage() {
                       </td>
                       <td className="px-6 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${pago.estadoCobro === 'PAGADO' ? 'bg-green-100 text-green-700' :
-                            pago.estadoCobro === 'VENCIDO' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
+                          pago.estadoCobro === 'VENCIDO' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
                           }`}>
                           {pago.estadoCobro}
                         </span>
@@ -431,6 +555,17 @@ export function ExpedienteAlumnoPage() {
           </div>
         </div>
       )}
+
+      {/* Estado de Cuenta */}
+      <div className="mt-8 mb-8">
+        <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-4 px-1">
+          <Calculator size={20} />
+          <h2>Estado de Cuenta</h2>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <p className="text-gray-500 text-sm text-center">El historial detallado de movimientos (cargos, abonos, pagos parciales) se implementará aquí próximamente, mostrando el saldo real histórico del alumno independiente de su proyección del calendario.</p>
+        </div>
+      </div>
 
       {isVincularModalOpen && (
         <VincularTutorModal
