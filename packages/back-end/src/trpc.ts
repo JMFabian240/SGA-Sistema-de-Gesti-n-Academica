@@ -122,6 +122,16 @@ export const hasModulePermission = (modulo: string, requireWrite: boolean = fals
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'No autenticado' });
   }
 
+  // Los administradores tienen acceso total a todos los módulos
+  const userRoles = await ctx.prisma.usuarioRol.findMany({
+    where: { usuarioId: user.usuarioId, activo: true, eliminadoEn: null },
+    include: { rol: true }
+  });
+  const isAdmin = userRoles.some(ur => ur.rol.codigo === 'ADMIN');
+  if (isAdmin) {
+    return next({ ctx });
+  }
+
   const permisoModulo = await ctx.prisma.usuarioPermisoModulo.findUnique({
     where: {
       usuarioId_modulo: {
