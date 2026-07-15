@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar } from 'lucide-react';
+import { X, Calendar, AlertTriangle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -46,8 +46,9 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
 
   const { data: niveles } = trpc.grupos.getNiveles.useQuery(undefined, { enabled: isOpen });
   const { data: grados } = trpc.grupos.getGrados.useQuery(undefined, { enabled: isOpen });
-  const { data: grupos } = trpc.grupos.getGrupos.useQuery(undefined, { enabled: isOpen });
-  const { data: planesPago } = trpc.inscripciones.getPlanesPago.useQuery(undefined, { enabled: isOpen });
+  const { data: grupos, isLoading: loadingGrupos } = trpc.grupos.getGrupos.useQuery(undefined, { enabled: isOpen });
+  const { data: planesPago, isLoading: loadingPlanes } = trpc.inscripciones.getPlanesPago.useQuery(undefined, { enabled: isOpen });
+  const { data: ciclos, isLoading: loadingCiclos } = trpc.grupos.getCiclos.useQuery(undefined, { enabled: isOpen });
   const createAlumnoMutation = trpc.alumnos.create.useMutation();
 
   const watchNivelId = watch('nivelId');
@@ -63,6 +64,12 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
   }, [isOpen, reset]);
 
   if (!isOpen) return null;
+
+  const isLoadingData = loadingGrupos || loadingPlanes || loadingCiclos;
+  const hayCicloActivo = ciclos ? ciclos.some((c: any) => c.activo) : false;
+  const hayPlanesPago = planesPago ? planesPago.length > 0 : false;
+  const hayGrupos = grupos ? grupos.length > 0 : false;
+  const canRegister = hayCicloActivo && hayPlanesPago && hayGrupos;
 
   const onSubmit = async (data: NuevoAlumnoForm) => {
     try {
@@ -107,11 +114,52 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
 
         {/* Form Body */}
         <div className="p-6 overflow-y-auto">
-          {submitError && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100">
-              {submitError}
+          {isLoadingData ? (
+            <div className="py-12 text-center text-gray-500 font-medium">
+              Verificando requisitos del sistema...
             </div>
-          )}
+          ) : !canRegister ? (
+            <div className="py-8 space-y-6 text-center">
+              <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-4">
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">Prerrequisitos Incompletos</h3>
+              <p className="text-gray-500 text-sm max-w-md mx-auto">
+                Para poder registrar alumnos e inscribirlos correctamente, primero debes asegurarte de que el sistema cuenta con las siguientes configuraciones obligatorias:
+              </p>
+              
+              <div className="text-left bg-gray-50 p-4 rounded-xl max-w-md mx-auto space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${hayCicloActivo ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className={`text-sm font-medium ${hayCicloActivo ? 'text-gray-700' : 'text-red-600'}`}>
+                    Ciclo Escolar Activo
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${hayPlanesPago ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className={`text-sm font-medium ${hayPlanesPago ? 'text-gray-700' : 'text-red-600'}`}>
+                    Planes de Pago Creados
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${hayGrupos ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className={`text-sm font-medium ${hayGrupos ? 'text-gray-700' : 'text-red-600'}`}>
+                    Grupos Académicos Creados
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400">
+                Ve a las secciones de <strong>Ajustes Generales</strong> y <strong>Grupos</strong> para configurar estos elementos.
+              </p>
+            </div>
+          ) : (
+            <>
+              {submitError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100">
+                  {submitError}
+                </div>
+              )}
 
           <form id="alumno-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
@@ -244,6 +292,8 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
             </div>
 
           </form>
+            </>
+          )}
         </div>
 
         {/* Footer */}
@@ -253,16 +303,18 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-100 transition-colors text-sm cursor-pointer"
           >
-            Cancelar
+            {canRegister ? 'Cancelar' : 'Entendido'}
           </button>
-          <button
-            type="submit"
-            form="alumno-form"
-            disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-[#001c40] text-white font-medium hover:bg-[#00132b] transition-colors text-sm shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer"
-          >
-            {isSubmitting ? 'Guardando...' : 'Guardar Alumno'}
-          </button>
+          {canRegister && !isLoadingData && (
+            <button
+              type="submit"
+              form="alumno-form"
+              disabled={isSubmitting}
+              className="px-5 py-2.5 rounded-xl bg-[#001c40] text-white font-medium hover:bg-[#00132b] transition-colors text-sm shadow-sm disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+            >
+              {isSubmitting ? 'Guardando...' : 'Guardar Alumno'}
+            </button>
+          )}
         </div>
 
       </div>

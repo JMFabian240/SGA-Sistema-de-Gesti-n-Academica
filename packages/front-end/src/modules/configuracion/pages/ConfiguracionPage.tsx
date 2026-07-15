@@ -9,8 +9,9 @@ import { Modal } from '../../../components/ui/Modal';
 import { Input } from '../../../components/ui/Input';
 import { CicloFormModal } from '../components/CicloFormModal';
 import { ImportacionDatosPanel } from '../components/ImportacionDatosPanel';
+import { PlanesPagoPanel } from '../components/PlanesPagoPanel';
 
-type TabType = 'ciclos' | 'tarifas' | 'cierre' | 'importacion';
+type TabType = 'ciclos' | 'tarifas' | 'planespago' | 'cierre' | 'importacion';
 
 export function ConfiguracionPage() {
   const [activeTab, setActiveTab] = useState<TabType>('ciclos');
@@ -317,6 +318,16 @@ export function ConfiguracionPage() {
           Finanzas y Tarifas
         </button>
         <button
+          onClick={() => setActiveTab('planespago')}
+          className={`px-6 py-3 font-semibold text-sm transition-all border-b-2 cursor-pointer ${
+            activeTab === 'planespago'
+              ? 'border-red-600 text-red-600'
+              : 'border-transparent text-gray-500 hover:text-navy-800'
+          }`}
+        >
+          Planes de Pago
+        </button>
+        <button
           onClick={() => setActiveTab('cierre')}
           className={`px-6 py-3 font-semibold text-sm transition-all border-b-2 cursor-pointer ${
             activeTab === 'cierre'
@@ -446,6 +457,10 @@ export function ConfiguracionPage() {
               } : undefined}
             />
           </div>
+        )}
+
+        {activeTab === 'planespago' && (
+          <PlanesPagoPanel />
         )}
 
         {activeTab === 'tarifas' && (
