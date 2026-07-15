@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { trpc } from '../../../lib/trpc';
+import { trpc } from '../../../lib/trpc'; 
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 
@@ -13,7 +13,7 @@ const planPagoSchema = z.object({
   montoMensual: z.number().min(0, 'No puede ser negativo'),
   montoDiciembre: z.number().min(0, 'No puede ser negativo').optional().nullable().transform(val => val === null ? undefined : val),
   descripcion: z.string().optional(),
-  activo: z.boolean().default(true)
+  activo: z.boolean()
 });
 
 type PlanPagoForm = z.infer<typeof planPagoSchema>;

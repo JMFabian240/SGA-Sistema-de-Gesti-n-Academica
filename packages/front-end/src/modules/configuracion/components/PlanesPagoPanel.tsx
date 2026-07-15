@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { trpc } from '../../../lib/trpc';
+import { trpc } from '../../../lib/trpc'; 
 import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
 import { PlanPagoFormModal } from './PlanPagoFormModal';
 
