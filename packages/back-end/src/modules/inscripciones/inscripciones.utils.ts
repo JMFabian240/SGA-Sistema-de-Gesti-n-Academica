@@ -6,13 +6,34 @@ export interface BecaData {
   porcentajeDescuento: number;
 }
 
+export interface TarifaData {
+  concepto: string;
+  monto: number;
+}
+
 export class CalculadoraPagos {
   /**
-   * Genera el arreglo de recibos basados en el Plan de 10 o 12 meses.
+   * Suma días hábiles a una fecha dada, omitiendo sábados y domingos.
+   */
+  static addBusinessDays(startDate: Date, days: number): Date {
+    const result = new Date(startDate);
+    let addedDays = 0;
+    while (addedDays < days) {
+      result.setDate(result.getDate() + 1);
+      const dayOfWeek = result.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        addedDays++;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Genera el arreglo de recibos basados en las tarifas y el plan de pagos.
    */
   static generarCalendario(
     plan: PlanPagoData, 
-    tarifaMensualBase: number, 
+    tarifas: TarifaData[], 
     fechaIngreso: Date, 
     beca?: BecaData | null
   ) {
@@ -20,40 +41,69 @@ export class CalculadoraPagos {
     const meses12 = ['Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Julio', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
 
     const mesesToUse = plan.meses === 12 ? meses12 : meses10;
-    const adeudos = [];
+    const adeudos: any[] = [];
     
-    // El costo total del ciclo asume que la tarifaMensualBase está planeada a 12 meses
-    const costoTotal = tarifaMensualBase * 12;
-    // Si son 10 meses, pagan el total dividido entre 10
-    const montoMensual10 = costoTotal / 10;
+    // Buscar la tarifa de colegiatura anual
+    const tarifaColegiatura = tarifas.find(t => t.concepto.toUpperCase() === 'COLEGIATURA');
+    const tarifaAnualColegiatura = tarifaColegiatura ? tarifaColegiatura.monto : 0;
     
+    const montoBase12 = tarifaAnualColegiatura / 12;
+    const montoBase10 = tarifaAnualColegiatura / 10;
+    
+    // Pagos Únicos (solo se cobran en el primer mes)
+    const conceptosUnicos = ['INSCRIPCION', 'INSCRIPCIÓN', 'ARANCELES', 'MATERIALES', 'LIBROS'];
+    
+    const primerMes = mesesToUse[0];
+    const fechaPrimerMes = new Date(fechaIngreso);
+    // Para simplificar, la fecha base de los adeudos del primer mes es la fecha de ingreso
+    
+    for (const tarifa of tarifas) {
+      const conceptoUpper = tarifa.concepto.toUpperCase();
+      if (conceptosUnicos.includes(conceptoUpper)) {
+        // Plazo: 60 días hábiles para inscripción y materiales. Para otros únicos, podemos usar lo mismo o 5.
+        // El requerimiento decía "inscripcion y materiales 60 dias, colegiatura 5 dias".
+        const diasPlazo = (conceptoUpper.includes('INSCRIPCION') || conceptoUpper.includes('INSCRIPCIÓN') || conceptoUpper.includes('MATERIALES')) ? 60 : 5;
+        const fechaVencimiento = this.addBusinessDays(fechaPrimerMes, diasPlazo);
+        
+        adeudos.push({
+          concepto: tarifa.concepto, // ej. "Inscripción", "Materiales"
+          mes: primerMes,
+          fechaVencimiento,
+          montoOriginal: tarifa.monto,
+          saldoPendiente: tarifa.monto,
+          estadoCobro: tarifa.monto === 0 ? 'PAGADO' : 'PENDIENTE'
+        });
+      }
+    }
+
+    // Generar mensualidades de Colegiatura
     for (let i = 0; i < mesesToUse.length; i++) {
       const mesStr = mesesToUse[i];
       let monto = 0;
       
-      // Reglas de negocio
+      // Reglas de negocio Colegiatura
       if (plan.meses === 12) {
         if (mesStr === 'Diciembre') {
-          // El monto doble de diciembre
-          monto = tarifaMensualBase * 2;
+          monto = montoBase12 * 2; // Julio se suma a Diciembre
         } else if (mesStr === 'Julio') {
           monto = 0;
         } else {
-          monto = tarifaMensualBase;
+          monto = montoBase12;
         }
       } else {
-        // Para 10 meses, el pago es uniforme pero 20% más alto
-        monto = montoMensual10;
+        monto = montoBase10;
       }
 
-      // Aplicar beca (si no es monto 0)
+      // Aplicar beca solo a colegiatura
       if (beca && beca.porcentajeDescuento > 0 && monto > 0) {
         const descuento = (monto * beca.porcentajeDescuento) / 100;
         monto = monto - descuento;
       }
 
-      const fechaVencimiento = new Date(fechaIngreso);
-      fechaVencimiento.setMonth(fechaVencimiento.getMonth() + i + 1);
+      const fechaBaseColegiatura = new Date(fechaIngreso);
+      fechaBaseColegiatura.setMonth(fechaBaseColegiatura.getMonth() + i);
+      // Vencimiento de colegiatura: 5 días hábiles después del día de cobro ("fechaBase")
+      const fechaVencimiento = this.addBusinessDays(fechaBaseColegiatura, 5);
 
       adeudos.push({
         concepto: `Colegiatura ${mesStr}`,

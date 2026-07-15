@@ -188,23 +188,25 @@ export class InscripcionesService {
         }
       });
 
-      // 1.5 Buscar la Tarifa
-      const tarifa = await tx.tarifa.findFirst({
+      // 1.5 Buscar todas las Tarifas activas (Colegiatura, Inscripción, etc.)
+      const tarifas = await tx.tarifa.findMany({
         where: {
           cicloId: inscripcion.cicloId,
           nivelId: inscripcion.alumno.nivelId,
-          concepto: 'COLEGIATURA',
           activa: true,
           eliminadoEn: null
         }
       });
 
-      const tarifaMensualBase = tarifa ? Number(tarifa.monto) : 0;
+      const tarifasParaCalculadora = tarifas.map(t => ({
+        concepto: t.concepto,
+        monto: Number(t.monto)
+      }));
 
       // 2. Generar Adeudos usando CalculadoraPagos
       const planBase = { meses: planPago.meses };
       
-      const adeudosCalculados = CalculadoraPagos.generarCalendario(planBase, tarifaMensualBase, new Date(inscripcion.fechaIngreso));
+      const adeudosCalculados = CalculadoraPagos.generarCalendario(planBase, tarifasParaCalculadora, new Date(inscripcion.fechaIngreso));
       
       const adeudosParaInsertar = adeudosCalculados.map(a => ({
         alumnoId: inscripcion.alumnoId,

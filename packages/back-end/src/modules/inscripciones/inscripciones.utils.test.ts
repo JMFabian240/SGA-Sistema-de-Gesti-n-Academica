@@ -4,74 +4,65 @@ import { CalculadoraPagos } from './inscripciones.utils';
 describe('CalculadoraPagos', () => {
   const fechaIngreso = new Date('2025-08-15');
 
-  it('debe calcular correctamente un plan de 10 meses sin Diciembre doble', () => {
-    const plan = {
-      meses: 10
-    };
-    const tarifa = 1000;
-
-    const recibos = CalculadoraPagos.generarCalendario(plan, tarifa, fechaIngreso);
+  it('debe calcular correctamente un plan de 10 meses', () => {
+    const plan = { meses: 10 };
+    const tarifas = [{ concepto: 'Colegiatura', monto: 12000 }]; // 12000 anual
+    const recibos = CalculadoraPagos.generarCalendario(plan, tarifas, fechaIngreso);
 
     expect(recibos.length).toBe(10);
-    // Verificamos que arranque en Septiembre
     expect(recibos[0].mes).toBe('Septiembre');
     expect(recibos[0].montoOriginal).toBe(1200);
 
-    // Verificamos Diciembre
     const dic = recibos.find(r => r.mes === 'Diciembre');
-    expect(dic).toBeDefined();
     expect(dic?.montoOriginal).toBe(1200); // Sin cobro doble
-
-    // Verificamos último mes
-    expect(recibos[9].mes).toBe('Junio');
   });
 
-  it('debe calcular un plan de 12 meses con Agosto, Diciembre doble y Julio 0', () => {
-    const plan = {
-      meses: 12
-    };
-    const tarifa = 1000;
+  it('debe calcular un plan de 12 meses con Diciembre doble y Julio 0, y calcular pagos únicos', () => {
+    const plan = { meses: 12 };
+    const tarifas = [
+      { concepto: 'Colegiatura', monto: 12000 },
+      { concepto: 'Inscripción', monto: 2000 },
+      { concepto: 'Uniformes', monto: 1500 } // No debe autogenerarse por ser opcional o al menos no tiene regla especial de fechas. 
+      // Wait, uniformes is not in the list of 'INSCRIPCION', 'ARANCELES', etc, so it won't be generated in the one-time loop.
+    ];
 
-    const recibos = CalculadoraPagos.generarCalendario(plan, tarifa, fechaIngreso);
+    const recibos = CalculadoraPagos.generarCalendario(plan, tarifas, fechaIngreso);
 
-    // Son 12 recibos en arreglo físico
-    expect(recibos.length).toBe(12);
+    // 12 meses colegiatura + 1 inscripción = 13 recibos
+    expect(recibos.length).toBe(13);
     
-    // Verificamos que arranque en Agosto
-    expect(recibos[0].mes).toBe('Agosto');
-    expect(recibos[0].montoOriginal).toBe(1000);
+    // Verificamos Inscripción
+    const insc = recibos.find(r => r.concepto === 'Inscripción');
+    expect(insc).toBeDefined();
+    expect(insc?.montoOriginal).toBe(2000);
+    expect(insc?.mes).toBe('Agosto'); // Primer mes
 
-    // Verificamos Diciembre (Debe ser el doble)
-    const dic = recibos.find(r => r.mes === 'Diciembre');
-    expect(dic).toBeDefined();
+    // Verificamos Colegiaturas
+    const ago = recibos.find(r => r.concepto === 'Colegiatura Agosto');
+    expect(ago?.montoOriginal).toBe(1000);
+
+    const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
     expect(dic?.montoOriginal).toBe(2000);
 
-    // Verificamos Julio (Monto 0, PAGADO)
-    const jul = recibos.find(r => r.mes === 'Julio');
-    expect(jul).toBeDefined();
+    const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
     expect(jul?.montoOriginal).toBe(0);
     expect(jul?.estadoCobro).toBe('PAGADO');
   });
 
   it('debe aplicar el descuento de beca correctamente a las mensualidades (excepto Julio)', () => {
-    const plan = {
-      meses: 12
-    };
-    const tarifa = 1000;
+    const plan = { meses: 12 };
+    const tarifas = [{ concepto: 'Colegiatura', monto: 12000 }];
     const beca = { porcentajeDescuento: 15 }; // 15% de descuento
 
-    const recibos = CalculadoraPagos.generarCalendario(plan, tarifa, fechaIngreso, beca);
+    const recibos = CalculadoraPagos.generarCalendario(plan, tarifas, fechaIngreso, beca);
 
-    const ago = recibos.find(r => r.mes === 'Agosto');
-    // 15% de 1000 = 150. Paga 850.
-    expect(ago?.montoOriginal).toBe(850);
+    const ago = recibos.find(r => r.concepto === 'Colegiatura Agosto');
+    expect(ago?.montoOriginal).toBe(850); // 15% de 1000
 
-    const dic = recibos.find(r => r.mes === 'Diciembre');
-    // 15% de 2000 = 300. Paga 1700.
-    expect(dic?.montoOriginal).toBe(1700);
+    const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
+    expect(dic?.montoOriginal).toBe(1700); // 15% de 2000
 
-    const jul = recibos.find(r => r.mes === 'Julio');
-    // Monto 0 - 0% = 0.
+    const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
     expect(jul?.montoOriginal).toBe(0);
   });
 });

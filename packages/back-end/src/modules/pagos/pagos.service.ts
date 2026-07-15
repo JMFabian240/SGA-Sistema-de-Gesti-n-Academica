@@ -74,28 +74,38 @@ export class PagosService {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno no tiene inscripción activa en un ciclo activo.' });
       }
 
-      // 2. Encontrar tarifa activa de COLEGIATURA para su nivel
-      const tarifa = await tx.tarifa.findFirst({
+      // 2. Obtener todas las tarifas activas
+      const tarifas = await tx.tarifa.findMany({
         where: {
           cicloId: inscripcion.cicloId,
           nivelId: inscripcion.alumno.nivelId,
-          concepto: 'COLEGIATURA',
           activa: true,
           eliminadoEn: null
         }
       });
-      if (!tarifa) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay tarifa de COLEGIATURA activa para este nivel y ciclo.' });
+      if (tarifas.length === 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay tarifas activas para este nivel y ciclo.' });
       }
-      const nuevaTarifa = Number(tarifa.monto);
 
-      // 3. Obtener adeudos PENDIENTE para el ciclo actual, concepto COLEGIATURA
+      const planPago = await tx.planPago.findUnique({ where: { planPagoId: inscripcion.planPagoId! } });
+      if (!planPago) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno no tiene un plan de pagos válido.' });
+      }
+
+      const { CalculadoraPagos } = require('../inscripciones/inscripciones.utils');
+      const tarifasParaCalculadora = tarifas.map(t => ({ concepto: t.concepto, monto: Number(t.monto) }));
+      const adeudosIdeales = CalculadoraPagos.generarCalendario(
+        { meses: planPago.meses },
+        tarifasParaCalculadora,
+        new Date(inscripcion.fechaIngreso)
+      );
+
+      // 3. Obtener TODOS los adeudos PENDIENTE o ABONO para el ciclo actual (cualquier concepto)
       const adeudos = await tx.calendarioPago.findMany({
         where: {
           alumnoId,
           cicloId: inscripcion.cicloId,
-          concepto: 'COLEGIATURA',
-          estadoCobro: 'PENDIENTE',
+          estadoCobro: { in: ['PENDIENTE', 'ABONO'] },
           eliminadoEn: null
         },
         orderBy: { fechaVencimiento: 'asc' },
@@ -114,6 +124,12 @@ export class PagosService {
       let appPool: AppPoolItem[] = [];
 
       for (const adeudo of adeudos) {
+        // Buscar cuál debería ser el monto actual según la calculadora
+        const ideal = adeudosIdeales.find((a: any) => a.concepto === adeudo.concepto);
+        if (!ideal) continue; // Si no hay ideal, no se recalcula
+
+        const nuevaTarifa = ideal.montoOriginal;
+
         for (const app of adeudo.aplicacionesPago) {
           appPool.push({
              pagoId: app.pagoId,

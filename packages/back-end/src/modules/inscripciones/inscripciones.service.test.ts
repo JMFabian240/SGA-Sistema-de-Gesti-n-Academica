@@ -170,9 +170,10 @@ describe('InscripcionesService (Unit)', () => {
         meses: 12,
         eliminadoEn: null
       } as any);
-      prismaMock.tarifa.findFirst.mockResolvedValue({
-        monto: 2000
-      } as any);
+      prismaMock.tarifa.findMany.mockResolvedValue([{
+        concepto: 'COLEGIATURA',
+        monto: 24000 // Anual
+      }] as any);
       prismaMock.inscripcionCiclo.update.mockResolvedValue({ inscripcionId: 1 } as any);
       prismaMock.calendarioPago.createMany.mockResolvedValue({ count: 12 } as any);
 

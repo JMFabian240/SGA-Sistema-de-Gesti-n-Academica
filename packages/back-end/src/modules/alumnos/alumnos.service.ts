@@ -107,19 +107,18 @@ export class AlumnosService {
           if (input.planPagoId) {
             const planPago = await tx.planPago.findUnique({ where: { planPagoId: input.planPagoId } });
             if (planPago && !planPago.eliminadoEn) {
-              const tarifa = await tx.tarifa.findFirst({
+              const tarifas = await tx.tarifa.findMany({
                 where: {
                   cicloId: cicloActivo.cicloId,
                   nivelId: input.nivelId,
-                  concepto: 'COLEGIATURA',
                   activa: true,
                   eliminadoEn: null
                 }
               });
-              const tarifaMensualBase = tarifa ? Number(tarifa.monto) : 0;
+              const tarifasParaCalculadora = tarifas.map(t => ({ concepto: t.concepto, monto: Number(t.monto) }));
               const { CalculadoraPagos } = require('../inscripciones/inscripciones.utils');
               const planBase = { meses: planPago.meses };
-              const adeudosCalculados = CalculadoraPagos.generarCalendario(planBase, tarifaMensualBase, new Date(inscripcion.fechaIngreso));
+              const adeudosCalculados = CalculadoraPagos.generarCalendario(planBase, tarifasParaCalculadora, new Date(inscripcion.fechaIngreso));
               const adeudosParaInsertar = adeudosCalculados.map((a: any) => ({
                 alumnoId: alumno.alumnoId,
                 cicloId: cicloActivo.cicloId,
