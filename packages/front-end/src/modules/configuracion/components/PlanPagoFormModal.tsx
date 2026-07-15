@@ -11,7 +11,7 @@ const planPagoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
   meses: z.number().min(1, 'Debe ser al menos 1 mes').max(12, 'Máximo 12 meses'),
   montoMensual: z.number().min(0, 'No puede ser negativo'),
-  montoDiciembre: z.number().min(0, 'No puede ser negativo').optional().nullable().transform(val => val === null ? undefined : val),
+  montoDiciembre: z.number().min(0, 'No puede ser negativo').optional(),
   descripcion: z.string().optional(),
   activo: z.boolean()
 });
