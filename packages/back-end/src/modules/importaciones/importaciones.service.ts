@@ -3,13 +3,14 @@ import * as Papa from 'papaparse';
 import { CatalogoAcademicoSchema, CatalogoAcademicoImportRow } from './importaciones.schema';
 
 export class ImportacionesService {
-  async procesarImportacionCatalogo(csvBuffer: Buffer, cicloId: number): Promise<{ success: boolean; message: string }> {
+  async procesarImportacionCatalogo(csvBuffer: Buffer): Promise<{ success: boolean; message: string }> {
     const csvString = csvBuffer.toString('utf8');
     
     // Parse CSV
     const parsed = Papa.parse(csvString, {
       header: true,
-      skipEmptyLines: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: (h) => h.trim(),
     });
 
     if (parsed.errors.length > 0) {
@@ -24,23 +25,28 @@ export class ImportacionesService {
       const result = CatalogoAcademicoSchema.safeParse(row);
       if (!result.success) {
         const errorMsg = result.error.errors.map(e => e.message).join(', ');
-        throw new Error(`Error de validación en fila ${i + 1}: ${errorMsg}`);
+        throw new Error(`Error de validación en fila ${i + 1}: ${errorMsg}. (Datos leídos en esta fila: ${JSON.stringify(row)})`);
       }
       rows.push(result.data);
     }
 
     // Execute in transaction
     await prisma.$transaction(async (tx) => {
-      // Validate if ciclo exists
-      const ciclo = await tx.cicloEscolar.findUnique({ where: { cicloId } });
-      if (!ciclo) {
-        throw new Error('El ciclo escolar especificado no existe.');
-      }
-
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         
         try {
+          // Find cycle dynamically based on Tipo de Ciclo
+          const tipoCiclo = row['Tipo de Ciclo'] as string;
+          const ciclo = await tx.cicloEscolar.findFirst({
+            where: { periodicidad: tipoCiclo, activo: true }
+          });
+          
+          if (!ciclo) {
+            throw new Error(`No hay un ciclo activo para el tipo ${tipoCiclo}.`);
+          }
+          
+          const cicloId = ciclo.cicloId;
           // 1. Find or create Nivel Educativo
           // Using a generic mapping for "codigo" based on name, or expecting it from frontend.
           // For simplicity, we create if it doesn't exist.
@@ -97,9 +103,9 @@ export class ImportacionesService {
           if (grupoExistente) {
              // throw new Error(`El grupo ${grupoName} ya existe para este nivel, grado y ciclo.`);
              // Update cupoMaximo instead of error
-             await tx.grupo.update({
+              await tx.grupo.update({
                where: { grupoId: grupoExistente.grupoId },
-               data: { cupoMaximo: row['Cupo Máximo'] }
+               data: { cupoMaximo: row['Cupo Maximo'] }
              });
           } else {
             await tx.grupo.create({
@@ -108,7 +114,7 @@ export class ImportacionesService {
                 nivelId: nivel.nivelId,
                 gradoId: grado.gradoId,
                 cicloId: cicloId,
-                cupoMaximo: row['Cupo Máximo']
+                cupoMaximo: row['Cupo Maximo']
               }
             });
           }
@@ -121,13 +127,14 @@ export class ImportacionesService {
     return { success: true, message: `Importación completada. Se procesaron ${rows.length} registros exitosamente.` };
   }
 
-  async procesarImportacionInscripciones(csvBuffer: Buffer, cicloId: number): Promise<{ success: boolean; message: string }> {
+  async procesarImportacionInscripciones(csvBuffer: Buffer): Promise<{ success: boolean; message: string }> {
     const csvString = csvBuffer.toString('utf8');
     
     // Parse CSV
     const parsed = Papa.parse(csvString, {
       header: true,
-      skipEmptyLines: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: (h) => h.trim(),
     });
 
     if (parsed.errors.length > 0) {
@@ -150,16 +157,21 @@ export class ImportacionesService {
 
     // Execute in transaction
     await prisma.$transaction(async (tx) => {
-      // Validate if ciclo exists
-      const ciclo = await tx.cicloEscolar.findUnique({ where: { cicloId } });
-      if (!ciclo) {
-        throw new Error('El ciclo escolar especificado no existe.');
-      }
-
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         
         try {
+          // Find cycle dynamically based on Tipo de Ciclo
+          const tipoCiclo = row['Tipo de Ciclo'] as string;
+          const ciclo = await tx.cicloEscolar.findFirst({
+            where: { periodicidad: tipoCiclo, activo: true }
+          });
+          
+          if (!ciclo) {
+            throw new Error(`No hay un ciclo activo para el tipo ${tipoCiclo}.`);
+          }
+          
+          const cicloId = ciclo.cicloId;
           // 1. Validar jerarquía del grupo destino
           const nivel = await tx.nivelEducativo.findFirst({
             where: { nombre: { equals: row['Nivel Educativo Destino'], mode: 'insensitive' } }
@@ -178,12 +190,12 @@ export class ImportacionesService {
 
           // 2. Buscar o Crear Alumno
           let alumno;
-          if (row['CURP Alumno'] || row['Matrícula']) {
+          if (row['CURP Alumno'] || row['Matricula']) {
             alumno = await tx.alumno.findFirst({
               where: {
                 OR: [
                   ...(row['CURP Alumno'] ? [{ curp: row['CURP Alumno'] }] : []),
-                  ...(row['Matrícula'] ? [{ matricula: row['Matrícula'] }] : [])
+                  ...(row['Matricula'] ? [{ matricula: row['Matricula'] }] : [])
                 ]
               }
             });
@@ -200,7 +212,7 @@ export class ImportacionesService {
               data: {
                 nombreCompleto: row['Nombre Alumno'],
                 curp: row['CURP Alumno'] || undefined,
-                matricula: row['Matrícula'] || undefined,
+                matricula: row['Matricula'] || undefined,
                 fechaNacimiento: new Date(row['Fecha Nacimiento']),
                 sexo: row['Sexo'],
                 estado: row['Estado Alumno'],
@@ -229,7 +241,7 @@ export class ImportacionesService {
             tutor = await tx.tutor.create({
               data: {
                 nombreCompleto: row['Nombre Tutor'],
-                telefono: row['Teléfono Tutor'] || undefined,
+                telefono: row['Telefono Tutor'] || undefined,
                 correoElectronico: row['Correo Tutor'] || undefined,
               }
             });
@@ -273,6 +285,16 @@ export class ImportacionesService {
               throw new Error(`El grupo ${grupo.nombre} ya ha alcanzado su cupo máximo de ${grupo.cupoMaximo}`);
             }
 
+            // Buscar Plan de Pago (opcional)
+            let planPagoId = undefined;
+            if (row['Plan de Pago Asignado']) {
+              const plan = await tx.planPago.findFirst({
+                where: { nombre: { equals: row['Plan de Pago Asignado'], mode: 'insensitive' } }
+              });
+              if (!plan) throw new Error(`El Plan de Pago '${row['Plan de Pago Asignado']}' no existe.`);
+              planPagoId = plan.planPagoId;
+            }
+
             // Inscribir
             await tx.inscripcionCiclo.create({
               data: {
@@ -280,12 +302,12 @@ export class ImportacionesService {
                 cicloId: cicloId,
                 gradoId: grado.gradoId,
                 grupoId: grupo.grupoId,
+                planPagoId: planPagoId,
                 estadoEnCiclo: 'ACTIVO',
                 estadoFinanciero: 'AL_CORRIENTE',
                 fechaIngreso: new Date()
               }
             });
-            // Omitimos calendario_pago en importación básica, puede generarse después con una función de utilidad
           }
 
         } catch (error: any) {
@@ -297,13 +319,14 @@ export class ImportacionesService {
     return { success: true, message: `Importación completada. Se inscribieron ${rows.length} alumnos exitosamente.` };
   }
 
-  async procesarImportacionPagos(csvBuffer: Buffer, cicloId: number): Promise<{ success: boolean; message: string }> {
+  async procesarImportacionPagos(csvBuffer: Buffer): Promise<{ success: boolean; message: string }> {
     const csvString = csvBuffer.toString('utf8');
     
     // Parse CSV
     const parsed = Papa.parse(csvString, {
       header: true,
-      skipEmptyLines: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: (h) => h.trim(),
     });
 
     if (parsed.errors.length > 0) {
@@ -326,23 +349,29 @@ export class ImportacionesService {
 
     // Execute in transaction
     await prisma.$transaction(async (tx) => {
-      const ciclo = await tx.cicloEscolar.findUnique({ where: { cicloId } });
-      if (!ciclo) {
-        throw new Error('El ciclo escolar especificado no existe.');
-      }
-
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         
         try {
+          // Find cycle dynamically based on Tipo de Ciclo
+          const tipoCiclo = row['Tipo de Ciclo'] as string;
+          const ciclo = await tx.cicloEscolar.findFirst({
+            where: { periodicidad: tipoCiclo, activo: true }
+          });
+          
+          if (!ciclo) {
+            throw new Error(`No hay un ciclo activo para el tipo ${tipoCiclo}.`);
+          }
+          
+          const cicloId = ciclo.cicloId;
           // 1. Buscar Alumno
           let alumno;
-          if (row['CURP Alumno'] || row['Matrícula']) {
+          if (row['CURP Alumno'] || row['Matricula']) {
             alumno = await tx.alumno.findFirst({
               where: {
                 OR: [
                   ...(row['CURP Alumno'] ? [{ curp: row['CURP Alumno'] }] : []),
-                  ...(row['Matrícula'] ? [{ matricula: row['Matrícula'] }] : [])
+                  ...(row['Matricula'] ? [{ matricula: row['Matricula'] }] : [])
                 ]
               }
             });
@@ -374,7 +403,7 @@ export class ImportacionesService {
               tutorId: tutor.tutorId,
               fechaPago: new Date(row['Fecha Pago']),
               montoTotal: row['Monto Total'],
-              metodoPago: row['Método Pago'],
+              metodoPago: row['Metodo Pago'],
               observaciones: row['Observaciones'] || 'Importación Inicial',
               registradoPor: 1 // Default usuario sistema
             }
@@ -389,13 +418,14 @@ export class ImportacionesService {
     return { success: true, message: `Importación completada. Se registraron ${rows.length} pagos exitosamente.` };
   }
 
-  async procesarImportacionSaldos(csvBuffer: Buffer, cicloId: number): Promise<{ success: boolean; message: string }> {
+  async procesarImportacionSaldos(csvBuffer: Buffer): Promise<{ success: boolean; message: string }> {
     const csvString = csvBuffer.toString('utf8');
     
     // Parse CSV
     const parsed = Papa.parse(csvString, {
       header: true,
-      skipEmptyLines: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: (h) => h.trim(),
     });
 
     if (parsed.errors.length > 0) {
@@ -418,23 +448,29 @@ export class ImportacionesService {
 
     // Execute in transaction
     await prisma.$transaction(async (tx) => {
-      const ciclo = await tx.cicloEscolar.findUnique({ where: { cicloId } });
-      if (!ciclo) {
-        throw new Error('El ciclo escolar especificado no existe.');
-      }
-
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         
         try {
+          // Find cycle dynamically based on Tipo de Ciclo
+          const tipoCiclo = row['Tipo de Ciclo'] as string;
+          const ciclo = await tx.cicloEscolar.findFirst({
+            where: { periodicidad: tipoCiclo, activo: true }
+          });
+          
+          if (!ciclo) {
+            throw new Error(`No hay un ciclo activo para el tipo ${tipoCiclo}.`);
+          }
+          
+          const cicloId = ciclo.cicloId;
           // 1. Buscar Alumno
           let alumno;
-          if (row['CURP Alumno'] || row['Matrícula']) {
+          if (row['CURP Alumno'] || row['Matricula']) {
             alumno = await tx.alumno.findFirst({
               where: {
                 OR: [
                   ...(row['CURP Alumno'] ? [{ curp: row['CURP Alumno'] }] : []),
-                  ...(row['Matrícula'] ? [{ matricula: row['Matrícula'] }] : [])
+                  ...(row['Matricula'] ? [{ matricula: row['Matricula'] }] : [])
                 ]
               }
             });
