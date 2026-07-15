@@ -1,0 +1,29 @@
+﻿Tipo de Ciclo,Nivel Educativo,Grado,Nombre Grupo,Cupo Maximo
+ANUAL,Preescolar,1º Grado,K,30
+SEMESTRAL,Bachillerato,5º Semestre,B,30
+ANUAL,Preescolar,1º Grado,K2,30
+ANUAL,Preescolar,1º Grado,B,1
+SEMESTRAL,Bachillerato,1º Semestre,B,30
+SEMESTRAL,Bachillerato,2º Semestre,B,30
+SEMESTRAL,Bachillerato,1º Semestre,B2,30
+ANUAL,Secundaria,2º Grado,S,30
+SEMESTRAL,Bachillerato,3º Semestre,B,30
+ANUAL,Primaria,1º Grado,P,30
+ANUAL,Preescolar,2º Grado,K,30
+ANUAL,Primaria,2º Grado,P,30
+ANUAL,Preescolar,3º Grado,K,30
+ANUAL,Preescolar,1�,K,30
+ANUAL,Preescolar,2�,K,30
+ANUAL,Preescolar,3�,K,30
+ANUAL,Primaria,1�,P,30
+ANUAL,Primaria,2�,P,30
+ANUAL,Primaria,3�,P,30
+ANUAL,Primaria,4�,P,30
+ANUAL,Primaria,5�,P,30
+ANUAL,Primaria,6�,P,30
+ANUAL,Secundaria,1�,S,30
+ANUAL,Secundaria,2�,S,30
+ANUAL,Secundaria,3�,S,30
+SEMESTRAL,Bachillerato,1� Semestre,B,30
+SEMESTRAL,Bachillerato,3� Semestre,B,30
+SEMESTRAL,Bachillerato,5� Semestre,B,30

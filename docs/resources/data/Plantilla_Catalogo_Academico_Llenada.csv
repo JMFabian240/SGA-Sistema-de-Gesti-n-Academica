@@ -1,0 +1,14 @@
+﻿Tipo de Ciclo,Nivel Educativo,Grado,Nombre Grupo,Cupo Maximo
+ANUAL,Preescolar,1° Grado,K,40
+ANUAL,Preescolar,2° Grado,K,40
+ANUAL,Preescolar,3° Grado,K,40
+ANUAL,Primaria,1° Grado,P,40
+ANUAL,Primaria,2° Grado,P,40
+ANUAL,Primaria,3° Grado,P,40
+ANUAL,Primaria,4° Grado,P,40
+ANUAL,Primaria,5° Grado,P,40
+ANUAL,Primaria,6° Grado,P,40
+ANUAL,Secundaria,1° Grado,S,40
+ANUAL,Secundaria,2° Grado,S,40
+ANUAL,Secundaria,3° Grado,S,40
+SEMESTRAL,Bachillerato,9° Semestre,B,40
