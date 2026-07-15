@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, BookOpen, Save, Layers, GraduationCap } from 'lucide-react';
+import { X, BookOpen, Save, Layers, GraduationCap } from 'lucide-react';
 import { trpc } from '../../../lib/trpc';
 
 interface InscribirAlumnoModalProps {
@@ -10,8 +10,7 @@ interface InscribirAlumnoModalProps {
 
 export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlumnoModalProps) {
   const utils = trpc.useUtils();
-  
-  const [cicloId, setCicloId] = useState('');
+
   const [nivelId, setNivelId] = useState('');
   const [gradoId, setGradoId] = useState('');
   const [grupoId, setGrupoId] = useState('');
@@ -25,15 +24,9 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
   const { data: niveles } = trpc.grupos.getNiveles.useQuery(undefined, { enabled: isOpen });
   const { data: grados } = trpc.grupos.getGrados.useQuery(undefined, { enabled: isOpen });
 
-  // Auto-seleccionar el ciclo activo
-  useEffect(() => {
-    if (ciclos && ciclos.length > 0 && !cicloId) {
-      const activo = ciclos.find((c: any) => c.activo && !c.eliminadoEn);
-      if (activo) {
-        setCicloId(activo.cicloId.toString());
-      }
-    }
-  }, [ciclos, cicloId]);
+  // Obtener todos los ciclos activos (por ejemplo, Semestral y Anual a la vez)
+  const ciclosActivos = ciclos?.filter((c: any) => c.activo && !c.eliminadoEn) || [];
+  const activoCicloIds = ciclosActivos.map((c: any) => c.cicloId);
 
   const createMutation = trpc.inscripciones.createInscripcion.useMutation({
     onSuccess: () => {
@@ -51,7 +44,6 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
   // Limpiar form al cerrar
   useEffect(() => {
     if (!isOpen) {
-      setCicloId('');
       setNivelId('');
       setGradoId('');
       setGrupoId('');
@@ -62,12 +54,12 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
   if (!isOpen) return null;
 
   const gradosFiltrados = grados?.filter((g: any) => g.nivelId.toString() === nivelId) || [];
-  
-  // Filtrar grupos activos del ciclo, nivel y grado seleccionados
-  const gruposDisponibles = grupos?.filter((g: any) => 
-    !g.eliminadoEn && 
-    !g.cerrado && 
-    g.cicloId.toString() === cicloId &&
+
+  // Filtrar grupos activos que pertenezcan a CUALQUIER ciclo activo, del nivel y grado seleccionados
+  const gruposDisponibles = grupos?.filter((g: any) =>
+    !g.eliminadoEn &&
+    !g.cerrado &&
+    activoCicloIds.includes(g.cicloId) &&
     g.nivelId.toString() === nivelId &&
     g.gradoId.toString() === gradoId
   ) || [];
@@ -75,15 +67,21 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    if (!cicloId || !nivelId || !gradoId || !grupoId) {
+    if (!nivelId || !gradoId || !grupoId) {
       setErrorMsg('Completa todos los campos obligatorios');
+      return;
+    }
+
+    const grupoSeleccionado = grupos?.find((g: any) => g.grupoId.toString() === grupoId);
+    if (!grupoSeleccionado) {
+      setErrorMsg('Grupo inválido');
       return;
     }
 
     setIsSubmitting(true);
     createMutation.mutate({
       alumnoId,
-      cicloId: Number(cicloId),
+      cicloId: grupoSeleccionado.cicloId,
       grupoId: Number(grupoId),
       fechaIngreso: new Date().toISOString(),
       estadoEnCiclo: 'INSCRITO',
@@ -111,24 +109,13 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
         )}
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <Calendar size={16} className="text-blue-500" />
-                Ciclo Escolar (Activo)
-              </label>
-              <select
-                value={cicloId}
-                disabled
-                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl outline-none text-sm text-gray-600 cursor-not-allowed"
-                required
-              >
-                <option value="">Detectando ciclo activo...</option>
-                {ciclos?.filter((c: any) => c.activo && !c.eliminadoEn).map((c: any) => (
-                  <option key={c.cicloId} value={c.cicloId}>{c.nombre}</option>
-                ))}
-              </select>
+          {ciclosActivos.length === 0 && ciclos && ciclos.length > 0 && (
+            <div className="mx-6 mt-4 p-3 bg-yellow-50 border border-yellow-100 text-yellow-800 text-sm rounded-xl">
+              No hay un ciclo escolar activo actualmente. No puedes realizar inscripciones.
             </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
@@ -151,7 +138,7 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
                 ))}
               </select>
             </div>
-            
+
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <GraduationCap size={16} className="text-blue-500" />
@@ -204,7 +191,7 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !cicloId || !grupoId || !nivelId || !gradoId}
+              disabled={isSubmitting || !grupoId || !nivelId || !gradoId}
               className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors shadow-sm disabled:opacity-50"
             >
               <Save size={16} />

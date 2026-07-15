@@ -12,7 +12,7 @@ const nuevoAlumnoSchema = z.object({
   matricula: z.string().min(1, 'Obligatorio'),
   curp: z.string().length(18, 'Debe ser de 18 caracteres').optional().or(z.literal('')),
   nivelId: z.string().min(1, 'Obligatorio'),
-  gradoId: z.string().min(1, 'Obligatorio'),
+  gradoId: z.string().optional(),
   seccionId: z.string().optional(),
   planPagoId: z.string().optional()
 });
@@ -127,7 +127,7 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
               <p className="text-gray-500 text-sm max-w-md mx-auto">
                 Para poder registrar alumnos e inscribirlos correctamente, primero debes asegurarte de que el sistema cuenta con las siguientes configuraciones obligatorias:
               </p>
-              
+
               <div className="text-left bg-gray-50 p-4 rounded-xl max-w-md mx-auto space-y-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${hayCicloActivo ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -161,137 +161,137 @@ export function NuevoAlumnoModal({ isOpen, onClose, onSuccess }: NuevoAlumnoModa
                 </div>
               )}
 
-          <form id="alumno-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form id="alumno-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-            {/* Nombre Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-3">
-                <label className="block text-sm text-gray-600 mb-1">Nombre Completo <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  {...register('nombreCompleto')}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.nombreCompleto ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
-                />
-                {errors.nombreCompleto && <span className="text-xs text-red-500 mt-1">{errors.nombreCompleto.message}</span>}
-              </div>
-            </div>
-
-            {/* Fecha & Genero Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Fecha de Nac. <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    {...register('fechaNacimiento')}
-                    className={`w-full px-3 py-2 rounded-xl border ${errors.fechaNacimiento ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm appearance-none`}
-                  />
-                  <Calendar className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" size={16} />
+                {/* Nombre Section */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-3">
+                    <label className="block text-sm text-gray-600 mb-1">Nombre Completo <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      {...register('nombreCompleto')}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.nombreCompleto ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
+                    />
+                    {errors.nombreCompleto && <span className="text-xs text-red-500 mt-1">{errors.nombreCompleto.message}</span>}
+                  </div>
                 </div>
-                {errors.fechaNacimiento && <span className="text-xs text-red-500 mt-1">{errors.fechaNacimiento.message}</span>}
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Género <span className="text-red-500">*</span></label>
-                <select
-                  {...register('sexo')}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.sexo ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white`}
-                >
-                  <option value="">Seleccione</option>
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                </select>
-                {errors.sexo && <span className="text-xs text-red-500 mt-1">{errors.sexo.message}</span>}
-              </div>
-            </div>
+
+                {/* Fecha & Genero Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Fecha de Nac. <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        {...register('fechaNacimiento')}
+                        className={`w-full px-3 py-2 rounded-xl border ${errors.fechaNacimiento ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm appearance-none`}
+                      />
+                      <Calendar className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" size={16} />
+                    </div>
+                    {errors.fechaNacimiento && <span className="text-xs text-red-500 mt-1">{errors.fechaNacimiento.message}</span>}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Género <span className="text-red-500">*</span></label>
+                    <select
+                      {...register('sexo')}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.sexo ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white`}
+                    >
+                      <option value="">Seleccione</option>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                    </select>
+                    {errors.sexo && <span className="text-xs text-red-500 mt-1">{errors.sexo.message}</span>}
+                  </div>
+                </div>
 
 
 
-            {/* Matricula y CURP */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Matrícula <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  {...register('matricula')}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.matricula ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
-                />
-                {errors.matricula && <span className="text-xs text-red-500 mt-1">{errors.matricula.message}</span>}
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">CURP</label>
-                <input
-                  type="text"
-                  {...register('curp')}
-                  maxLength={18}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.curp ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
-                />
-                {errors.curp && <span className="text-xs text-red-500 mt-1">{errors.curp.message}</span>}
-              </div>
-            </div>
+                {/* Matricula y CURP */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Matrícula <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      {...register('matricula')}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.matricula ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
+                    />
+                    {errors.matricula && <span className="text-xs text-red-500 mt-1">{errors.matricula.message}</span>}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">CURP</label>
+                    <input
+                      type="text"
+                      {...register('curp')}
+                      maxLength={18}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.curp ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm uppercase`}
+                    />
+                    {errors.curp && <span className="text-xs text-red-500 mt-1">{errors.curp.message}</span>}
+                  </div>
+                </div>
 
-            {/* Nivel, Grado, Seccion */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-gray-100 pb-6">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Nivel <span className="text-red-500">*</span></label>
-                <select
-                  {...register('nivelId')}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.nivelId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white`}
-                >
-                  <option value="">Selecciona Niv...</option>
-                  {niveles?.map(n => (
-                    <option key={n.nivelId} value={n.nivelId.toString()}>{n.nombre}</option>
-                  ))}
-                </select>
-                {errors.nivelId && <span className="text-xs text-red-500 mt-1">{errors.nivelId.message}</span>}
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Grado <span className="text-red-500">*</span></label>
-                <select
-                  {...register('gradoId')}
-                  disabled={!watchNivelId}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.gradoId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
-                >
-                  <option value="">Selecciona Gra...</option>
-                  {gradosFiltrados?.map(g => (
-                    <option key={g.gradoId} value={g.gradoId.toString()}>{g.nombre}</option>
-                  ))}
-                </select>
-                {errors.gradoId && <span className="text-xs text-red-500 mt-1">{errors.gradoId.message}</span>}
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Grupo</label>
-                <select
-                  {...register('seccionId')}
-                  disabled={!watchGradoId}
-                  className={`w-full px-3 py-2 rounded-xl border ${errors.seccionId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
-                >
-                  <option value="">Selecciona Sec...</option>
-                  {gruposFiltrados?.map(g => (
-                    <option key={g.grupoId} value={g.grupoId.toString()}>{g.nombre}</option>
-                  ))}
-                </select>
-                {errors.seccionId && <span className="text-xs text-red-500 mt-1">{errors.seccionId.message}</span>}
-              </div>
-            </div>
+                {/* Nivel, Grado, Seccion */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-gray-100 pb-6">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Nivel <span className="text-red-500">*</span></label>
+                    <select
+                      {...register('nivelId')}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.nivelId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white`}
+                    >
+                      <option value="">Selecciona Niv...</option>
+                      {niveles?.map(n => (
+                        <option key={n.nivelId} value={n.nivelId.toString()}>{n.nombre}</option>
+                      ))}
+                    </select>
+                    {errors.nivelId && <span className="text-xs text-red-500 mt-1">{errors.nivelId.message}</span>}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Grado <span className="text-red-500">*</span></label>
+                    <select
+                      {...register('gradoId')}
+                      disabled={!watchNivelId}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.gradoId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
+                    >
+                      <option value="">Selecciona Gra...</option>
+                      {gradosFiltrados?.map(g => (
+                        <option key={g.gradoId} value={g.gradoId.toString()}>{g.nombre}</option>
+                      ))}
+                    </select>
+                    {errors.gradoId && <span className="text-xs text-red-500 mt-1">{errors.gradoId.message}</span>}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Grupo</label>
+                    <select
+                      {...register('seccionId')}
+                      disabled={!watchGradoId}
+                      className={`w-full px-3 py-2 rounded-xl border ${errors.seccionId ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'} focus:ring-2 focus:ring-opacity-20 outline-none text-sm bg-white disabled:opacity-50`}
+                    >
+                      <option value="">Selecciona Sec...</option>
+                      {gruposFiltrados?.map(g => (
+                        <option key={g.grupoId} value={g.grupoId.toString()}>{g.nombre}</option>
+                      ))}
+                    </select>
+                    {errors.seccionId && <span className="text-xs text-red-500 mt-1">{errors.seccionId.message}</span>}
+                  </div>
+                </div>
 
-            {/* Plan de Pago (Opcional) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Plan de Pagos (Opcional)</label>
-                <select
-                  {...register('planPagoId')}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white"
-                >
-                  <option value="">Selecciona un plan (opcional)</option>
-                  {planesPago?.map(p => (
-                    <option key={p.planPagoId} value={p.planPagoId.toString()}>{p.nombre} ({p.meses} meses)</option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-400 mt-1">Se generará la deuda automáticamente si lo seleccionas.</p>
-              </div>
-            </div>
+                {/* Plan de Pago (Opcional) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Plan de Pagos (Opcional)</label>
+                    <select
+                      {...register('planPagoId')}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none text-sm bg-white"
+                    >
+                      <option value="">Selecciona un plan (opcional)</option>
+                      {planesPago?.map(p => (
+                        <option key={p.planPagoId} value={p.planPagoId.toString()}>{p.nombre} ({p.meses} meses)</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1">Se generará la deuda automáticamente si lo seleccionas.</p>
+                  </div>
+                </div>
 
-          </form>
+              </form>
             </>
           )}
         </div>

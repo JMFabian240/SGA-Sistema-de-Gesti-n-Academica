@@ -130,13 +130,20 @@ export class InscripcionesService {
         include: { alumno: true, grupo: true }
       });
 
-      // 2. Cambiar el estado del alumno a ACTIVO
+      // 2. Cambiar el estado del alumno a ACTIVO y sincronizar Nivel y Grado
+      const updateData: any = {
+        estado: 'ACTIVO',
+        actualizadoEn: new Date()
+      };
+
+      if (inscripcion.grupo) {
+        updateData.nivelId = inscripcion.grupo.nivelId;
+        updateData.gradoId = inscripcion.grupo.gradoId;
+      }
+
       await tx.alumno.update({
         where: { alumnoId: input.alumnoId },
-        data: {
-          estado: 'ACTIVO',
-          actualizadoEn: new Date()
-        }
+        data: updateData
       });
       
       return inscripcion;
