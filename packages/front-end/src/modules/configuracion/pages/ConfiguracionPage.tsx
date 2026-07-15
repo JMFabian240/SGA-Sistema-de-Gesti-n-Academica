@@ -48,6 +48,7 @@ export function ConfiguracionPage() {
   // --- Tarifas de Cobro (ANUAL) ---
   const [selectedCicloId, setSelectedCicloId] = useState<number | undefined>(undefined);
   const { data: niveles, isLoading: loadingNiveles } = trpc.grupos.getNiveles.useQuery();
+  const { data: configuracionGlobal } = trpc.configuracion.get.useQuery();
   
   const { data: tarifas, isLoading: loadingTarifas } = trpc.pagos.getTarifas.useQuery(
     selectedCicloId ? { cicloId: selectedCicloId } : undefined,
@@ -515,7 +516,7 @@ export function ConfiguracionPage() {
                             <th className="py-3 font-semibold text-center">Materiales ($)</th>
                             <th className="py-3 font-semibold text-center">Libros ($)</th>
                             <th className="py-3 font-semibold text-center">Uniforme ($)</th>
-                            <th className="py-3 font-semibold text-center">Colegiatura ($ / Mes)</th>
+                            <th className="py-3 font-semibold text-center">Colegiatura ($ / Anual)</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -623,7 +624,7 @@ export function ConfiguracionPage() {
                             <th className="py-3 font-semibold text-center">Materiales ($)</th>
                             <th className="py-3 font-semibold text-center">Libros ($)</th>
                             <th className="py-3 font-semibold text-center">Uniforme ($)</th>
-                            <th className="py-3 font-semibold text-center">Colegiatura ($ / Mes)</th>
+                            <th className="py-3 font-semibold text-center">Colegiatura ($ / Anual)</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -690,25 +691,37 @@ export function ConfiguracionPage() {
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                 <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                  <CheckCircle className="text-green-600" size={18} />
-                  <h4 className="font-bold text-navy-800">Promoción Pronto Pago</h4>
+                  <CheckCircle className="text-orange-600" size={18} />
+                  <h4 className="font-bold text-navy-800">Recargos y Plazos</h4>
                 </div>
-                <div className="p-4 bg-green-50/50 rounded-xl border border-green-100 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-green-800">15% de Descuento</span>
-                    <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">Activo</span>
+                
+                {configuracionGlobal ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-orange-50/50 rounded-xl border border-orange-100 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-orange-800">Recargo por Atraso</span>
+                        <span className="text-xs font-bold text-orange-700">${configuracionGlobal.montoRecargoDefecto.toFixed(2)}</span>
+                      </div>
+                      <p className="text-xs text-orange-700">Se aplica después de {configuracionGlobal.diasGraciaRecargo} días de gracia.</p>
+                    </div>
+
+                    <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-blue-800">Plazo Inscripción/Materiales</span>
+                        <span className="text-xs font-bold text-blue-700">{configuracionGlobal.plazoInscripcionDias} días</span>
+                      </div>
+                      <p className="text-xs text-blue-700">Días hábiles permitidos antes del vencimiento.</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-green-700">Aplica para mensualidades pagadas durante los primeros 10 días de cada mes lectivo.</p>
-                  <div className="text-[10px] text-green-600 pt-2 border-t border-green-100 flex justify-between">
-                    <span>Inicio: 01/01/2026</span>
-                    <span>Fin: 31/12/2026</span>
-                  </div>
-                </div>
+                ) : (
+                  <div className="text-center text-gray-400 text-sm py-4">Cargando configuración...</div>
+                )}
+                
                 <button
                   disabled
-                  className="w-full py-2 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-not-allowed text-center"
+                  className="w-full py-2 border border-dashed border-gray-300 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-50 cursor-not-allowed text-center mt-2"
                 >
-                  + Nueva Promoción (Deshabilitado en Demo)
+                  Modificar (Sección Global)
                 </button>
               </div>
 

@@ -61,7 +61,6 @@ export function PlanesPagoPanel() {
                 <tr>
                   <th className="px-6 py-4 font-semibold">Nombre del Plan</th>
                   <th className="px-6 py-4 font-semibold text-center">Meses</th>
-                  <th className="px-6 py-4 font-semibold text-right">Monto Mensual ($)</th>
                   <th className="px-6 py-4 font-semibold text-center">Estado</th>
                   <th className="px-6 py-4 font-semibold text-right">Acciones</th>
                 </tr>
@@ -75,9 +74,6 @@ export function PlanesPagoPanel() {
                     </td>
                     <td className="px-6 py-4 text-center text-gray-600 font-medium">
                       {p.meses}
-                    </td>
-                    <td className="px-6 py-4 text-right text-gray-700 font-medium">
-                      ${Number(p.montoMensual).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
@@ -112,7 +108,7 @@ export function PlanesPagoPanel() {
                 ))}
                 {planes?.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400">
                       No hay planes de pago registrados. Crea uno nuevo.
                     </td>
                   </tr>
