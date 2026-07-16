@@ -230,12 +230,17 @@ export class ImportacionesService {
           }
 
           if (!alumno) {
+            const fechaNacimiento = new Date(row['Fecha Nacimiento']);
+            if (isNaN(fechaNacimiento.getTime())) {
+              throw new Error(`Fecha de nacimiento inválida: '${row['Fecha Nacimiento']}'`);
+            }
+
             alumno = await tx.alumno.create({
               data: {
                 nombreCompleto: row['Nombre Alumno'],
                 curp: row['CURP Alumno'] || undefined,
                 matricula: row['Matricula'] || undefined,
-                fechaNacimiento: new Date(row['Fecha Nacimiento']),
+                fechaNacimiento: fechaNacimiento,
                 sexo: row['Sexo'],
                 estado: row['Estado Alumno'],
                 nivelId: nivel.nivelId,
