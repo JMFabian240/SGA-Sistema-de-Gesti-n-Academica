@@ -58,7 +58,8 @@ vi.mock('../../../lib/trpc', () => {
         obtenerMetricasInscripcion: { useQuery: () => mockObtenerMetricas() },
         obtenerKpisFinancieros: { useQuery: () => mockObtenerKpis() },
         obtenerIngresosUltimos7Dias: { useQuery: () => mockObtenerIngresos() },
-        obtenerUltimosPagos: { useQuery: () => mockObtenerPagos() }
+        obtenerUltimosPagos: { useQuery: () => mockObtenerPagos() },
+        obtenerTopDeudores: { useQuery: () => ({ data: [], isLoading: false }) }
       }
     }
   };

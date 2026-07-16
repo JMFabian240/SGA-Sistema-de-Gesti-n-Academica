@@ -104,6 +104,7 @@ describe('GruposService (Unit)', () => {
 
   describe('Ciclos Escolares', () => {
     it('createCiclo transforma strings de fechas', async () => {
+      prismaMock.grado.findMany.mockResolvedValue([]);
       prismaMock.cicloEscolar.create.mockResolvedValue({ cicloId: 1 } as any);
       await GruposService.createCiclo({
         nombre: '2023-2024', fechaInicio: '2023-08-01', fechaFin: '2024-07-01', activo: false

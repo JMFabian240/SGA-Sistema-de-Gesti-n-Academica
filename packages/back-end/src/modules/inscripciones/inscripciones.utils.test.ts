@@ -17,7 +17,7 @@ describe('CalculadoraPagos', () => {
     expect(dic?.montoOriginal).toBe(1200); // Sin cobro doble
   });
 
-  it('debe calcular un plan de 12 meses con Diciembre doble y Julio 0, y calcular pagos únicos', () => {
+  it('debe calcular un plan de 12 meses dividiendo equitativamente la tarifa, y calcular pagos únicos', () => {
     const plan = { meses: 12 };
     const tarifas = [
       { concepto: 'Colegiatura', monto: 12000 },
@@ -42,14 +42,14 @@ describe('CalculadoraPagos', () => {
     expect(ago?.montoOriginal).toBe(1000);
 
     const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
-    expect(dic?.montoOriginal).toBe(2000);
+    expect(dic?.montoOriginal).toBe(1000);
 
     const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
-    expect(jul?.montoOriginal).toBe(0);
-    expect(jul?.estadoCobro).toBe('PAGADO');
+    expect(jul?.montoOriginal).toBe(1000);
+    expect(jul?.estadoCobro).toBe('PENDIENTE');
   });
 
-  it('debe aplicar el descuento de beca correctamente a las mensualidades (excepto Julio)', () => {
+  it('debe aplicar el descuento de beca correctamente a las mensualidades', () => {
     const plan = { meses: 12 };
     const tarifas = [{ concepto: 'Colegiatura', monto: 12000 }];
     const beca = { porcentajeDescuento: 15 }; // 15% de descuento
@@ -60,9 +60,9 @@ describe('CalculadoraPagos', () => {
     expect(ago?.montoOriginal).toBe(850); // 15% de 1000
 
     const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
-    expect(dic?.montoOriginal).toBe(1700); // 15% de 2000
+    expect(dic?.montoOriginal).toBe(850); // 15% de 1000
 
     const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
-    expect(jul?.montoOriginal).toBe(0);
+    expect(jul?.montoOriginal).toBe(850);
   });
 });

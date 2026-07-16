@@ -141,7 +141,7 @@ describe('Reportes Router (Unit)', () => {
       });
 
       expect(prismaMock.inscripcionCiclo.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { grupoId: 10, estadoEnCiclo: 'ACTIVO' }
+        where: { grupoId: 10, estadoEnCiclo: 'INSCRITO' }
       }));
 
       expect(result.totalAlumnos).toBe(2);

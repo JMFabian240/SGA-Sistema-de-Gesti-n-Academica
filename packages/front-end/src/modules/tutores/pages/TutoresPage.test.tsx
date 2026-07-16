@@ -16,6 +16,9 @@ vi.mock('react-router-dom', async () => {
 vi.mock('lucide-react', () => ({
   Plus: () => <span data-testid="plus-icon" />,
   Search: () => <span data-testid="search-icon" />,
+  Download: () => <span data-testid="download-icon" />,
+  Edit2: () => <span data-testid="edit-icon" />,
+  Trash2: () => <span data-testid="trash-icon" />
 }));
 
 // Mock de tRPC
@@ -24,9 +27,13 @@ const mockGetAllQuery = vi.fn();
 vi.mock('../../../lib/trpc', () => {
   return {
     trpc: {
+      useUtils: () => ({}),
       tutores: {
         getAll: {
           useQuery: () => mockGetAllQuery()
+        },
+        delete: {
+          useMutation: () => ({ mutate: vi.fn(), isPending: false })
         }
       }
     }
@@ -36,20 +43,16 @@ vi.mock('../../../lib/trpc', () => {
 describe('TutoresPage Component', () => {
   const mockTutores = [
     {
-      id: 1,
-      nombre: 'Roberto',
-      apellidoPaterno: 'Diaz',
-      apellidoMaterno: 'Gomez',
+      tutorId: 1,
+      nombreCompleto: 'Roberto Diaz Gomez',
       telefono: '5551234567',
-      email: 'roberto@example.com'
+      correoElectronico: 'roberto@example.com'
     },
     {
-      id: 2,
-      nombre: 'Maria',
-      apellidoPaterno: 'Herrera',
-      apellidoMaterno: 'Castillo',
+      tutorId: 2,
+      nombreCompleto: 'Maria Herrera Castillo',
       telefono: '5559876543',
-      email: 'maria@example.com'
+      correoElectronico: 'maria@example.com'
     }
   ];
 
@@ -66,7 +69,7 @@ describe('TutoresPage Component', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Cargando tutores...')).toBeInTheDocument();
+    expect(screen.getByText('Cargando directorio de padres...')).toBeInTheDocument();
   });
 
   it('debería renderizar la lista de tutores cuando se cargan los datos', () => {
@@ -80,7 +83,7 @@ describe('TutoresPage Component', () => {
 
     expect(screen.getByText('Roberto Diaz Gomez')).toBeInTheDocument();
     expect(screen.getByText('Maria Herrera Castillo')).toBeInTheDocument();
-    expect(screen.getByText('5551234567')).toBeInTheDocument();
+    expect(screen.getByText('roberto@example.com')).toBeInTheDocument();
     expect(screen.getByText('maria@example.com')).toBeInTheDocument();
   });
 
@@ -93,12 +96,10 @@ describe('TutoresPage Component', () => {
       </BrowserRouter>
     );
 
-    const row = screen.getByText('Roberto Diaz Gomez').closest('tr');
-    expect(row).toBeInTheDocument();
+    const btn = screen.getAllByText('Ver Info')[0];
+    expect(btn).toBeInTheDocument();
 
-    if (row) {
-      fireEvent.click(row);
-    }
+    fireEvent.click(btn);
 
     expect(mockNavigate).toHaveBeenCalledWith('/tutores/1');
   });

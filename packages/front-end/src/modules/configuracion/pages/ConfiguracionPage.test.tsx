@@ -57,6 +57,9 @@ vi.mock('../../../lib/trpc', () => {
         getTarifas: { useQuery: (options: any, config: any) => mockGetTarifas(options, config) },
         createTarifa: { useMutation: () => ({ mutateAsync: mockCreateTarifa }) },
         updateTarifa: { useMutation: () => ({ mutateAsync: mockUpdateTarifa }) }
+      },
+      configuracion: {
+        get: { useQuery: () => ({ data: { moduloFacturacion: false, notificacionesSMS: false }, isLoading: false }) }
       }
     }
   };

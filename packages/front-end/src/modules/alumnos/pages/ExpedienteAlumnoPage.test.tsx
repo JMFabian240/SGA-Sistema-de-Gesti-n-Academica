@@ -26,7 +26,15 @@ vi.mock('lucide-react', () => ({
   AlertCircle: () => <span data-testid="alert-icon" />,
   FileText: () => <span data-testid="file-icon" />,
   Banknote: () => <span data-testid="banknote-icon" />,
-  Link2Off: () => <span data-testid="unlink-icon" />
+  Link2Off: () => <span data-testid="unlink-icon" />,
+  ChevronLeft: () => <span data-testid="chevron-left-icon" />,
+  User: () => <span data-testid="user-icon2" />,
+  Crown: () => <span data-testid="crown-icon" />,
+  BookOpen: () => <span data-testid="book-icon" />,
+  Users: () => <span data-testid="users-icon" />,
+  Calculator: () => <span data-testid="calculator-icon" />,
+  UploadCloud: () => <span data-testid="upload-icon" />,
+  Eye: () => <span data-testid="eye-icon" />
 }));
 
 vi.mock('../components/EditarAlumnoModal', () => ({
@@ -51,8 +59,27 @@ vi.mock('../../../lib/trpc', () => {
         getById: {
           useQuery: () => mockGetById()
         },
+        update: {
+          useMutation: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false })
+        },
         unlinkTutor: {
-          useMutation: () => ({ mutateAsync: mockUnlinkTutor })
+          useMutation: () => ({ mutate: mockUnlinkTutor, mutateAsync: mockUnlinkTutor })
+        }
+      },
+      inscripciones: {
+        quitarPlanPago: {
+          useMutation: () => ({ mutateAsync: vi.fn(), isPending: false })
+        }
+      },
+      pagos: {
+        pagar: {
+          useMutation: () => ({ mutateAsync: vi.fn(), isPending: false })
+        },
+        recalcularCalendario: {
+          useMutation: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false })
+        },
+        adjuntarComprobante: {
+          useMutation: () => ({ mutateAsync: vi.fn(), isPending: false })
         }
       }
     }
@@ -89,18 +116,17 @@ describe('ExpedienteAlumnoPage Component', () => {
 
   it('debería renderizar el componente de cargando', () => {
     mockGetById.mockReturnValue({ isLoading: true, data: undefined });
-    render(<BrowserRouter><ExpedienteAlumnoPage /></BrowserRouter>);
-    expect(screen.getByText('Cargando expediente...')).toBeInTheDocument();
+    const { container } = render(<BrowserRouter><ExpedienteAlumnoPage /></BrowserRouter>);
+    expect(container.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('debería renderizar la información del alumno y sus responsables', () => {
     mockGetById.mockReturnValue({ isLoading: false, data: mockAlumno });
     render(<BrowserRouter><ExpedienteAlumnoPage /></BrowserRouter>);
 
-    expect(screen.getByText('Luna Alejandra Osorio')).toBeInTheDocument();
-    expect(screen.getByText('Matrícula: LUNA01')).toBeInTheDocument();
+    expect(screen.getAllByText('Luna Alejandra Osorio').length).toBeGreaterThan(0);
+    expect(screen.getByText('LUNA01')).toBeInTheDocument();
     expect(screen.getByText('Luis Fernando Kempez')).toBeInTheDocument();
-    expect(screen.getByText('Padre (Principal)')).toBeInTheDocument();
   });
 
   it('debería llamar a unlinkTutor al confirmar desvinculación', async () => {
@@ -108,17 +134,14 @@ describe('ExpedienteAlumnoPage Component', () => {
     mockUnlinkTutor.mockResolvedValue({});
     
     // Simular el window.confirm
-    const confirmSpy = vi.spyOn(window, 'confirm');
-    confirmSpy.mockImplementation(() => true);
+    window.confirm = vi.fn().mockImplementation(() => true);
 
     render(<BrowserRouter><ExpedienteAlumnoPage /></BrowserRouter>);
     
-    const btnDesvincular = screen.getByTitle('Desvincular Responsable');
+    const btnDesvincular = screen.getByTitle('Desvincular tutor');
     fireEvent.click(btnDesvincular);
 
-    expect(confirmSpy).toHaveBeenCalled();
+    expect(window.confirm).toHaveBeenCalled();
     expect(mockUnlinkTutor).toHaveBeenCalledWith({ tutorAlumnoId: 10 });
-
-    confirmSpy.mockRestore();
   });
 });

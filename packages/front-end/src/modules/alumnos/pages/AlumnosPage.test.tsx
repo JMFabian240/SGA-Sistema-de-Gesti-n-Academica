@@ -21,10 +21,17 @@ vi.mock('lucide-react', () => ({
   Download: () => React.createElement('span', { 'data-testid': 'download-icon' }),
   X: () => React.createElement('span', { 'data-testid': 'x-icon' }),
   Calendar: () => React.createElement('span', { 'data-testid': 'calendar-icon' }),
+  Edit2: () => React.createElement('span', { 'data-testid': 'edit-icon' }),
+  Trash2: () => React.createElement('span', { 'data-testid': 'trash-icon' }),
+  UserRound: () => React.createElement('span', { 'data-testid': 'user-icon' })
 }));
 
-vi.mock('../components/NuevoAlumnoModal', () => ({
+vi.mock('../../alumnos/components/NuevoAlumnoModal', () => ({
   NuevoAlumnoModal: () => React.createElement('div', { 'data-testid': 'mock-nuevo-alumno-modal' })
+}));
+
+vi.mock('../../alumnos/components/EditarAlumnoModal', () => ({
+  EditarAlumnoModal: () => React.createElement('div', { 'data-testid': 'mock-editar-alumno-modal' })
 }));
 
 // Mock de tRPC
@@ -33,17 +40,30 @@ const mockGetAllQuery = vi.fn();
 vi.mock('../../../lib/trpc', () => {
   return {
     trpc: {
+      useUtils: () => ({ alumnos: { getAll: { invalidate: vi.fn() } } }),
       alumnos: {
         getAll: {
           useQuery: () => mockGetAllQuery()
         },
         create: {
           useMutation: () => ({ mutateAsync: vi.fn() })
+        },
+        update: {
+          useMutation: () => ({ mutateAsync: vi.fn(), isPending: false })
+        },
+        delete: {
+          useMutation: () => ({ mutateAsync: vi.fn(), isPending: false })
         }
       },
       grupos: {
         getNiveles: {
           useQuery: () => ({ data: [{ nivelId: 1, nombre: 'PREESCOLAR' }] })
+        },
+        getGrados: {
+          useQuery: () => ({ data: [] })
+        },
+        getGrupos: {
+          useQuery: () => ({ data: [] })
         }
       }
     }
@@ -54,9 +74,7 @@ describe('AlumnosPage Component', () => {
   const mockAlumnos = [
     {
       alumnoId: 1,
-      nombre: 'Carlos',
-      apellidoPaterno: 'Lopez',
-      apellidoMaterno: 'Martinez',
+      nombreCompleto: 'Carlos Lopez Martinez',
       matricula: 'LOMC000000HDFRRS01',
       estado: 'ACTIVO',
       nivel: { nombre: 'PRIMARIA' },
@@ -70,9 +88,7 @@ describe('AlumnosPage Component', () => {
     },
     {
       alumnoId: 2,
-      nombre: 'Ana',
-      apellidoPaterno: 'Gomez',
-      apellidoMaterno: 'Sanchez',
+      nombreCompleto: 'Ana Gomez Sanchez',
       matricula: 'GOSA000000MDFRRS02',
       estado: 'ACTIVO',
       nivel: { nombre: 'PREESCOLAR' },
@@ -109,7 +125,7 @@ describe('AlumnosPage Component', () => {
     // Búsqueda de información esperada
     expect(screen.getByText('Carlos Lopez Martinez')).toBeInTheDocument();
     expect(screen.getByText('Matrícula: LOMC000000HDFRRS01')).toBeInTheDocument();
-    expect(screen.getByText('1°A PRIMARIA')).toBeInTheDocument();
+    expect(screen.getByText('1° - 1°A PRIMARIA')).toBeInTheDocument();
     expect(screen.getByText('Juan Lopez')).toBeInTheDocument();
     expect(screen.getByText('Tel: 5551234567')).toBeInTheDocument();
 

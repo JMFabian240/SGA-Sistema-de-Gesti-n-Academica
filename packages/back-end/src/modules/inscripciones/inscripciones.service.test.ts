@@ -184,7 +184,7 @@ describe('InscripcionesService (Unit)', () => {
       expect(prismaMock.calendarioPago.createMany).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.arrayContaining([
-            expect.objectContaining({ concepto: 'Colegiatura Diciembre', montoOriginal: 4000 })
+            expect.objectContaining({ concepto: 'Colegiatura Diciembre', montoOriginal: 2000 })
           ])
         })
       );
