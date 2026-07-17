@@ -177,7 +177,7 @@ export class GruposService {
 
   static async createCiclo(input: CreateCicloEscolarInput) {
     let gradosPermitidos = input.gradosPermitidos;
-    const { clonarDesdeCicloId, clonarTarifas, ...cicloData } = input;
+    const { clonarGruposDesdeCicloId, clonarTarifasDesdeCicloId, ...cicloData } = input;
     
     if (!gradosPermitidos) {
       const per = input.periodicidad || 'ANUAL';
@@ -200,9 +200,8 @@ export class GruposService {
       gradosPermitidos
     });
 
-    if (clonarDesdeCicloId) {
-      // Clonar Grupos, Materias (con docentes), y Tarifas
-      await this.clonarCicloEstructura(clonarDesdeCicloId, c.cicloId, !!clonarTarifas);
+    if (clonarGruposDesdeCicloId || clonarTarifasDesdeCicloId) {
+      await this.clonarCicloEstructura(c.cicloId, clonarGruposDesdeCicloId, clonarTarifasDesdeCicloId);
     }
 
     return {
@@ -211,12 +210,13 @@ export class GruposService {
     };
   }
 
-  private static async clonarCicloEstructura(cicloOrigenId: number, cicloDestinoId: number, clonarTarifas: boolean) {
-    // Clonar Grupos
-    const gruposOrigen = await prisma.grupo.findMany({
-      where: { cicloId: cicloOrigenId, eliminadoEn: null },
-      include: { materias: true }
-    });
+  private static async clonarCicloEstructura(cicloDestinoId: number, clonarGruposDesdeCicloId?: number, clonarTarifasDesdeCicloId?: number) {
+    if (clonarGruposDesdeCicloId) {
+      // Clonar Grupos
+      const gruposOrigen = await prisma.grupo.findMany({
+        where: { cicloId: clonarGruposDesdeCicloId, eliminadoEn: null },
+        include: { materias: true }
+      });
 
     for (const grupo of gruposOrigen) {
       const nuevoGrupo = await prisma.grupo.create({
@@ -240,11 +240,12 @@ export class GruposService {
         });
       }
     }
+    }
 
     // Clonar Tarifas
-    if (clonarTarifas) {
+    if (clonarTarifasDesdeCicloId) {
       const tarifasOrigen = await prisma.tarifa.findMany({
-        where: { cicloId: cicloOrigenId, eliminadoEn: null, activa: true }
+        where: { cicloId: clonarTarifasDesdeCicloId, eliminadoEn: null, activa: true }
       });
       for (const t of tarifasOrigen) {
         await prisma.tarifa.create({

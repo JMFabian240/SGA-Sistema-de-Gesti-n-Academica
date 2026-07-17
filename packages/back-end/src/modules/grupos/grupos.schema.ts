@@ -32,11 +32,11 @@ export const createCicloEscolarSchema = z.object({
   abierto: z.boolean().optional(),
   periodicidad: z.enum(['ANUAL', 'SEMESTRAL']).optional(),
   gradosPermitidos: z.record(z.array(z.number().int().positive())).optional(),
-  clonarDesdeCicloId: z.number().int().positive().optional(),
-  clonarTarifas: z.boolean().optional()
+  clonarGruposDesdeCicloId: z.number().int().positive().optional(),
+  clonarTarifasDesdeCicloId: z.number().int().positive().optional()
 });
 
-export const updateCicloEscolarSchema = createCicloEscolarSchema.omit({ clonarDesdeCicloId: true, clonarTarifas: true }).partial().extend({
+export const updateCicloEscolarSchema = createCicloEscolarSchema.omit({ clonarGruposDesdeCicloId: true, clonarTarifasDesdeCicloId: true }).partial().extend({
   cicloId: z.number().int().positive()
 });
 
