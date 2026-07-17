@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { trpc } from '../../../lib/trpc';
 import { RefreshCw, ArrowLeft, Users, AlertTriangle, PlusCircle } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
@@ -13,16 +13,17 @@ type Props = {
 export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBack }: Props) {
   const [selectedGrupoId, setSelectedGrupoId] = useState<number | null>(null);
   const [isGrupoModalOpen, setIsGrupoModalOpen] = useState(false);
-  
-  const { data: cicloDestino } = trpc.grupos.getCiclo.useQuery(cicloDestinoId);
+
+  const { data: ciclos } = trpc.grupos.getCiclos.useQuery();
+  const cicloDestino = ciclos?.find((c: any) => c.cicloId === cicloDestinoId);
   const { data: gruposOrigen, isLoading: loadingGrupos } = trpc.grupos.getGrupos.useQuery({ cicloId: cicloOrigenId });
   const { data: gruposDestino } = trpc.grupos.getGrupos.useQuery({ cicloId: cicloDestinoId });
-  
+
   const { data: grados } = trpc.grupos.getGrados.useQuery();
   const { data: inscripcionesOrigen } = trpc.inscripciones.getInscripciones.useQuery({ cicloId: cicloOrigenId });
 
   const utils = trpc.useContext();
-  
+
   const inscribirMutation = trpc.grupos.inscribirAlumnosTransicion.useMutation({
     onSuccess: () => {
       utils.inscripciones.getInscripciones.invalidate();
@@ -32,21 +33,21 @@ export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBac
   });
 
   const grupoSeleccionado = gruposOrigen?.find((g: any) => g.grupoId === selectedGrupoId) as any;
-  
+
   const alumnosCandidatos = inscripcionesOrigen
     ?.filter((ins: any) => ins.grupoId === selectedGrupoId)
     .map((ins: any) => ins.alumno) || [];
 
   const gradoActual = grupoSeleccionado?.grado;
   const nivelActual = grupoSeleccionado?.nivel;
-  
+
   let gradoSiguienteInfo: any = null;
   let grupoSugerido: any = null;
 
   if (gradoActual && nivelActual && grados) {
     const numeroSiguiente = gradoActual.numero + 1;
     gradoSiguienteInfo = grados.find((g: any) => g.nivelId === nivelActual.nivelId && g.numero === numeroSiguiente);
-    
+
     if (gradoSiguienteInfo) {
       const posiblesGrupos = gruposDestino?.filter((g: any) => g.gradoId === gradoSiguienteInfo.gradoId) || [];
       if (posiblesGrupos.length > 0) {
@@ -60,7 +61,7 @@ export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBac
       alert('No hay grupo sugerido/disponible para inscribir a estos alumnos.');
       return;
     }
-    
+
     const alumnosPorGrupo = {
       [grupoSugerido.grupoId]: alumnosCandidatos.map((a: any) => a.alumnoId)
     };
@@ -134,6 +135,10 @@ export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBac
     );
   }
 
+  const refetchGruposDestino = () => {
+    utils.grupos.getGrupos.invalidate({ cicloId: cicloDestinoId });
+  };
+
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
       <div className="flex justify-between items-center border-b border-gray-100 pb-4">
@@ -172,7 +177,7 @@ export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBac
           </div>
         ) : (
           <p className="text-sm text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 flex items-start gap-2">
-             <AlertTriangle size={16} className="mt-0.5 shrink-0" /> No se pudo determinar el siguiente grado. Es posible que estén en el último grado de su nivel.
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" /> No se pudo determinar el siguiente grado. Es posible que estén en el último grado de su nivel.
           </p>
         )}
       </div>
@@ -214,8 +219,8 @@ export function InscripcionTransicionPage({ cicloOrigenId, cicloDestinoId, onBac
         <Button variant="ghost" onClick={() => setSelectedGrupoId(null)}>
           Cancelar
         </Button>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           disabled={!grupoSugerido || alumnosCandidatos.length === 0 || inscribirMutation.isLoading}
           onClick={handleInscribir}
           isLoading={inscribirMutation.isLoading}
