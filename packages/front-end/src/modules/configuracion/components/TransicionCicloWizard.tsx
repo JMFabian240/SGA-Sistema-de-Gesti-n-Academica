@@ -8,9 +8,10 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   cicloActual: any;
+  onOpenNewCiclo?: () => void;
 };
 
-export function TransicionCicloWizard({ isOpen, onClose, cicloActual }: Props) {
+export function TransicionCicloWizard({ isOpen, onClose, cicloActual, onOpenNewCiclo }: Props) {
   const [step, setStep] = useState(1);
   const [cicloDestinoId, setCicloDestinoId] = useState<number | ''>('');
   const [alumnosSeleccionados, setAlumnosSeleccionados] = useState<Record<number, boolean>>({});
@@ -128,9 +129,20 @@ export function TransicionCicloWizard({ isOpen, onClose, cicloActual }: Props) {
                   <option key={c.cicloId} value={c.cicloId}>{c.nombre}</option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-2">
-                El ciclo destino debe estar vacío (sin alumnos inscritos). Si no lo has creado, cancela este asistente y créalo primero usando la opción "Nuevo Ciclo".
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-gray-500">
+                  El ciclo destino debe estar vacío (sin alumnos inscritos).
+                </p>
+                {onOpenNewCiclo && (
+                  <button
+                    type="button"
+                    onClick={onOpenNewCiclo}
+                    className="text-xs font-semibold text-navy-600 hover:text-navy-800 transition-colors"
+                  >
+                    + Crear Nuevo Ciclo
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end pt-4">

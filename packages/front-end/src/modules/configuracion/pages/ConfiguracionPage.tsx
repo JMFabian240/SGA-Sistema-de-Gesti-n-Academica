@@ -512,13 +512,6 @@ export function ConfiguracionPage() {
               } : undefined}
             />
 
-            {wizardCiclo && (
-              <TransicionCicloWizard
-                isOpen={true}
-                onClose={() => setWizardCiclo(null)}
-                cicloActual={wizardCiclo}
-              />
-            )}
           </div>
         )}
 
@@ -945,20 +938,7 @@ export function ConfiguracionPage() {
                     <h3 className="text-lg font-bold text-navy-800">Cierre de Ciclo por Grupos</h3>
                     <p className="text-xs text-gray-500">Selecciona un grupo para verificar el estado de sus alumnos y proceder con el cierre de ciclo.</p>
                   </div>
-                  {ciclosReady && ciclosReady.length > 0 && (
-                    <div className="flex flex-col gap-2 items-end">
-                      {ciclosReady.map((ciclo: any) => (
-                        <button
-                          key={ciclo.cicloId}
-                          onClick={() => setWizardCiclo(ciclo)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors shadow-sm cursor-pointer text-sm"
-                        >
-                          <CheckCircle size={16} />
-                          Transicionar Ciclo {ciclo.nombre}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {/* Transition buttons moved below the table */}
                 </div>
 
                 {loadingGrupos ? (
@@ -1032,6 +1012,21 @@ export function ConfiguracionPage() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                )}
+                {/* Transition buttons at the bottom of the table */}
+                {!loadingGrupos && ciclosReady && ciclosReady.length > 0 && (
+                  <div className="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+                    {ciclosReady.map((ciclo: any) => (
+                      <button
+                        key={ciclo.cicloId}
+                        onClick={() => setWizardCiclo(ciclo)}
+                        className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors shadow-sm cursor-pointer text-sm"
+                      >
+                        <CheckCircle size={18} />
+                        Transicionar Ciclo {ciclo.nombre}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1231,6 +1226,15 @@ export function ConfiguracionPage() {
 
       {activeTab === 'importacion' && (
         <ImportacionDatosPanel ciclos={ciclos || []} />
+      )}
+
+      {wizardCiclo && (
+        <TransicionCicloWizard
+          isOpen={true}
+          onClose={() => setWizardCiclo(null)}
+          cicloActual={wizardCiclo}
+          onOpenNewCiclo={handleOpenNewCiclo}
+        />
       )}
     </div>
   );
