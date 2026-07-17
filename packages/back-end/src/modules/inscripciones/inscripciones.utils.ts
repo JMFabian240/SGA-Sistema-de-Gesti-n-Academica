@@ -32,7 +32,7 @@ export class CalculadoraPagos {
     beca?: BecaData | null
   ) {
     const meses10 = ['Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
-    const meses12 = ['Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Julio', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
+    const meses12 = ['Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'];
 
     const mesesToUse = plan.meses === 12 ? meses12 : meses10;
     const adeudos: any[] = [];
@@ -77,6 +77,14 @@ export class CalculadoraPagos {
       const mesStr = mesesToUse[i];
       // Regla general: la colegiatura se divide de manera equitativa entre los meses del plan
       let monto = montoMensualColegiatura;
+
+      if (plan.meses === 12) {
+        if (mesStr === 'Diciembre') {
+          monto = montoMensualColegiatura * 2;
+        } else if (mesStr === 'Julio') {
+          monto = 0;
+        }
+      }
 
       // Aplicar beca solo a colegiatura
       if (beca && beca.porcentajeDescuento > 0 && monto > 0) {
