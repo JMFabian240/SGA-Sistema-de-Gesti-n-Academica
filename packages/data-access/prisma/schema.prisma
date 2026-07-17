@@ -193,6 +193,7 @@ model CicloEscolar {
   fechaInicio         DateTime                     @map("fecha_inicio") @db.Date
   fechaFin            DateTime                     @map("fecha_fin") @db.Date
   activo              Boolean?                     @default(false)
+  abierto             Boolean?                     @default(true) @map("abierto")
   creadoEn            DateTime?                    @default(now()) @map("creado_en") @db.Timestamptz(6)
   actualizadoEn       DateTime?                    @default(now()) @map("actualizado_en") @db.Timestamptz(6)
   eliminadoEn         DateTime?                    @map("eliminado_en") @db.Timestamptz(6)

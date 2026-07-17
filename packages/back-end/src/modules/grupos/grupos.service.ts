@@ -8,7 +8,8 @@ import type {
   CreateGrupoInput, UpdateGrupoInput,
   AssignMateriaGrupoInput, UnassignMateriaGrupoInput,
   CerrarCicloGrupoInput,
-  InicializarGruposSeleccionadosInput
+  InicializarGruposSeleccionadosInput,
+  TransicionCicloInput, CerrarCicloInput
 } from './grupos.schema';
 import { GruposRepository } from './grupos.repository';
 
@@ -176,6 +177,7 @@ export class GruposService {
 
   static async createCiclo(input: CreateCicloEscolarInput) {
     let gradosPermitidos = input.gradosPermitidos;
+    const { clonarDesdeCicloId, clonarTarifas, ...cicloData } = input;
     
     if (!gradosPermitidos) {
       const per = input.periodicidad || 'ANUAL';
@@ -192,15 +194,130 @@ export class GruposService {
     }
 
     const c = await GruposRepository.createCiclo({
-      ...input,
+      ...cicloData,
       fechaInicio: new Date(input.fechaInicio),
       fechaFin: new Date(input.fechaFin),
       gradosPermitidos
     });
+
+    if (clonarDesdeCicloId) {
+      // Clonar Grupos, Materias (con docentes), y Tarifas
+      await this.clonarCicloEstructura(clonarDesdeCicloId, c.cicloId, !!clonarTarifas);
+    }
+
     return {
       ...c,
       gradosPermitidos: c.gradosPermitidos as Record<string, number[]> | null
     };
+  }
+
+  private static async clonarCicloEstructura(cicloOrigenId: number, cicloDestinoId: number, clonarTarifas: boolean) {
+    // Clonar Grupos
+    const gruposOrigen = await prisma.grupo.findMany({
+      where: { cicloId: cicloOrigenId, eliminadoEn: null },
+      include: { materias: true }
+    });
+
+    for (const grupo of gruposOrigen) {
+      const nuevoGrupo = await prisma.grupo.create({
+        data: {
+          nivelId: grupo.nivelId,
+          cicloId: cicloDestinoId,
+          nombre: grupo.nombre,
+          cupoMaximo: grupo.cupoMaximo,
+          gradoId: grupo.gradoId
+        }
+      });
+
+      // Clonar Materias
+      for (const gm of grupo.materias) {
+        await prisma.grupoMateria.create({
+          data: {
+            grupoId: nuevoGrupo.grupoId,
+            materiaId: gm.materiaId,
+            docenteId: gm.docenteId // Se clona el docente, se puede editar luego
+          }
+        });
+      }
+    }
+
+    // Clonar Tarifas
+    if (clonarTarifas) {
+      const tarifasOrigen = await prisma.tarifa.findMany({
+        where: { cicloId: cicloOrigenId, eliminadoEn: null, activa: true }
+      });
+      for (const t of tarifasOrigen) {
+        await prisma.tarifa.create({
+          data: {
+            cicloId: cicloDestinoId,
+            nivelId: t.nivelId,
+            concepto: t.concepto,
+            monto: t.monto,
+            descripcion: t.descripcion,
+            activa: true
+          }
+        });
+      }
+    }
+  }
+
+  static async cerrarCiclo(input: CerrarCicloInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (!ciclo) throw new TRPCError({ code: 'NOT_FOUND', message: 'Ciclo no encontrado' });
+
+    // Validar que todos los grupos estén cerrados
+    const gruposAbiertos = await prisma.grupo.findMany({
+      where: { cicloId: input.cicloId, cerrado: false, eliminadoEn: null }
+    });
+
+    if (gruposAbiertos.length > 0) {
+      throw new TRPCError({ 
+        code: 'BAD_REQUEST', 
+        message: `Faltan grupos por cerrar (${gruposAbiertos.map(g => g.nombre).join(', ')})`
+      });
+    }
+
+    await prisma.cicloEscolar.update({
+      where: { cicloId: input.cicloId },
+      data: { abierto: false }
+    });
+
+    return { success: true };
+  }
+
+  static async transicionCiclo(input: TransicionCicloInput) {
+    // 1. Cerrar ciclo actual (Valida grupos también)
+    await this.cerrarCiclo({ cicloId: input.cicloActualId });
+
+    // 2. Validar ciclo destino (que esté vacío de alumnos)
+    const inscripcionesDestino = await prisma.inscripcionCiclo.count({
+      where: { cicloId: input.cicloDestinoId, eliminadoEn: null }
+    });
+
+    if (inscripcionesDestino > 0) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Este ciclo escolar ya está cerrado o tiene alumnos vinculados.' });
+    }
+
+    // 3. Inscribir alumnos seleccionados en los grupos destino
+    for (const [grupoDestinoIdStr, alumnoIds] of Object.entries(input.alumnosPorGrupo)) {
+      const grupoDestinoId = parseInt(grupoDestinoIdStr, 10);
+      const grupo = await prisma.grupo.findUnique({ where: { grupoId: grupoDestinoId } });
+      if (!grupo) continue;
+
+      for (const alumnoId of alumnoIds) {
+        await prisma.inscripcionCiclo.create({
+          data: {
+            alumnoId,
+            cicloId: input.cicloDestinoId,
+            grupoId: grupoDestinoId,
+            estadoEnCiclo: 'INSCRITO',
+            fechaInscripcion: new Date()
+          }
+        });
+      }
+    }
+
+    return { success: true };
   }
 
   static async updateCiclo(input: UpdateCicloEscolarInput) {

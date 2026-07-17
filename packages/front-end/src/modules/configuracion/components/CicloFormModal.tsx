@@ -20,7 +20,11 @@ export function CicloFormModal({ isOpen, onClose, cicloId, initialData }: Props)
   const [fechaFin, setFechaFin] = useState('');
   const [activo, setActivo] = useState(false);
   const [periodicidad, setPeriodicidad] = useState<'ANUAL' | 'SEMESTRAL'>('ANUAL');
+  const [clonarDesdeCicloId, setClonarDesdeCicloId] = useState<number | ''>('');
+  const [clonarTarifas, setClonarTarifas] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: ciclos } = trpc.grupos.getCiclos.useQuery(undefined, { enabled: isOpen && !isEditing });
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +41,8 @@ export function CicloFormModal({ isOpen, onClose, cicloId, initialData }: Props)
         setFechaFin('');
         setActivo(false);
         setPeriodicidad('ANUAL');
+        setClonarDesdeCicloId('');
+        setClonarTarifas(true);
       }
     }
   }, [isOpen, initialData]);
@@ -75,13 +81,18 @@ export function CicloFormModal({ isOpen, onClose, cicloId, initialData }: Props)
     const startISO = new Date(fechaInicio).toISOString();
     const endISO = new Date(fechaFin).toISOString();
 
-    const payload = {
+    const payload: any = {
       nombre,
       fechaInicio: startISO,
       fechaFin: endISO,
       activo,
       periodicidad
     };
+
+    if (!isEditing && clonarDesdeCicloId !== '') {
+      payload.clonarDesdeCicloId = Number(clonarDesdeCicloId);
+      payload.clonarTarifas = clonarTarifas;
+    }
 
     if (isEditing) {
       updateMutation.mutate({ cicloId: cicloId!, ...payload });
@@ -164,6 +175,43 @@ export function CicloFormModal({ isOpen, onClose, cicloId, initialData }: Props)
             Marcar como Ciclo Escolar Activo
           </label>
         </div>
+
+        {!isEditing && ciclos && ciclos.length > 0 && (
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+            <h4 className="text-sm font-semibold text-navy-800">Opciones de Clonación (Opcional)</h4>
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Clonar Grupos y Materias desde:
+              </label>
+              <select
+                value={clonarDesdeCicloId}
+                onChange={(e) => setClonarDesdeCicloId(e.target.value === '' ? '' : Number(e.target.value))}
+                disabled={isSaving}
+                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-navy-500 outline-none text-sm bg-white h-[38px] sm:text-sm"
+              >
+                <option value="">No clonar nada (Crear vacío)</option>
+                {ciclos.map(c => (
+                  <option key={c.cicloId} value={c.cicloId}>{c.nombre}</option>
+                ))}
+              </select>
+            </div>
+            {clonarDesdeCicloId !== '' && (
+              <div className="flex items-center gap-3 mt-2">
+                <input
+                  type="checkbox"
+                  id="clonar-tarifas-checkbox"
+                  checked={clonarTarifas}
+                  onChange={(e) => setClonarTarifas(e.target.checked)}
+                  disabled={isSaving}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                />
+                <label htmlFor="clonar-tarifas-checkbox" className="text-sm font-medium text-gray-700 select-none cursor-pointer">
+                  También clonar las Tarifas del ciclo seleccionado
+                </label>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>

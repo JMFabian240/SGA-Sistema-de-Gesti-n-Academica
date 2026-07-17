@@ -25,7 +25,7 @@ export function InscribirAlumnoModal({ alumnoId, isOpen, onClose }: InscribirAlu
   const { data: grados } = trpc.grupos.getGrados.useQuery(undefined, { enabled: isOpen });
 
   // Obtener todos los ciclos activos (por ejemplo, Semestral y Anual a la vez)
-  const ciclosActivos = ciclos?.filter((c: any) => c.activo && !c.eliminadoEn) || [];
+  const ciclosActivos = ciclos?.filter((c: any) => c.activo && c.abierto !== false && !c.eliminadoEn) || [];
   const activoCicloIds = ciclosActivos.map((c: any) => c.cicloId);
 
   const createMutation = trpc.inscripciones.createInscripcion.useMutation({

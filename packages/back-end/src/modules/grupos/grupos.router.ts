@@ -5,6 +5,7 @@ import {
   createNivelEducativoSchema, updateNivelEducativoSchema,
   createGradoSchema, updateGradoSchema,
   createCicloEscolarSchema, updateCicloEscolarSchema,
+  transicionCicloSchema, cerrarCicloSchema,
   createMateriaSchema, updateMateriaSchema,
   createGrupoSchema, updateGrupoSchema,
   assignMateriaGrupoSchema, unassignMateriaGrupoSchema,
@@ -36,6 +37,8 @@ export const gruposRouter = router({
   createCiclo: escritura.input(createCicloEscolarSchema).mutation(({ input }) => GruposService.createCiclo(input)),
   updateCiclo: escritura.input(updateCicloEscolarSchema).mutation(({ input }) => GruposService.updateCiclo(input)),
   deleteCiclo: escritura.input(z.number().int().positive()).mutation(({ input }) => GruposService.deleteCiclo(input)),
+  cerrarCiclo: escritura.input(cerrarCicloSchema).mutation(({ input }) => GruposService.cerrarCiclo(input)),
+  transicionCiclo: escritura.input(transicionCicloSchema).mutation(({ input }) => GruposService.transicionCiclo(input)),
 
   // --- Materias ---
   getMaterias: lecturaMaterias.query(() => GruposService.getMaterias()),

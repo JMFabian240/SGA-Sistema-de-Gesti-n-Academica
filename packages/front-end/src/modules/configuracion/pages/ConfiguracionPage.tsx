@@ -10,6 +10,7 @@ import { Input } from '../../../components/ui/Input';
 import { CicloFormModal } from '../components/CicloFormModal';
 import { ImportacionDatosPanel } from '../components/ImportacionDatosPanel';
 import { PlanesPagoPanel } from '../components/PlanesPagoPanel';
+import { TransicionCicloWizard } from '../components/TransicionCicloWizard';
 
 type TabType = 'ciclos' | 'tarifas' | 'planespago' | 'cierre' | 'importacion';
 
@@ -22,6 +23,7 @@ export function ConfiguracionPage() {
 
   const [isCicloModalOpen, setIsCicloModalOpen] = useState(false);
   const [editingCiclo, setEditingCiclo] = useState<any>(null);
+  const [wizardCiclo, setWizardCiclo] = useState<any>(null);
 
   const deleteCicloMutation = trpc.grupos.deleteCiclo.useMutation({
     onSuccess: () => {
@@ -503,6 +505,14 @@ export function ConfiguracionPage() {
                 periodicidad: editingCiclo.periodicidad
               } : undefined}
             />
+
+            {wizardCiclo && (
+              <TransicionCicloWizard
+                isOpen={true}
+                onClose={() => setWizardCiclo(null)}
+                cicloActual={wizardCiclo}
+              />
+            )}
           </div>
         )}
 

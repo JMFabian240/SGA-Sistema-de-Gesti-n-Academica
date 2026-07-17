@@ -65,6 +65,12 @@ export function ExpedienteAlumnoPage() {
     return (alumno as any).inscripciones.find((i: any) => i.estadoEnCiclo === 'INSCRITO' && i.ciclo.activo);
   }, [alumno]);
 
+  const selectedCiclo = useMemo(() => {
+    return (alumno as any)?.inscripciones?.find((i: any) => i.cicloId === selectedCicloId)?.ciclo;
+  }, [alumno, selectedCicloId]);
+
+  const isCicloAbierto = selectedCiclo?.abierto !== false;
+
   const quitarPlanMutation = trpc.inscripciones.quitarPlanPago.useMutation({
     onSuccess: () => {
       window.alert('Plan de pago removido con éxito.');
@@ -253,6 +259,15 @@ export function ExpedienteAlumnoPage() {
         </div>
       </div>
 
+      {!isCicloAbierto && (
+        <div className="mb-6 p-4 bg-red-50 rounded-xl border border-red-200 flex items-center gap-3 text-red-800">
+          <AlertTriangle size={20} className="shrink-0" />
+          <p className="text-sm font-medium">
+            <strong>CICLO CERRADO:</strong> El ciclo escolar <strong>{selectedCiclo?.nombre}</strong> se encuentra cerrado. Los datos del alumno para este ciclo (calificaciones, inscripciones y calendario) están en modo <strong>solo lectura</strong>.
+          </p>
+        </div>
+      )}
+
       {/* Información Personal */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-4 px-1">
@@ -434,26 +449,30 @@ export function ExpedienteAlumnoPage() {
                   <div className="text-sm font-medium text-blue-800">
                     Plan de pagos asignado: {inscripcionActual.planPago.nombre}
                   </div>
-                  <button
-                    onClick={() => handleQuitarPlan(inscripcionActual.inscripcionId)}
-                    disabled={quitarPlanMutation.isLoading}
-                    className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Quitar plan de pagos"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {inscripcionActual.ciclo?.abierto !== false && (
+                    <button
+                      onClick={() => handleQuitarPlan(inscripcionActual.inscripcionId)}
+                      disabled={quitarPlanMutation.isLoading}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Quitar plan de pagos"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="mt-3 flex items-center justify-between bg-amber-50/50 p-3 rounded-lg border border-amber-100">
                   <div className="text-sm text-amber-800">
                     <span className="font-semibold">Atención:</span> El alumno no tiene plan de pagos asignado.
                   </div>
-                  <button
-                    onClick={() => setIsAsignarPlanModalOpen(true)}
-                    className="px-3 py-1.5 bg-amber-100 text-amber-700 font-medium rounded-lg hover:bg-amber-200 transition-colors text-sm"
-                  >
-                    Asignar Plan
-                  </button>
+                  {inscripcionActual.ciclo?.abierto !== false && (
+                    <button
+                      onClick={() => setIsAsignarPlanModalOpen(true)}
+                      className="px-3 py-1.5 bg-amber-100 text-amber-700 font-medium rounded-lg hover:bg-amber-200 transition-colors text-sm"
+                    >
+                      Asignar Plan
+                    </button>
+                  )}
                 </div>
               )}
             </div>

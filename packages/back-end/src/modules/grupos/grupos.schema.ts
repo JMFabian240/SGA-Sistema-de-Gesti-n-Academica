@@ -29,11 +29,24 @@ export const createCicloEscolarSchema = z.object({
   fechaInicio: z.string().datetime({ message: 'Formato de fecha inválido' }),
   fechaFin: z.string().datetime({ message: 'Formato de fecha inválido' }),
   activo: z.boolean().optional(),
+  abierto: z.boolean().optional(),
   periodicidad: z.enum(['ANUAL', 'SEMESTRAL']).optional(),
-  gradosPermitidos: z.record(z.array(z.number().int().positive())).optional()
+  gradosPermitidos: z.record(z.array(z.number().int().positive())).optional(),
+  clonarDesdeCicloId: z.number().int().positive().optional(),
+  clonarTarifas: z.boolean().optional()
 });
 
-export const updateCicloEscolarSchema = createCicloEscolarSchema.partial().extend({
+export const updateCicloEscolarSchema = createCicloEscolarSchema.omit({ clonarDesdeCicloId: true, clonarTarifas: true }).partial().extend({
+  cicloId: z.number().int().positive()
+});
+
+export const transicionCicloSchema = z.object({
+  cicloActualId: z.number().int().positive(),
+  cicloDestinoId: z.number().int().positive(),
+  alumnosPorGrupo: z.record(z.array(z.number().int().positive())) // { "grupoId": [alumnoId1, alumnoId2] }
+});
+
+export const cerrarCicloSchema = z.object({
   cicloId: z.number().int().positive()
 });
 
@@ -109,6 +122,8 @@ export type CreateGradoInput = z.infer<typeof createGradoSchema>;
 export type UpdateGradoInput = z.infer<typeof updateGradoSchema>;
 export type CreateCicloEscolarInput = z.infer<typeof createCicloEscolarSchema>;
 export type UpdateCicloEscolarInput = z.infer<typeof updateCicloEscolarSchema>;
+export type TransicionCicloInput = z.infer<typeof transicionCicloSchema>;
+export type CerrarCicloInput = z.infer<typeof cerrarCicloSchema>;
 export type CreateMateriaInput = z.infer<typeof createMateriaSchema>;
 export type UpdateMateriaInput = z.infer<typeof updateMateriaSchema>;
 export type CreateGrupoInput = z.infer<typeof createGrupoSchema>;

@@ -18,11 +18,22 @@ export class PagosService {
   }
 
   static async createTarifa(input: CreateTarifaInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (ciclo && ciclo.abierto === false) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden crear tarifas en un ciclo escolar cerrado.' });
+    }
     const { fechaVencimiento, ...dataToSave } = input as any;
     return PagosRepository.createTarifa(dataToSave);
   }
 
   static async updateTarifa(input: UpdateTarifaInput) {
+    const tarifa = await PagosRepository.getTarifas().then(ts => ts.find((t: any) => t.tarifaId === input.tarifaId));
+    if (tarifa) {
+      const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: tarifa.cicloId } });
+      if (ciclo && ciclo.abierto === false) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden modificar tarifas de un ciclo escolar cerrado.' });
+      }
+    }
     const { tarifaId, fechaVencimiento, ...data } = input;
     const updateData: any = { ...data, actualizadoEn: new Date() };
     return PagosRepository.updateTarifa(tarifaId, updateData);
@@ -276,6 +287,10 @@ export class PagosService {
 
 
   static async createCargoExtraordinario(input: CreateCargoExtraordinarioInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (ciclo && ciclo.abierto === false) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden crear cargos en un ciclo escolar cerrado.' });
+    }
     return PagosRepository.createAdeudo({
       alumnoId: input.alumnoId,
       cicloId: input.cicloId,

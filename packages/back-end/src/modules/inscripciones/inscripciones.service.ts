@@ -61,6 +61,11 @@ export class InscripcionesService {
   }
 
   static async createInscripcion(input: CreateInscripcionInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (ciclo && ciclo.abierto === false) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden crear inscripciones en un ciclo escolar cerrado.' });
+    }
+
     const existente = await InscripcionesRepository.findInscripcionUnique(input.alumnoId, input.cicloId);
 
     if (existente && !existente.eliminadoEn) {
@@ -152,11 +157,18 @@ export class InscripcionesService {
 
   static async updateInscripcion(input: UpdateInscripcionInput) {
     const { inscripcionId, fechaIngreso, ...data } = input;
-    
+      
     const inscripcion = await InscripcionesRepository.findInscripcionById(inscripcionId);
 
     if (!inscripcion || inscripcion.eliminadoEn) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Inscripción no encontrada' });
+    }
+
+    if (inscripcion) {
+      const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: inscripcion.cicloId } });
+      if (ciclo && ciclo.abierto === false) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden modificar inscripciones de un ciclo escolar cerrado.' });
+      }
     }
 
     return InscripcionesRepository.updateInscripcion(inscripcionId, {
@@ -300,6 +312,13 @@ export class InscripcionesService {
   }
 
   static async deleteInscripcion(inscripcionId: number) {
+    const inscripcion = await InscripcionesRepository.findInscripcionById(inscripcionId);
+    if (inscripcion) {
+      const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: inscripcion.cicloId } });
+      if (ciclo && ciclo.abierto === false) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden eliminar inscripciones de un ciclo escolar cerrado.' });
+      }
+    }
     return InscripcionesRepository.deleteInscripcion(inscripcionId);
   }
 }
