@@ -121,14 +121,21 @@ export class AlumnosRepository {
 
   static async hasTutorPrincipal(alumnoId: number) {
     const tutor = await prisma.tutorAlumno.findFirst({
-      where: { alumnoId, esPrincipal: true }
+      where: { 
+        alumnoId, 
+        esPrincipal: true,
+        tutor: { eliminadoEn: null }
+      }
     });
     return !!tutor;
   }
 
   static async getTutorCount(alumnoId: number) {
     return prisma.tutorAlumno.count({
-      where: { alumnoId }
+      where: { 
+        alumnoId,
+        tutor: { eliminadoEn: null }
+      }
     });
   }
 
