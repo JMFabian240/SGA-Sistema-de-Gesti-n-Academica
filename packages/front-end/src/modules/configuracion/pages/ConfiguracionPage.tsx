@@ -499,18 +499,7 @@ export function ConfiguracionPage() {
               </div>
             </div>
 
-            <CicloFormModal
-              isOpen={isCicloModalOpen}
-              onClose={() => setIsCicloModalOpen(false)}
-              cicloId={editingCiclo?.cicloId}
-              initialData={editingCiclo ? {
-                nombre: editingCiclo.nombre,
-                fechaInicio: new Date(editingCiclo.fechaInicio).toISOString().split('T')[0],
-                fechaFin: new Date(editingCiclo.fechaFin).toISOString().split('T')[0],
-                activo: editingCiclo.activo,
-                periodicidad: editingCiclo.periodicidad
-              } : undefined}
-            />
+
 
           </div>
         )}
@@ -1236,6 +1225,19 @@ export function ConfiguracionPage() {
           onOpenNewCiclo={handleOpenNewCiclo}
         />
       )}
+
+      <CicloFormModal
+        isOpen={isCicloModalOpen}
+        onClose={() => setIsCicloModalOpen(false)}
+        cicloId={editingCiclo?.cicloId}
+        initialData={editingCiclo ? {
+          nombre: editingCiclo.nombre,
+          fechaInicio: new Date(editingCiclo.fechaInicio).toISOString().split('T')[0],
+          fechaFin: new Date(editingCiclo.fechaFin).toISOString().split('T')[0],
+          activo: editingCiclo.activo,
+          periodicidad: editingCiclo.periodicidad
+        } : undefined}
+      />
     </div>
   );
 }

@@ -137,7 +137,7 @@ export function TransicionCicloWizard({ isOpen, onClose, cicloActual, onOpenNewC
                   <button
                     type="button"
                     onClick={onOpenNewCiclo}
-                    className="text-xs font-semibold text-navy-600 hover:text-navy-800 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-navy-600 hover:bg-navy-700 text-white font-medium rounded-lg transition-colors shadow-sm text-xs"
                   >
                     + Crear Nuevo Ciclo
                   </button>
