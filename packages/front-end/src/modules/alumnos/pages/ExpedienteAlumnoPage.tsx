@@ -69,6 +69,11 @@ export function ExpedienteAlumnoPage() {
     return (alumno as any)?.inscripciones?.find((i: any) => i.cicloId === selectedCicloId)?.ciclo;
   }, [alumno, selectedCicloId]);
 
+  const calendarioFiltrado = useMemo(() => {
+    if (!alumno?.calendariosPagos) return [];
+    return (alumno as any).calendariosPagos.filter((p: any) => p.cicloId === selectedCicloId);
+  }, [alumno, selectedCicloId]);
+
   const isCicloAbierto = selectedCiclo?.abierto !== false;
 
   const quitarPlanMutation = trpc.inscripciones.quitarPlanPago.useMutation({
@@ -501,7 +506,7 @@ export function ExpedienteAlumnoPage() {
       </div>
 
       {/* Calendario de Pagos */}
-      {(alumno.calendariosPagos && alumno.calendariosPagos.length > 0) && (
+      {(calendarioFiltrado && calendarioFiltrado.length > 0) && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4 px-1">
             <div className="flex items-center gap-2 text-emerald-700 font-semibold">
@@ -535,7 +540,7 @@ export function ExpedienteAlumnoPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {alumno.calendariosPagos.map((pago: any) => (
+                  {calendarioFiltrado.map((pago: any) => (
                     <tr key={pago.calendarioPagoId} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-3 font-medium text-gray-900">{pago.mes || '-'}</td>
                       <td className="px-6 py-3 text-gray-600">{pago.concepto}</td>
