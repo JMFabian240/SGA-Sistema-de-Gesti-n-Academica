@@ -45,7 +45,7 @@ export class CalculadoraPagos {
     const montoMensualColegiatura = tarifaAnualColegiatura / plan.meses;
     
     // Pagos Únicos (solo se cobran en el primer mes)
-    const conceptosUnicos = ['INSCRIPCION', 'INSCRIPCIÓN', 'ARANCELES', 'MATERIALES', 'LIBROS'];
+    const conceptosUnicos = ['INSCRIPCION', 'INSCRIPCIÓN', 'ARANCEL', 'ARANCELES', 'MATERIAL', 'MATERIALES', 'LIBROS', 'UNIFORME'];
     
     const primerMes = mesesToUse[0];
     const fechaPrimerMes = new Date(fechaIngreso);
@@ -59,7 +59,8 @@ export class CalculadoraPagos {
         const month = fechaPrimerMes.getMonth();
         const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
         const dayToUse = Math.min(diaVencimientoMensual, lastDayOfMonth);
-        const fechaVencimiento = new Date(year, month, dayToUse);
+        // Se establece la hora a las 12:00 PM (mediodía) para evitar que el offset de zona horaria (ej. UTC-6) cambie el día
+        const fechaVencimiento = new Date(year, month, dayToUse, 12, 0, 0);
         
         adeudos.push({
           concepto: tarifa.concepto, // ej. "Inscripción", "Materiales"
@@ -98,7 +99,7 @@ export class CalculadoraPagos {
       const month = fechaBaseColegiatura.getMonth();
       const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
       const dayToUse = Math.min(diaVencimientoMensual, lastDayOfMonth);
-      const fechaVencimiento = new Date(year, month, dayToUse);
+      const fechaVencimiento = new Date(year, month, dayToUse, 12, 0, 0);
 
       adeudos.push({
         concepto: `Colegiatura ${mesStr}`,
