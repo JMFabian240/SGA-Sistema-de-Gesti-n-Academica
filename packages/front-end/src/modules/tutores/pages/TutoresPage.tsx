@@ -41,6 +41,25 @@ export function TutoresPage() {
     return result;
   }, [tutores, searchTerm, filterFactura]);
 
+  const handleExport = () => {
+    // Basic export functionality with UTF-8 BOM for Excel compatibility
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF"
+      + "Nombre,Correo,Telefono,Alumnos a Cargo,Requiere Factura\n"
+      + currentData.map((t: any) => {
+        const alumnos = t.tutoresAlumnos?.map((ta: any) => ta.alumno?.nombreCompleto).join(' - ') || '';
+        const factura = t.datosFiscales ? 'Si' : 'No';
+        return `"${t.nombreCompleto || ''}","${t.correoElectronico || ''}","${t.telefono || ''}","${alumnos}","${factura}"`;
+      }).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "tutores_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col space-y-6 animate-in fade-in duration-500">
       {/* Header */}
@@ -94,7 +113,7 @@ export function TutoresPage() {
       {/* Contador de registros y acciones secundarias */}
       <div className="flex justify-between items-center text-sm text-gray-500 font-medium px-1">
         <span>Total de registros: {currentData?.length || 0}</span>
-        <button className="flex items-center gap-1.5 hover:text-gray-700 transition-colors bg-white border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50">
+        <button onClick={handleExport} className="flex items-center gap-1.5 hover:text-gray-700 transition-colors bg-white border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50">
           <Download size={16} /> Exportar
         </button>
       </div>
