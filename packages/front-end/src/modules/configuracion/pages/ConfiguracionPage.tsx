@@ -74,15 +74,70 @@ export function ConfiguracionPage() {
 
   const [editandoConfiguracion, setEditandoConfiguracion] = useState(false);
   const [configValores, setConfigValores] = useState({
-    diaVencimientoMensual: '1',
-    plazoInscripcionDias: '0'
+    diaVencimientoMensual: '1'
   });
+
+  // Estados para el Modal de Recargo
+  const [modalRecargoOpen, setModalRecargoOpen] = useState(false);
+  const [recargoEditando, setRecargoEditando] = useState<any>(null);
+  const [recargoForm, setRecargoForm] = useState({
+    concepto: 'COLEGIATURA',
+    llevaRecargo: true,
+    monto: '0',
+    diasGracia: '0'
+  });
+
+  const abrirModalRecargo = (recargo?: any) => {
+    if (recargo) {
+      setRecargoEditando(recargo);
+      setRecargoForm({
+        concepto: recargo.conceptoPago,
+        llevaRecargo: Number(recargo.monto) > 0,
+        monto: recargo.monto.toString(),
+        diasGracia: recargo.diasGracia.toString()
+      });
+    } else {
+      setRecargoEditando(null);
+      setRecargoForm({
+        concepto: 'COLEGIATURA',
+        llevaRecargo: true,
+        monto: '0',
+        diasGracia: '0'
+      });
+    }
+    setModalRecargoOpen(true);
+  };
+
+  const handleSaveRecargoForm = () => {
+    if (!recargoForm.concepto) return alert('Selecciona un concepto');
+    const monto = recargoForm.llevaRecargo ? Number(recargoForm.monto) : 0;
+    const diasGracia = Number(recargoForm.diasGracia);
+
+    if (isNaN(monto) || isNaN(diasGracia)) return alert('Valores numéricos inválidos');
+
+    if (recargoEditando) {
+      updateRecargoMutation.mutate({
+        id: recargoEditando.id,
+        monto,
+        diasGracia
+      }, {
+        onSuccess: () => setModalRecargoOpen(false)
+      });
+    } else {
+      createRecargoMutation.mutate({
+        conceptoPago: recargoForm.concepto,
+        monto,
+        diasGracia
+      }, {
+        onSuccess: () => setModalRecargoOpen(false)
+      });
+    }
+  };
 
   useEffect(() => {
     if (configuracionGlobal) {
       setConfigValores({
-        diaVencimientoMensual: configuracionGlobal.diaVencimientoMensual?.toString() || '1',
-        plazoInscripcionDias: configuracionGlobal.plazoInscripcionDias.toString()
+        diaVencimientoMensual: configuracionGlobal.diaVencimientoMensual?.toString() || '1'
       });
     }
   }, [configuracionGlobal]);
@@ -90,8 +145,7 @@ export function ConfiguracionPage() {
   const handleSaveConfiguracion = async () => {
     try {
       await updateConfiguracionMutation.mutateAsync({
-        diaVencimientoMensual: parseInt(configValores.diaVencimientoMensual, 10),
-        plazoInscripcionDias: parseInt(configValores.plazoInscripcionDias, 10)
+        diaVencimientoMensual: parseInt(configValores.diaVencimientoMensual, 10)
       });
       setEditandoConfiguracion(false);
     } catch (error) {
@@ -756,15 +810,6 @@ export function ConfiguracionPage() {
                         />
                         <p className="text-xs text-orange-700 mt-1">Día del mes (1-31) límite para pagar las mensualidades.</p>
                       </div>
-                      <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 space-y-2">
-                        <label className="text-sm font-bold text-blue-800">Plazo Inscripción (días)</label>
-                        <Input
-                          type="number"
-                          value={configValores.plazoInscripcionDias}
-                          onChange={(e) => setConfigValores({ ...configValores, plazoInscripcionDias: e.target.value })}
-                          className="bg-white text-xs h-8"
-                        />
-                      </div>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -774,14 +819,6 @@ export function ConfiguracionPage() {
                           <span className="text-xs font-bold text-orange-700">Día {configuracionGlobal.diaVencimientoMensual} de cada mes</span>
                         </div>
                         <p className="text-xs text-orange-700">Aplica como límite a las mensualidades (ej. Colegiatura).</p>
-                      </div>
-
-                      <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-bold text-blue-800">Plazo Inscripción/Materiales</span>
-                          <span className="text-xs font-bold text-blue-700">{configuracionGlobal.plazoInscripcionDias} días</span>
-                        </div>
-                        <p className="text-xs text-blue-700">Días permitidos antes del vencimiento.</p>
                       </div>
                     </div>
                   )
@@ -797,8 +834,7 @@ export function ConfiguracionPage() {
                       onClick={() => {
                         setEditandoConfiguracion(false);
                         setConfigValores({
-                          diaVencimientoMensual: configuracionGlobal?.diaVencimientoMensual?.toString() || '1',
-                          plazoInscripcionDias: configuracionGlobal?.plazoInscripcionDias.toString() || '0'
+                          diaVencimientoMensual: configuracionGlobal?.diaVencimientoMensual?.toString() || '1'
                         });
                       }}
                       disabled={updateConfiguracionMutation.isLoading}
@@ -822,90 +858,141 @@ export function ConfiguracionPage() {
                     Modificar Configuración
                   </button>
                 )}
-              </div>
 
-              {/* Recargos Personalizados */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="text-navy-600" size={18} />
-                    <h4 className="font-bold text-navy-800">Recargos por Concepto</h4>
+                {/* Recargos Personalizados Integrados */}
+                <div className="pt-4 mt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between pb-3">
+                    <span className="text-sm font-bold text-navy-800">Recargos por Concepto Específico</span>
+                    <Button
+                      variant="outline"
+                      className="text-xs px-3 py-1 h-auto"
+                      onClick={() => abrirModalRecargo()}
+                    >
+                      <Plus size={14} className="mr-1" /> Añadir
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="text-xs px-3 py-1 h-auto"
-                    onClick={() => {
-                      const concepto = prompt('Concepto de pago (ej. COLEGIATURA, INSCRIPCION):');
-                      if (!concepto) return;
-                      const monto = prompt('Monto del recargo ($):');
-                      if (!monto || isNaN(Number(monto))) return;
-                      const dias = prompt('Días de gracia (naturales) a partir de la fecha de vencimiento:');
-                      if (!dias || isNaN(Number(dias))) return;
-                      createRecargoMutation.mutate({
-                        conceptoPago: concepto.toUpperCase(),
-                        monto: Number(monto),
-                        diasGracia: Number(dias)
-                      });
-                    }}
-                  >
-                    <Plus size={14} className="mr-1" /> Añadir
-                  </Button>
-                </div>
-                
-                {loadingRecargos ? (
-                  <div className="text-center text-gray-400 text-sm py-4">Cargando recargos...</div>
-                ) : recargos && recargos.length > 0 ? (
-                  <div className="space-y-2">
-                    {recargos.map((r: any) => (
-                      <div key={r.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
-                        <div>
-                          <p className="text-sm font-bold text-navy-800">{r.conceptoPago}</p>
-                          <p className="text-xs text-gray-500">
-                            Recargo: <span className="font-semibold text-red-600">${r.monto}</span> • Gracia: {r.diasGracia} días
-                          </p>
+                  
+                  {loadingRecargos ? (
+                    <div className="text-center text-gray-400 text-sm py-4">Cargando recargos...</div>
+                  ) : recargos && recargos.length > 0 ? (
+                    <div className="space-y-2 mt-2">
+                      {recargos.map((r: any) => (
+                        <div key={r.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                          <div>
+                            <p className="text-sm font-bold text-navy-800">{r.conceptoPago}</p>
+                            <p className="text-xs text-gray-500">
+                              Recargo: <span className="font-semibold text-red-600">${r.monto}</span> • Gracia: {r.diasGracia} días
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => abrirModalRecargo(r)}
+                              className="p-1.5 text-navy-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                              title="Editar recargo"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`¿Seguro que deseas eliminar el recargo para ${r.conceptoPago}?`)) {
+                                  updateRecargoMutation.mutate({
+                                    id: r.id,
+                                    activo: false
+                                  });
+                                }
+                              }}
+                              className="p-1.5 text-red-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                              title="Eliminar recargo"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              const monto = prompt('Nuevo monto del recargo ($):', r.monto.toString());
-                              if (!monto || isNaN(Number(monto))) return;
-                              const dias = prompt('Nuevos días de gracia:', r.diasGracia.toString());
-                              if (!dias || isNaN(Number(dias))) return;
-                              updateRecargoMutation.mutate({
-                                id: r.id,
-                                monto: Number(monto),
-                                diasGracia: Number(dias)
-                              });
-                            }}
-                            className="p-1.5 text-navy-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Editar recargo"
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-400 text-xs py-4 border-2 border-dashed border-gray-100 rounded-xl mt-2">
+                      No hay recargos personalizados configurados.
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal de Recargo */}
+                {modalRecargoOpen && (
+                  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-5 animate-in fade-in zoom-in duration-200">
+                      <h3 className="text-lg font-bold text-navy-800">
+                        {recargoEditando ? 'Editar Recargo' : 'Añadir Recargo Específico'}
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-gray-700">Concepto de Pago</label>
+                          <select
+                            className="w-full text-sm p-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-navy-500"
+                            value={recargoForm.concepto}
+                            onChange={(e) => setRecargoForm({ ...recargoForm, concepto: e.target.value })}
+                            disabled={!!recargoEditando}
                           >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`¿Seguro que deseas eliminar el recargo para ${r.conceptoPago}?`)) {
-                                updateRecargoMutation.mutate({
-                                  id: r.id,
-                                  activo: false
-                                });
-                              }
-                            }}
-                            className="p-1.5 text-red-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                            title="Eliminar recargo"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                            {['INSCRIPCION', 'ARANCEL', 'MATERIAL', 'LIBROS', 'UNIFORME', 'COLEGIATURA'].map(c => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="checkbox"
+                            id="chkLlevaRecargo"
+                            checked={recargoForm.llevaRecargo}
+                            onChange={(e) => setRecargoForm({ ...recargoForm, llevaRecargo: e.target.checked })}
+                            className="w-4 h-4 text-navy-600 rounded border-gray-300 focus:ring-navy-500"
+                          />
+                          <label htmlFor="chkLlevaRecargo" className="text-sm text-gray-700 cursor-pointer font-medium">Lleva recargo económico</label>
+                        </div>
+
+                        {recargoForm.llevaRecargo && (
+                          <div className="space-y-1.5 animate-in slide-in-from-top-2">
+                            <label className="text-xs font-bold text-gray-700">Monto del Recargo ($)</label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={recargoForm.monto}
+                              onChange={(e) => setRecargoForm({ ...recargoForm, monto: e.target.value })}
+                              className="bg-gray-50"
+                              placeholder="Ej. 400"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-gray-700">Plazo (Días de gracia)</label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={recargoForm.diasGracia}
+                            onChange={(e) => setRecargoForm({ ...recargoForm, diasGracia: e.target.value })}
+                            className="bg-gray-50"
+                            placeholder="Ej. 5"
+                          />
+                          <p className="text-[10px] text-gray-500 leading-tight">Días naturales permitidos a partir de la fecha de vencimiento antes de aplicar la penalización o vencer el plazo.</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-400 text-xs py-4 border-2 border-dashed border-gray-100 rounded-xl">
-                    No hay recargos personalizados configurados.
+
+                      <div className="flex justify-end gap-2 pt-2">
+                        <Button variant="outline" className="text-xs py-1.5" onClick={() => setModalRecargoOpen(false)}>
+                          Cancelar
+                        </Button>
+                        <Button variant="primary" className="text-xs py-1.5" onClick={handleSaveRecargoForm}>
+                          Guardar
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
+
+              {/* Recargos Personalizados (Eliminado a petición) */}
 
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-3">
                 <div className="flex items-center gap-2 text-gray-700 font-semibold border-b border-gray-100 pb-2">
