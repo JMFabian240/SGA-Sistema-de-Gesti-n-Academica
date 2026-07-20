@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FileText, Download, Search, ArrowLeft } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { trpc } from '../../../lib/trpc';
-import { parseSpanishName } from '../../../utils/nameParser';
+import { parseSpanishName } from '../../../utils/nameParser.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
