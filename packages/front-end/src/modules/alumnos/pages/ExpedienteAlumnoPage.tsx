@@ -1,0 +1,750 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { trpc } from '../../../lib/trpc';
+import { ChevronLeft, User, Crown, Mail, Phone, BookOpen, Users, Link2Off, Plus, Calculator, Trash2, UploadCloud, Eye, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { VincularTutorModal } from '../components/VincularTutorModal';
+import { InscribirAlumnoModal } from '../components/InscribirAlumnoModal';
+import { AsignarPlanPagoModal } from '../components/AsignarPlanPagoModal';
+
+export function ExpedienteAlumnoPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const utils = trpc.useUtils();
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editData, setEditData] = useState<any>({});
+  const [isVincularModalOpen, setIsVincularModalOpen] = useState(false);
+  const [isInscribirModalOpen, setIsInscribirModalOpen] = useState(false);
+  const [isAsignarPlanModalOpen, setIsAsignarPlanModalOpen] = useState(false);
+  const [selectedCicloId, setSelectedCicloId] = useState<number | null>(null);
+
+  const alumnoId = parseInt(id || '0', 10);
+
+  const { data: alumno, isLoading, error } = trpc.alumnos.getById.useQuery(alumnoId, {
+    enabled: !!alumnoId,
+  });
+
+  useEffect(() => {
+    if (alumno?.inscripciones && selectedCicloId === null) {
+      const active = (alumno as any).inscripciones.find((i: any) => i.estadoEnCiclo === 'INSCRITO' && i.ciclo.activo);
+      if (active) setSelectedCicloId(active.cicloId);
+      else if ((alumno as any).inscripciones.length > 0) setSelectedCicloId((alumno as any).inscripciones[0].cicloId);
+    }
+  }, [alumno, selectedCicloId]);
+
+  const { data: estadoCuenta, isLoading: isLoadingEC } = trpc.pagos.getEstadoCuenta.useQuery(
+    { alumnoId, cicloId: selectedCicloId! },
+    { enabled: !!alumnoId && !!selectedCicloId }
+  );
+
+  const updateAlumnoMutation = trpc.alumnos.update.useMutation({
+    onSuccess: () => {
+      setIsEditingInfo(false);
+      utils.alumnos.getById.invalidate(alumnoId);
+      toast.success('Estado/Información actualizada');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al actualizar');
+    }
+  });
+
+  const unlinkTutorMutation = trpc.alumnos.unlinkTutor.useMutation({
+    onSuccess: () => {
+      utils.alumnos.getById.invalidate(alumnoId);
+    }
+  });
+
+  const handleUnlink = (tutorAlumnoId: number) => {
+    if (window.confirm('¿Estás seguro de que deseas desvincular a este responsable?')) {
+      unlinkTutorMutation.mutate({ tutorAlumnoId });
+    }
+  };
+
+  const inscripcionActual = useMemo(() => {
+    if (!alumno?.inscripciones) return null;
+    return (alumno as any).inscripciones.find((i: any) => i.estadoEnCiclo === 'INSCRITO' && i.ciclo.activo);
+  }, [alumno]);
+
+  const selectedCiclo = useMemo(() => {
+    return (alumno as any)?.inscripciones?.find((i: any) => i.cicloId === selectedCicloId)?.ciclo;
+  }, [alumno, selectedCicloId]);
+
+  const calendarioFiltrado = useMemo(() => {
+    if (!alumno?.calendariosPagos) return [];
+    return (alumno as any).calendariosPagos.filter((p: any) => p.cicloId === selectedCicloId);
+  }, [alumno, selectedCicloId]);
+
+  const isCicloAbierto = selectedCiclo?.abierto !== false;
+
+  const quitarPlanMutation = trpc.inscripciones.quitarPlanPago.useMutation({
+    onSuccess: () => {
+      window.alert('Plan de pago removido con éxito.');
+      utils.alumnos.getById.invalidate(alumnoId);
+    },
+    onError: (err) => {
+      window.alert(err.message || 'Error al quitar el plan de pagos.');
+    }
+  });
+
+  const adjuntarMutation = trpc.pagos.adjuntarComprobante.useMutation({
+    onSuccess: () => {
+      toast.success('Comprobante adjuntado con éxito');
+      utils.alumnos.getById.invalidate(alumnoId);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al adjuntar comprobante');
+    }
+  });
+
+  const recalcularMutation = trpc.pagos.recalcularCalendario.useMutation({
+    onSuccess: () => {
+      toast.success('Calendario recalculado con éxito');
+      utils.alumnos.getById.invalidate(alumnoId);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Error al recalcular el calendario');
+    }
+  });
+
+  const handleAdjuntar = (pagoId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('El archivo es demasiado grande (máx 5MB)');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      adjuntarMutation.mutate({
+        pagoId,
+        alumnoId,
+        comprobanteBase64: reader.result as string,
+        comprobanteNombre: file.name,
+        comprobanteMime: file.type
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVerComprobante = async (pagoId: number) => {
+    const toastId = toast.loading('Cargando comprobante...');
+    try {
+      const data = await utils.pagos.getComprobanteBase64.fetch({ pagoId });
+      toast.dismiss(toastId);
+
+      const base64Data = data.base64.split(',')[1];
+      const binaryStr = window.atob(base64Data);
+      const len = binaryStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], { type: data.mime });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+
+      // Cleanup de la URL (opcional, aunque si se recarga se borra sola, un timeout simple sirve)
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (error: any) {
+      toast.dismiss(toastId);
+      toast.error(error.message || 'Error al visualizar el comprobante');
+    }
+  };
+
+  const handleQuitarPlan = (inscripcionId: number) => {
+    if (window.confirm('¿Estás seguro que deseas quitar el plan de pagos? Esto borrará el calendario de recibos generado (siempre y cuando no tengan pagos aplicados).')) {
+      quitarPlanMutation.mutate({ inscripcionId });
+    }
+  };
+
+  const handleToggleEstado = () => {
+    if (!alumno) return;
+    let nextEstado = 'BAJA_TEMPORAL';
+    if (alumno.estado === 'BAJA_TEMPORAL') nextEstado = 'BAJA_DEFINITIVA';
+    else if (alumno.estado === 'BAJA_DEFINITIVA') nextEstado = 'ACTIVO';
+
+    if (window.confirm(`¿Estás seguro de cambiar el estatus a ${nextEstado.replace('_', ' ')}?`)) {
+      updateAlumnoMutation.mutate({
+        alumnoId,
+        estado: nextEstado
+      } as any);
+    }
+  };
+
+  const getEstadoButtonConfig = () => {
+    if (!alumno) return null;
+    switch (alumno.estado) {
+      case 'ACTIVO': return { label: 'Dar de baja temporal', color: 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200' };
+      case 'BAJA_TEMPORAL': return { label: 'Dar de baja definitiva', color: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300' };
+      case 'BAJA_DEFINITIVA': return { label: 'Reactivar alumno', color: 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200' };
+      default: return null;
+    }
+  };
+
+  const btnConfig = getEstadoButtonConfig();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#001429]"></div>
+      </div>
+    );
+  }
+
+  if (error || !alumno) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-gray-500">
+        <p>No se pudo cargar el expediente del alumno.</p>
+        <button
+          onClick={() => navigate('/alumnos')}
+          className="mt-4 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+        >
+          Volver al directorio
+        </button>
+      </div>
+    );
+  }
+
+  const formatFecha = (fecha: string | Date) => {
+    return new Date(fecha).toLocaleDateString('es-MX', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const handleEditInfo = () => {
+    if (isEditingInfo) {
+      updateAlumnoMutation.mutate({
+        alumnoId,
+        nombreCompleto: editData.nombreCompleto,
+        fechaNacimiento: new Date(editData.fechaNacimiento).toISOString(),
+        sexo: editData.sexo,
+        matricula: editData.matricula,
+        curp: editData.curp
+      } as any);
+    } else {
+      setEditData({
+        nombreCompleto: alumno.nombreCompleto,
+        fechaNacimiento: new Date(alumno.fechaNacimiento).toISOString().split('T')[0],
+        sexo: alumno.sexo,
+        matricula: alumno.matricula || '',
+        curp: alumno.curp || '',
+        estado: alumno.estado
+      });
+      setIsEditingInfo(true);
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto pb-12">
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-8">
+        <button
+          onClick={() => navigate('/alumnos')}
+          className="p-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors mt-1"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <div className="flex-1 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">{alumno.nombreCompleto}</h1>
+            <p className="text-gray-500">Matrícula: {alumno.matricula || 'Sin matrícula'}</p>
+          </div>
+          {btnConfig && (
+            <button
+              onClick={handleToggleEstado}
+              disabled={updateAlumnoMutation.isLoading}
+              className={`px-3 py-1.5 rounded-lg border font-medium text-sm transition-colors ${btnConfig.color} disabled:opacity-50 mt-1`}
+            >
+              {btnConfig.label}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {!isCicloAbierto && (
+        <div className="mb-6 p-4 bg-red-50 rounded-xl border border-red-200 flex items-center gap-3 text-red-800">
+          <AlertTriangle size={20} className="shrink-0" />
+          <p className="text-sm font-medium">
+            <strong>CICLO CERRADO:</strong> El ciclo escolar <strong>{selectedCiclo?.nombre}</strong> se encuentra cerrado. Los datos del alumno para este ciclo (calificaciones, inscripciones y calendario) están en modo <strong>solo lectura</strong>.
+          </p>
+        </div>
+      )}
+
+      {/* Información Personal */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 text-emerald-700 font-semibold mb-4 px-1">
+          <User size={20} />
+          <h2>Información Personal</h2>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-12">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Nombre Completo</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.nombreCompleto} onChange={e => setEditData({ ...editData, nombreCompleto: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.nombreCompleto}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Fecha de Nacimiento</p>
+              {isEditingInfo ? (
+                <input type="date" value={editData.fechaNacimiento} onChange={e => setEditData({ ...editData, fechaNacimiento: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{formatFecha(alumno.fechaNacimiento)}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Matrícula</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.matricula} onChange={e => setEditData({ ...editData, matricula: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.matricula || '-'}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Sexo</p>
+              {isEditingInfo ? (
+                <select value={editData.sexo} onChange={e => setEditData({ ...editData, sexo: e.target.value })} className="w-full px-2 py-1 border rounded">
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                </select>
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">CURP</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.curp} onChange={e => setEditData({ ...editData, curp: e.target.value })} className="w-full px-2 py-1 border rounded" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.curp || '-'}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Nivel Educativo</p>
+              <p className="font-medium text-gray-900">{alumno.nivel?.nombre || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Grado</p>
+              <p className="font-medium text-gray-900">{inscripcionActual?.grupo?.grado?.nombre || alumno.grado?.nombre || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Grupo</p>
+              <p className="font-medium text-gray-900">{inscripcionActual?.grupo?.nombre || '-'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Estatus</p>
+              {isEditingInfo ? (
+                <input type="text" value={editData.estado} disabled className="w-full px-2 py-1 border rounded bg-gray-100 text-gray-500 cursor-not-allowed" />
+              ) : (
+                <p className="font-medium text-gray-900">{alumno.estado}</p>
+              )}
+            </div>
+          </div>
+          <div className="absolute bottom-4 right-6">
+            <button
+              onClick={handleEditInfo}
+              disabled={updateAlumnoMutation.isLoading}
+              className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors text-sm"
+            >
+              {isEditingInfo ? 'Guardar Información' : 'Modificar Información'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Responsables */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+            <Users size={20} />
+            <h2>Responsables</h2>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
+          {(!alumno.tutoresAlumnos || alumno.tutoresAlumnos.length === 0) && (
+            <div className="flex justify-end items-center w-full min-h-[48px]">
+              <button
+                onClick={() => setIsVincularModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 font-medium rounded-lg hover:bg-emerald-100 transition-colors text-sm"
+              >
+                <Plus size={16} /> Vincular tutor
+              </button>
+            </div>
+          )}
+          {alumno.tutoresAlumnos && alumno.tutoresAlumnos.length > 0 ? (
+            alumno.tutoresAlumnos.map((relacion: any) => (
+              <div key={relacion.tutorAlumnoId} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-900">{relacion.tutor.nombreCompleto}</span>
+                    <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full font-medium">
+                      {relacion.parentesco}
+                    </span>
+                    {relacion.esPrincipal && (
+                      <span title="Tutor Principal">
+                        <Crown size={16} className="text-amber-500" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    {relacion.tutor.correoElectronico ? (
+                      <div className="flex items-center gap-1.5">
+                        <Mail size={14} />
+                        <span>{relacion.tutor.correoElectronico}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <Phone size={14} />
+                        <span>{relacion.tutor.telefono || 'Sin contacto registrado'}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUnlink(relacion.tutorAlumnoId);
+                  }}
+                  disabled={unlinkTutorMutation.isPending}
+                  title="Desvincular tutor"
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shrink-0 disabled:opacity-50"
+                >
+                  <Link2Off size={18} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm p-4 text-center">No hay responsables asignados.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Inscripciones */}
+      <div>
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+            <BookOpen size={20} />
+            <h2>Inscripciones a Comisiones</h2>
+          </div>
+          {!inscripcionActual && (
+            <button
+              onClick={() => setIsInscribirModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors text-sm"
+            >
+              <Plus size={16} /> Inscribir a Ciclo
+            </button>
+          )}
+        </div>
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+          {inscripcionActual ? (
+            <div className="p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+              <p className="font-semibold text-gray-900">
+                {inscripcionActual.grupo?.grado?.nombre || alumno.grado?.nombre || 'Grado sin asignar'}
+                {' - '}
+                Grupo {inscripcionActual.grupo?.nombre || 'Sin grupo'}
+                <span className="text-gray-500 ml-2 font-normal">({inscripcionActual.ciclo.nombre})</span>
+              </p>
+              {inscripcionActual.planPago ? (
+                <div className="mt-3 flex items-center justify-between bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                  <div className="text-sm font-medium text-blue-800">
+                    Plan de pagos asignado: {inscripcionActual.planPago.nombre}
+                  </div>
+                  {inscripcionActual.ciclo?.abierto !== false && (
+                    <button
+                      onClick={() => handleQuitarPlan(inscripcionActual.inscripcionId)}
+                      disabled={quitarPlanMutation.isLoading}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Quitar plan de pagos"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center justify-between bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+                  <div className="text-sm text-amber-800">
+                    <span className="font-semibold">Atención:</span> El alumno no tiene plan de pagos asignado.
+                  </div>
+                  {inscripcionActual.ciclo?.abierto !== false && (
+                    <button
+                      onClick={() => setIsAsignarPlanModalOpen(true)}
+                      className="px-3 py-1.5 bg-amber-100 text-amber-700 font-medium rounded-lg hover:bg-amber-200 transition-colors text-sm"
+                    >
+                      Asignar Plan
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : alumno.inscripciones && alumno.inscripciones.length > 0 ? (
+            <div className="space-y-3">
+              {alumno.inscripciones.map((insc: any) => (
+                <div key={insc.inscripcionId} className="p-4 border border-gray-100 rounded-xl bg-gray-50/50 opacity-75">
+                  <p className="font-semibold text-gray-900">
+                    {insc.grupo?.grado?.nombre || alumno.grado?.nombre || 'Grado sin asignar'}
+                    {' - '}
+                    Grupo {insc.grupo?.nombre || 'Sin grupo'}
+                    <span className="text-gray-500 ml-2 font-normal">({insc.ciclo.nombre}) - {insc.estadoEnCiclo}</span>
+                  </p>
+                  {insc.planPago && (
+                    <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-md bg-gray-200 text-gray-700 text-xs font-medium">
+                      Plan asignado: {insc.planPago.nombre}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm p-4 text-center">El alumno no cuenta con inscripciones registradas.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Calendario de Pagos */}
+      {(calendarioFiltrado && calendarioFiltrado.length > 0) && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+              <Calculator size={20} />
+              <h2>Calendario de Pagos</h2>
+            </div>
+            <button
+              onClick={() => {
+                if (window.confirm('¿Estás seguro de recalcular el calendario? Se ajustarán los montos pendientes a la tarifa actual.')) {
+                  recalcularMutation.mutate({ alumnoId });
+                }
+              }}
+              disabled={recalcularMutation.isLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 font-medium rounded-lg hover:bg-indigo-100 transition-colors text-sm disabled:opacity-50"
+            >
+              <Calculator size={16} /> Actualizar Calendario
+            </button>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Mes</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Concepto</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Vencimiento</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Monto</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Referencia</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Comprobante</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {calendarioFiltrado.map((pago: any) => (
+                    <tr key={pago.calendarioPagoId} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-3 font-medium text-gray-900">{pago.mes || '-'}</td>
+                      <td className="px-6 py-3 text-gray-600">{pago.concepto}</td>
+                      <td className="px-6 py-3 text-gray-600">
+                        {formatFecha(pago.fechaVencimiento)}
+                      </td>
+                      <td className="px-6 py-3 font-semibold text-gray-900">
+                        ${Number(pago.montoOriginal).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-3 text-gray-600">
+                        {pago.aplicacionesPago?.[0]?.pago?.observaciones || '-'}
+                      </td>
+                      <td className="px-6 py-3">
+                        {pago.aplicacionesPago?.[0]?.pago && (
+                          pago.aplicacionesPago[0].pago.documentos && pago.aplicacionesPago[0].pago.documentos.length > 0 ? (
+                            <button
+                              onClick={() => handleVerComprobante(pago.aplicacionesPago[0].pago.pagoId)}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                              title="Ver Comprobante"
+                            >
+                              <Eye size={16} /> Ver
+                            </button>
+                          ) : (
+                            <label className="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-600 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-600 transition-colors text-sm font-medium" title="Adjuntar comprobante a este pago">
+                              <UploadCloud size={16} /> Adjuntar
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*,.pdf"
+                                onChange={(e) => handleAdjuntar(pago.aplicacionesPago[0].pago.pagoId, e)}
+                              />
+                            </label>
+                          )
+                        )}
+                        {!pago.aplicacionesPago?.[0]?.pago && <span className="text-gray-400">-</span>}
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${pago.estadoCobro === 'PAGADO' ? 'bg-green-100 text-green-700' :
+                          pago.estadoCobro === 'VENCIDO' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                          {pago.estadoCobro}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Estado de Cuenta */}
+      <div className="mt-8 mb-8">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+            <Calculator size={20} />
+            <h2>Estado de Cuenta</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">Ciclo Escolar:</label>
+            <select
+              value={selectedCicloId || ''}
+              onChange={(e) => setSelectedCicloId(Number(e.target.value))}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {alumno?.inscripciones?.map((insc: any) => (
+                <option key={insc.cicloId} value={insc.cicloId}>
+                  {insc.ciclo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          {isLoadingEC ? (
+            <div className="flex justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            </div>
+          ) : (!estadoCuenta || estadoCuenta.length === 0) ? (
+            <p className="text-gray-500 text-sm text-center py-8">No hay movimientos financieros registrados para este ciclo escolar.</p>
+          ) : (
+            <div className="relative pl-6 border-l-2 border-gray-100 py-4 space-y-6">
+              {estadoCuenta.map((mov: any) => {
+                const isAbono = mov.tipo === 'ABONO';
+                let circleColor = 'bg-red-500';
+                let badgeColor = '';
+                let condicionLabel = mov.condicionPago || '';
+
+                if (isAbono) {
+                  if (mov.condicionPago === 'REGULAR') {
+                    circleColor = 'bg-emerald-500';
+                    badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                  } else if (mov.condicionPago === 'VENCIDO') {
+                    circleColor = 'bg-red-500';
+                    badgeColor = 'bg-red-100 text-red-800 border-red-200';
+                  } else if (mov.condicionPago === 'ABONO') {
+                    circleColor = 'bg-orange-500';
+                    badgeColor = 'bg-orange-100 text-orange-800 border-orange-200';
+                  } else if (mov.condicionPago === 'ADELANTADO') {
+                    circleColor = 'bg-blue-500';
+                    badgeColor = 'bg-blue-100 text-blue-800 border-blue-200';
+                  }
+                }
+
+                const isCicloActivo = alumno?.inscripciones?.find((i: any) => i.cicloId === selectedCicloId)?.ciclo?.activo;
+
+                return (
+                  <div key={mov.id} className="relative">
+                    <div className={`absolute -left-[33px] top-4 w-4 h-4 rounded-full border-4 border-white ${circleColor}`} />
+                    <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-shadow shadow-sm">
+                      <div className="flex flex-col gap-1.5 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-900">{formatFecha(mov.fecha)}</span>
+                          {isAbono && badgeColor && (
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${badgeColor}`}>
+                              {condicionLabel}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-700 font-medium">{mov.concepto}</span>
+                        {isAbono && mov.metodoPago && (
+                          <span className="text-xs text-gray-500 font-medium">Método: {mov.metodoPago}</span>
+                        )}
+                        {isAbono && mov.pagoId && (
+                          <div className="mt-2 flex items-center gap-2">
+                            {mov.tieneComprobante ? (
+                              <button
+                                onClick={() => handleVerComprobante(mov.pagoId)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-xs font-semibold"
+                                title="Ver Comprobante"
+                              >
+                                <Eye size={14} /> Ver Comprobante
+                              </button>
+                            ) : (
+                              isCicloActivo && (
+                                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-emerald-600 transition-colors text-xs font-semibold" title="Adjuntar comprobante a este pago">
+                                  <UploadCloud size={14} /> Adjuntar
+                                  <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*,.pdf"
+                                    onChange={(e) => handleAdjuntar(mov.pagoId, e)}
+                                  />
+                                </label>
+                              )
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:gap-1 text-sm shrink-0 border-t md:border-t-0 border-gray-100 pt-3 md:pt-0">
+                        <div className="flex gap-4">
+                          {isAbono ? (
+                            <span className="font-bold text-emerald-600 text-base">-${mov.abono.toFixed(2)}</span>
+                          ) : (
+                            <span className="font-bold text-red-600 text-base">+${mov.cargo.toFixed(2)}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 font-bold text-gray-800 bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">
+                          <span className="text-xs text-gray-500 font-medium">Saldo:</span> ${mov.saldo.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {isVincularModalOpen && (
+        <VincularTutorModal
+          isOpen={isVincularModalOpen}
+          alumnoId={alumnoId}
+          onClose={() => setIsVincularModalOpen(false)}
+          onSuccess={() => {
+            setIsVincularModalOpen(false);
+            utils.alumnos.getById.invalidate(alumnoId);
+          }}
+          onRegistrarPadre={() => {
+            setIsVincularModalOpen(false);
+            navigate('/tutores');
+          }}
+        />
+      )}
+
+      {isInscribirModalOpen && (
+        <InscribirAlumnoModal
+          isOpen={isInscribirModalOpen}
+          alumnoId={alumnoId}
+          onClose={() => setIsInscribirModalOpen(false)}
+        />
+      )}
+
+      {isAsignarPlanModalOpen && inscripcionActual && (
+        <AsignarPlanPagoModal
+          isOpen={isAsignarPlanModalOpen}
+          alumnoId={alumnoId}
+          inscripcionId={inscripcionActual.inscripcionId}
+          onClose={() => setIsAsignarPlanModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+}

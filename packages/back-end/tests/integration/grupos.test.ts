@@ -1,42 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Grupos Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken
-  };
-
   it('debería crear la estructura completa: Nivel, Ciclo, Materia, Grupo y Asignación', async () => {
+    const { ctx } = await createTestContext(['Grupos', 'Materias']);
     const caller = appRouter.createCaller(ctx);
+
+    const ts = Date.now().toString().slice(-4); // sufijo corto
 
     // 1. Crear Nivel Educativo
     const nivelResult = await caller.grupos.createNivel({
-      codigo: 'PRI',
-      nombre: 'Primaria',
+      codigo: `P_${ts}`,
+      nombre: 'Primaria Test',
       orden: 2
     });
     expect(nivelResult.nivelId).toBeDefined();
 
-    // 2. Crear Ciclo Escolar
+    // 1.5 Crear Grado (requerido para Grupo)
+    const grado = await prisma.grado.create({
+      data: {
+        nivelId: nivelResult.nivelId,
+        numero: 1,
+        nombre: 'Primero'
+      }
+    });
+
+    // 2. Crear Ciclo Escolar (requiere gradosPermitidos para validación de gap 3)
     const cicloResult = await caller.grupos.createCiclo({
-      nombre: '2024-2025',
+      nombre: `C24-${ts}`,
       fechaInicio: new Date('2024-08-01').toISOString(),
       fechaFin: new Date('2025-07-15').toISOString(),
-      activo: true
+      activo: true,
+      gradosPermitidos: { [nivelResult.nivelId]: [grado.gradoId] }
     });
     expect(cicloResult.cicloId).toBeDefined();
 
     // 3. Crear Materia
     const materiaResult = await caller.grupos.createMateria({
-      nombre: 'Matemáticas I',
-      clave: 'MAT-1'
+      nombre: `Matemáticas ${ts}`,
+      clave: `MAT-${ts}`
     });
     expect(materiaResult.materiaId).toBeDefined();
 
@@ -44,6 +48,7 @@ describe('Grupos Router (Integration)', () => {
     const grupoResult = await caller.grupos.createGrupo({
       nivelId: nivelResult.nivelId,
       cicloId: cicloResult.cicloId,
+      gradoId: grado.gradoId,
       nombre: '1A',
       cupoMaximo: 30
     });
@@ -66,13 +71,14 @@ describe('Grupos Router (Integration)', () => {
     });
 
     expect(dbGrupoMateria).not.toBeNull();
-    expect(dbGrupoMateria?.materia.clave).toBe('MAT-1');
+    expect(dbGrupoMateria?.materia.clave).toBe(`MAT-${ts}`);
     expect(dbGrupoMateria?.grupo.nombre).toBe('1A');
-    expect(dbGrupoMateria?.grupo.nivel.codigo).toBe('PRI');
-    expect(dbGrupoMateria?.grupo.ciclo.nombre).toBe('2024-2025');
+    expect(dbGrupoMateria?.grupo.nivel.codigo).toBe(`P_${ts}`);
+    expect(dbGrupoMateria?.grupo.ciclo.nombre).toBe(`C24-${ts}`);
   });
 
   it('debería rechazar creación de Nivel Educativo si faltan campos requeridos (Zod)', async () => {
+    const { ctx } = await createTestContext(['Grupos']);
     const caller = appRouter.createCaller(ctx);
 
     const invalidNivel = {

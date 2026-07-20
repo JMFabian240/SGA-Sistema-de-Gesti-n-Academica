@@ -1,35 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Pagos Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken,
-    user: { usuarioId: 1, rol: 'ADMIN' }
-  };
-
   it('debería crear una tarifa, un adeudo y registrar su pago atómicamente', async () => {
+    const { ctx } = await createTestContext(['Pagos']);
     const caller = appRouter.createCaller(ctx);
 
     // 1. Preparar BD con dependencias
-    await prisma.usuario.create({
-      data: {
-        usuarioId: 1,
-        nombreUsuario: 'admin_pagos',
-        nombreCompleto: 'Admin Pagos',
-        correo: 'admin.pagos@test.com',
-        passwordHash: 'hash_falso',
-      }
-    });
-
-    const nivel = await prisma.nivelEducativo.create({
-      data: { codigo: 'SEC', nombre: 'Secundaria', orden: 3 }
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'SEC_PAGOS' },
+      update: {},
+      create: { codigo: 'SEC_PAGOS', nombre: 'Secundaria', orden: 3 }
     });
 
     const ciclo = await prisma.cicloEscolar.create({
@@ -52,7 +35,7 @@ describe('Pagos Router (Integration)', () => {
     const alumno = await prisma.alumno.create({
       data: {
         nombreCompleto: 'Alumno Pago',
-        curp: 'ALUMNOPAGO12345678',
+        curp: `TS${Date.now()}CDE`,
         fechaNacimiento: new Date('2010-05-15'),
         sexo: 'F',
         estado: 'ACTIVO',
@@ -119,6 +102,7 @@ describe('Pagos Router (Integration)', () => {
   });
 
   it('debería rechazar un pago sin aplicaciones (Zod)', async () => {
+    const { ctx } = await createTestContext(['Pagos']);
     const caller = appRouter.createCaller(ctx);
 
     const invalidPago = {
@@ -126,7 +110,7 @@ describe('Pagos Router (Integration)', () => {
       tutorId: 1,
       fechaPago: new Date().toISOString(),
       montoTotal: 100,
-      metodoPago: 'EFECTIVO', // Inválido (no está en el enum)
+      metodoPago: 'DEPOSITO', // Inválido (no está en el enum)
       aplicaciones: [] // Inválido (requiere min 1)
     };
 

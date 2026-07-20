@@ -5,12 +5,15 @@ const EstadoAlumno = z.enum([
   'BAJA_DEFINITIVA',
   'BAJA_TEMPORAL',
   'EGRESADO',
-  'TRANSICION_PENDIENTE'
+  'TRANSICION_PENDIENTE',
+  'RETENCION_FINANCIERA',
+  'RETENCION_ACADEMICA',
+  'PREINSCRIPCION'
 ]);
 
 export const createAlumnoSchema = z.object({
   matricula: z.string().max(30).optional(),
-  curp: z.string().length(18, 'El CURP debe tener exactamente 18 caracteres'),
+  curp: z.string().length(18, 'El CURP debe tener exactamente 18 caracteres').optional().nullable().or(z.literal('')),
   nombreCompleto: z.string().min(1, 'El nombre completo es requerido').max(120),
   fechaNacimiento: z.string().datetime({ message: 'Formato de fecha de nacimiento inválido' }),
   sexo: z.string().length(1, 'El sexo debe ser M o F'),
@@ -22,6 +25,9 @@ export const createAlumnoSchema = z.object({
   alergias: z.string().optional(),
   padecimientos: z.string().optional(),
   observaciones: z.string().optional(),
+  gradoId: z.number().int().positive().optional(),
+  grupoId: z.number().int().positive().optional(),
+  planPagoId: z.number().int().positive().optional(),
 });
 
 export const updateAlumnoSchema = createAlumnoSchema.partial().extend({

@@ -1,187 +1,650 @@
-import { prisma } from '@sga/data-access';
 import { TRPCError } from '@trpc/server';
-import { 
-  type CreateTarifaInput, type UpdateTarifaInput, 
-  type CreateCalendarioPagoInput, type UpdateCalendarioPagoInput, 
-  type RegistrarPagoInput 
+import fs from 'fs';
+import path from 'path';
+import { prisma, EstadoCobro } from '@sga/data-access';
+import type {
+  CreateTarifaInput, UpdateTarifaInput,
+  CreateCalendarioPagoInput, UpdateCalendarioPagoInput,
+  RegistrarPagoInput, CreateCargoExtraordinarioInput,
+  AdjuntarComprobanteInput
 } from './pagos.schema';
+import { PagosRepository } from './pagos.repository';
 
 export class PagosService {
-  
+
   // --- Tarifas ---
   static async getTarifas(cicloId?: number, nivelId?: number) {
-    return prisma.tarifa.findMany({
-      where: {
-        eliminadoEn: null,
-        ...(cicloId && { cicloId }),
-        ...(nivelId && { nivelId })
-      },
-      include: {
-        ciclo: true,
-        nivel: true
-      },
-      orderBy: { creadoEn: 'desc' }
-    });
+    return PagosRepository.getTarifas(cicloId, nivelId);
   }
 
   static async createTarifa(input: CreateTarifaInput) {
-    return prisma.tarifa.create({ data: input });
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (ciclo && ciclo.abierto === false) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden crear tarifas en un ciclo escolar cerrado.' });
+    }
+    const { fechaVencimiento, ...dataToSave } = input as any;
+    return PagosRepository.createTarifa(dataToSave);
   }
 
   static async updateTarifa(input: UpdateTarifaInput) {
-    const { tarifaId, ...data } = input;
-    return prisma.tarifa.update({
-      where: { tarifaId },
-      data: { ...data, actualizadoEn: new Date() }
-    });
+    const tarifa = await PagosRepository.getTarifas().then(ts => ts.find((t: any) => t.tarifaId === input.tarifaId));
+    if (tarifa) {
+      const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: tarifa.cicloId } });
+      if (ciclo && ciclo.abierto === false) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden modificar tarifas de un ciclo escolar cerrado.' });
+      }
+    }
+    const { tarifaId, fechaVencimiento, ...data } = input;
+    const updateData: any = { ...data, actualizadoEn: new Date() };
+    return PagosRepository.updateTarifa(tarifaId, updateData);
   }
 
   static async deleteTarifa(tarifaId: number) {
-    return prisma.tarifa.update({
-      where: { tarifaId },
-      data: { eliminadoEn: new Date(), activa: false }
-    });
+    return PagosRepository.deleteTarifa(tarifaId);
   }
 
   // --- Calendario de Pagos (Adeudos) ---
-  static async getAdeudosAlumno(alumnoId: number, estadoCobro?: 'PENDIENTE' | 'PAGADO' | 'VENCIDO' | 'CANCELADO') {
-    return prisma.calendarioPago.findMany({
-      where: {
-        alumnoId,
-        eliminadoEn: null,
-        ...(estadoCobro && { estadoCobro })
-      },
-      orderBy: { fechaVencimiento: 'asc' }
-    });
+  static async getAdeudosAlumno(alumnoId: number, estadoCobro?: 'PENDIENTE' | 'PAGADO' | 'VENCIDO' | 'CANCELADO' | 'ABONO') {
+    return PagosRepository.getAdeudosAlumno(alumnoId, estadoCobro as any);
   }
 
   static async createAdeudo(input: CreateCalendarioPagoInput) {
-    return prisma.calendarioPago.create({
-      data: {
-        ...input,
-        fechaVencimiento: new Date(input.fechaVencimiento),
-        estadoCobro: input.saldoPendiente > 0 ? 'PENDIENTE' : 'PAGADO'
-      }
+    let estado: EstadoCobro = EstadoCobro.PENDIENTE;
+    if (input.saldoPendiente <= 0) estado = EstadoCobro.PAGADO;
+    else if (input.montoPagado && input.montoPagado > 0) estado = EstadoCobro.ABONO;
+    
+    return PagosRepository.createAdeudo({
+      ...input,
+      fechaVencimiento: new Date(input.fechaVencimiento),
+      estadoCobro: estado
     });
   }
 
   static async updateAdeudo(input: UpdateCalendarioPagoInput) {
     const { calendarioPagoId, fechaVencimiento, ...data } = input;
-    return prisma.calendarioPago.update({
-      where: { calendarioPagoId },
-      data: {
-        ...data,
-        ...(fechaVencimiento && { fechaVencimiento: new Date(fechaVencimiento) }),
-        actualizadoEn: new Date()
-      }
+    return PagosRepository.updateAdeudo(calendarioPagoId, {
+      ...data,
+      ...(fechaVencimiento && { fechaVencimiento: new Date(fechaVencimiento) }),
+      actualizadoEn: new Date()
     });
   }
 
-  // --- Registro de Pagos ---
+  static async recalcularCalendario(alumnoId: number, usuarioId: number) {
+    return prisma.$transaction(async (tx) => {
+      // 1. Encontrar inscripción activa
+      const inscripcion = await tx.inscripcionCiclo.findFirst({
+        where: { alumnoId, estadoEnCiclo: 'INSCRITO', eliminadoEn: null, ciclo: { activo: true } },
+        include: { ciclo: true, alumno: true }
+      });
+      if (!inscripcion) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno no tiene inscripción activa en un ciclo activo.' });
+      }
+
+      // 2. Obtener todas las tarifas activas
+      const tarifas = await tx.tarifa.findMany({
+        where: {
+          cicloId: inscripcion.cicloId,
+          nivelId: inscripcion.alumno.nivelId,
+          activa: true,
+          eliminadoEn: null
+        }
+      });
+      if (tarifas.length === 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'No hay tarifas activas para este nivel y ciclo.' });
+      }
+
+      if (!inscripcion.planPagoId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'El alumno no tiene un plan de pagos asignado para el ciclo actual.' });
+      }
+
+      const planPago = await tx.planPago.findUnique({ where: { planPagoId: inscripcion.planPagoId } });
+      if (!planPago) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'El plan de pagos asignado no es válido.' });
+      }
+
+      const configGlobal = await tx.configuracionGlobal.findFirst({ where: { configuracionId: 1 } });
+      const diaVencimiento = configGlobal?.diaVencimientoMensual || 1;
+      
+      const { CalculadoraPagos } = require('../inscripciones/inscripciones.utils');
+      const tarifasParaCalculadora = tarifas.map(t => ({ concepto: t.concepto, monto: Number(t.monto) }));
+      const adeudosIdeales = CalculadoraPagos.generarCalendario(
+        { meses: planPago.meses },
+        tarifasParaCalculadora,
+        new Date(inscripcion.fechaIngreso),
+        diaVencimiento
+      );
+
+      // 3. Obtener TODOS los adeudos PENDIENTE o ABONO para el ciclo actual (cualquier concepto)
+      const adeudos = await tx.calendarioPago.findMany({
+        where: {
+          alumnoId,
+          cicloId: inscripcion.cicloId,
+          estadoCobro: { in: [EstadoCobro.PENDIENTE, EstadoCobro.ABONO] },
+          eliminadoEn: null
+        },
+        orderBy: { fechaVencimiento: 'asc' },
+        include: {
+          aplicacionesPago: {
+            orderBy: { creadoEn: 'asc' }
+          }
+        }
+      });
+
+      interface AppPoolItem {
+        pagoId: number;
+        montoAplicado: number;
+        aplicadoA: string;
+      }
+      
+      let appPool: AppPoolItem[] = [];
+      let excesoSinPagoId = 0; // Dinero sobrante que no tiene un pago asociado (ej. importación CSV)
+
+      for (const adeudo of adeudos) {
+        // Buscar cuál debería ser el monto actual según la calculadora
+        const ideal = adeudosIdeales.find((a: any) => {
+          if (a.concepto === adeudo.concepto) return true;
+          // Si el CSV guardó "Colegiatura" y el ideal generó "Colegiatura Septiembre", los hacemos coincidir por mes
+          if (a.mes && adeudo.mes && a.mes === adeudo.mes && 
+              a.concepto.toUpperCase().includes('COLEGIATURA') && 
+              adeudo.concepto.toUpperCase().includes('COLEGIATURA')) {
+            return true;
+          }
+          return false;
+        });
+        if (!ideal) continue; // Si no hay ideal, no se recalcula
+
+        const nuevaTarifa = ideal.montoOriginal;
+
+        let sumAplicacionesFormales = 0;
+        for (const app of adeudo.aplicacionesPago) {
+          sumAplicacionesFormales += Number(app.montoAplicado);
+          appPool.push({
+             pagoId: app.pagoId,
+             montoAplicado: Number(app.montoAplicado),
+             aplicadoA: app.aplicadoA
+          });
+        }
+
+        const montoPagadoActual = Number(adeudo.montoPagado);
+        if (montoPagadoActual > sumAplicacionesFormales) {
+          excesoSinPagoId += (montoPagadoActual - sumAplicacionesFormales);
+        }
+
+        if (adeudo.aplicacionesPago.length > 0) {
+          await tx.aplicacionPago.deleteMany({
+            where: { calendarioPagoId: adeudo.calendarioPagoId }
+          });
+        }
+
+        let montoParaEsteAdeudo = 0;
+        let nuevasApps: AppPoolItem[] = [];
+        let nuevoPool: AppPoolItem[] = [];
+
+        // 1. Usar dinero sin pagoId primero (importado de CSV o arrastrado)
+        if (excesoSinPagoId > 0) {
+          if (excesoSinPagoId >= nuevaTarifa) {
+            montoParaEsteAdeudo += nuevaTarifa;
+            excesoSinPagoId -= nuevaTarifa;
+          } else {
+            montoParaEsteAdeudo += excesoSinPagoId;
+            excesoSinPagoId = 0;
+          }
+        }
+
+        // 2. Usar dinero formal (appPool) si aún falta
+        for (const app of appPool) {
+          const faltaParaLlenar = nuevaTarifa - montoParaEsteAdeudo;
+          if (faltaParaLlenar > 0) {
+            if (app.montoAplicado <= faltaParaLlenar) {
+              nuevasApps.push({ ...app });
+              montoParaEsteAdeudo += app.montoAplicado;
+            } else {
+              nuevasApps.push({
+                pagoId: app.pagoId,
+                montoAplicado: faltaParaLlenar,
+                aplicadoA: app.aplicadoA
+              });
+              montoParaEsteAdeudo += faltaParaLlenar;
+              nuevoPool.push({
+                pagoId: app.pagoId,
+                montoAplicado: app.montoAplicado - faltaParaLlenar,
+                aplicadoA: app.aplicadoA
+              });
+            }
+          } else {
+            nuevoPool.push(app);
+          }
+        }
+
+        appPool = nuevoPool;
+
+        for (const nuevaApp of nuevasApps) {
+          await tx.aplicacionPago.create({
+            data: {
+              pagoId: nuevaApp.pagoId,
+              calendarioPagoId: adeudo.calendarioPagoId,
+              montoAplicado: nuevaApp.montoAplicado,
+              aplicadoA: nuevaApp.aplicadoA
+            }
+          });
+        }
+
+        const saldoPendiente = Math.round((nuevaTarifa - montoParaEsteAdeudo) * 100) / 100;
+        let estadoCobro: EstadoCobro = saldoPendiente <= 0 ? EstadoCobro.PAGADO : EstadoCobro.PENDIENTE;
+        if (montoParaEsteAdeudo > 0 && saldoPendiente > 0) estadoCobro = EstadoCobro.ABONO;
+        
+        await tx.calendarioPago.update({
+          where: { calendarioPagoId: adeudo.calendarioPagoId },
+          data: {
+            montoOriginal: nuevaTarifa,
+            montoPagado: montoParaEsteAdeudo,
+            saldoPendiente: saldoPendiente,
+            estadoCobro: estadoCobro,
+            liquidadoAt: estadoCobro === EstadoCobro.PAGADO ? new Date() : null,
+            actualizadoEn: new Date()
+          }
+        });
+      }
+
+      // Si sobra dinero al final, va al saldo a favor
+      let saldoAFavorTotal = appPool.reduce((acc, curr) => acc + curr.montoAplicado, 0) + excesoSinPagoId;
+
+      if (saldoAFavorTotal > 0) {
+        const alumno = await tx.alumno.findUnique({ 
+          where: { alumnoId }, 
+          include: { tutoresAlumnos: { where: { esPrincipal: true } } } 
+        });
+        const tutorId = alumno?.tutoresAlumnos?.[0]?.tutorId;
+        
+        if (tutorId) {
+          await tx.tutor.update({
+            where: { tutorId },
+            data: { saldoAFavor: { increment: saldoAFavorTotal } }
+          });
+          
+          for (const app of appPool) {
+             await tx.movimientoSaldo.create({
+               data: {
+                 tutorId,
+                 pagoId: app.pagoId,
+                 tipo: 'INGRESO',
+                 monto: app.montoAplicado,
+                 descripcion: 'Saldo a favor generado por recálculo de tarifas (reducción).',
+                 creadoPor: usuarioId
+               }
+             });
+          }
+
+          if (excesoSinPagoId > 0) {
+             await tx.movimientoSaldo.create({
+               data: {
+                 tutorId,
+                 tipo: 'INGRESO',
+                 monto: excesoSinPagoId,
+                 descripcion: 'Saldo a favor generado por exceso en importe manual o CSV.',
+                 creadoPor: usuarioId
+               }
+             });
+          }
+        }
+      }
+
+      return { success: true, message: 'Calendario recalculado exitosamente' };
+    });
+  }
+
+
+  static async createCargoExtraordinario(input: CreateCargoExtraordinarioInput) {
+    const ciclo = await prisma.cicloEscolar.findUnique({ where: { cicloId: input.cicloId } });
+    if (ciclo && ciclo.abierto === false) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'No se pueden crear cargos en un ciclo escolar cerrado.' });
+    }
+    return PagosRepository.createAdeudo({
+      alumnoId: input.alumnoId,
+      cicloId: input.cicloId,
+      concepto: input.concepto,
+      mes: null, // Los cargos extra no están ligados a un mes específico
+      fechaVencimiento: new Date(input.fechaVencimiento),
+      montoOriginal: input.monto,
+      saldoPendiente: input.monto,
+      estadoCobro: 'PENDIENTE'
+    });
+  }
+
   static async registrarPago(input: RegistrarPagoInput, registradorId: number) {
     // Calcular suma de aplicaciones para validar contra el monto total
     const totalAplicado = input.aplicaciones.reduce((acc, app) => acc + app.montoAplicado, 0);
 
-    // Permitir que el montoTotal sea mayor (para guardar saldo a favor)
-    // Pero nunca menor a lo que se intenta aplicar.
-    if (input.montoTotal < totalAplicado) {
+    // Buscar todos los adeudos pendientes del alumno para aplicar excedentes si los hay
+    let surplus = input.montoTotal - totalAplicado;
+    
+    if (surplus < 0) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: 'El monto total del pago es menor que la suma de las aplicaciones indicadas.'
       });
     }
 
-    const saldoAFavorGenerado = input.montoTotal - totalAplicado;
-
-    // Ejecutar registro de pago, aplicaciones y actualización de adeudos en una sola transacción
-    return prisma.$transaction(async (tx) => {
-      
-      // 1. Crear el Pago
-      const pago = await tx.pago.create({
-        data: {
+    if (surplus > 0) {
+      // Buscar adeudos pendientes ordenados por fecha
+      const pendientes = await prisma.calendarioPago.findMany({
+        where: {
           alumnoId: input.alumnoId,
-          tutorId: input.tutorId,
-          fechaPago: new Date(input.fechaPago),
-          montoTotal: input.montoTotal,
-          metodoPago: input.metodoPago,
-          aplicadoASaldo: input.aplicadoASaldo,
-          observaciones: input.observaciones,
-          registradoPor: registradorId
-        }
+          eliminadoEn: null,
+          estadoCobro: 'PENDIENTE'
+        },
+        orderBy: { fechaVencimiento: 'asc' }
       });
 
-      // 2. Procesar Aplicaciones
-      for (const app of input.aplicaciones) {
-        // Obtener el adeudo actual
-        const adeudo = await tx.calendarioPago.findUnique({
-          where: { calendarioPagoId: app.calendarioPagoId }
-        });
+      for (const adeudo of pendientes) {
+        if (surplus <= 0) break;
 
-        if (!adeudo || adeudo.eliminadoEn) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: `Adeudo ${app.calendarioPagoId} no encontrado` });
-        }
-
-        // Validar que el monto no exceda el saldo pendiente (permitiendo decimal error de 0.01)
-        if (app.montoAplicado > Number(adeudo.saldoPendiente)) {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: `El monto aplicado al adeudo ${adeudo.concepto} excede su saldo pendiente.` });
-        }
-
-        // Crear la aplicación
-        await tx.aplicacionPago.create({
-          data: {
-            pagoId: pago.pagoId,
-            calendarioPagoId: app.calendarioPagoId,
-            montoAplicado: app.montoAplicado,
-            aplicadoA: app.aplicadoA
-          }
-        });
-
-        // Actualizar saldos del adeudo
-        const nuevoMontoPagado = Number(adeudo.montoPagado) + app.montoAplicado;
-        const nuevoSaldoPendiente = Number(adeudo.saldoPendiente) - app.montoAplicado;
+        // Verificar si ya viene en las aplicaciones explícitas y cuánto se le aplicó
+        const appImplicita = input.aplicaciones.find(a => a.calendarioPagoId === adeudo.calendarioPagoId);
+        const yaAplicado = appImplicita ? appImplicita.montoAplicado : 0;
         
-        let nuevoEstado = adeudo.estadoCobro;
-        let liquidadoAt = adeudo.liquidadoAt;
-        
-        if (nuevoSaldoPendiente <= 0) {
-          nuevoEstado = 'PAGADO';
-          liquidadoAt = new Date();
-        }
+        // Cuánto le falta por pagar a este adeudo
+        const faltaPorPagar = Number(adeudo.saldoPendiente) - yaAplicado;
 
-        await tx.calendarioPago.update({
-          where: { calendarioPagoId: adeudo.calendarioPagoId },
-          data: {
-            montoPagado: nuevoMontoPagado,
-            saldoPendiente: nuevoSaldoPendiente,
-            estadoCobro: nuevoEstado,
-            liquidadoAt
+        if (faltaPorPagar > 0) {
+          const aplicarAhora = Math.min(surplus, faltaPorPagar);
+          
+          if (appImplicita) {
+            appImplicita.montoAplicado += aplicarAhora;
+          } else {
+            input.aplicaciones.push({
+              calendarioPagoId: adeudo.calendarioPagoId,
+              montoAplicado: aplicarAhora,
+              aplicadoA: 'CAPITAL' // Concepto por defecto para excedentes automáticos
+            });
           }
-        });
+          surplus -= aplicarAhora;
+        }
       }
 
-      // 3. Manejo de saldo a favor del tutor
-      if (saldoAFavorGenerado > 0) {
-        await tx.tutor.update({
-          where: { tutorId: input.tutorId },
-          data: {
-            saldoAFavor: { increment: saldoAFavorGenerado }
-          }
-        });
-        
-        // Registrar movimiento de saldo
-        await tx.movimientoSaldo.create({
-          data: {
-            tutorId: input.tutorId,
-            pagoId: pago.pagoId,
-            tipo: 'INGRESO',
-            monto: saldoAFavorGenerado,
-            descripcion: 'Saldo a favor generado por exceso en pago.',
-            creadoPor: registradorId
-          }
+      // Si aún sobra dinero después de cubrir todos los adeudos
+      if (surplus > 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'El pago excede el total de todas las deudas pendientes del alumno.'
         });
       }
+    }
 
-      return pago;
+    // Por regla de negocio impuesta, el saldo a favor generado será siempre 0
+    const saldoAFavorGenerado = 0;
+
+    // Delegar transacción al repositorio
+    const resultadoPago = await PagosRepository.registrarPagoTransaccion({
+      pagoData: {
+        alumnoId: input.alumnoId,
+        tutorId: input.tutorId,
+        fechaPago: new Date(input.fechaPago),
+        montoTotal: input.montoTotal,
+        metodoPago: input.metodoPago,
+        aplicadoASaldo: input.aplicadoASaldo,
+        // @ts-ignore - requiereFactura existe en el esquema Prisma, el cliente podría requerir re-generación
+        requiereFactura: input.requiereFactura,
+        observaciones: input.observaciones,
+        registradoPor: registradorId
+      },
+      aplicaciones: input.aplicaciones,
+      saldoAFavorGenerado,
+      tutorId: input.tutorId,
+      registradorId
+    });
+
+    // Si viene comprobante adjunto
+    if (input.comprobanteBase64 && input.comprobanteNombre && input.comprobanteMime) {
+      try {
+        const uploadsDir = path.join(process.cwd(), 'uploads', 'comprobantes');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        // Limpiar el base64 si trae prefijo 'data:image/jpeg;base64,'
+        const base64Data = input.comprobanteBase64.replace(/^data:([A-Za-z-+/]+);base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const filename = `${Date.now()}-${input.comprobanteNombre}`;
+        const rutaCompleta = path.join(uploadsDir, filename);
+
+        fs.writeFileSync(rutaCompleta, buffer);
+
+        // Guardar el registro Documento en BD
+        await prisma.documento.create({
+          data: {
+            tipoDocumento: 'COMPROBANTE_PAGO',
+            nombreOriginal: input.comprobanteNombre,
+            rutaAlmacen: `uploads/comprobantes/${filename}`,
+            mimeType: input.comprobanteMime,
+            tamanoBytes: buffer.length,
+            pagoId: resultadoPago.pagoId,
+            alumnoId: input.alumnoId,
+            subidoPor: registradorId
+          }
+        });
+      } catch (error) {
+        console.error('Error al guardar el comprobante adjunto:', error);
+        // Podríamos fallar o dejarlo pasar. Siendo opcional, lo registramos como error sin tirar la tx.
+      }
+    }
+
+    return resultadoPago;
+  }
+
+  static async getReciboPago(pagoId: number) {
+    const pago = await PagosRepository.getReciboPago(pagoId);
+    if (!pago) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Recibo de pago no encontrado.'
+      });
+    }
+    return pago;
+  }
+
+  static async adjuntarComprobante(input: AdjuntarComprobanteInput, subidoPorId: number) {
+    try {
+      const uploadsDir = path.join(process.cwd(), 'uploads', 'comprobantes');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const base64Data = input.comprobanteBase64.replace(/^data:([A-Za-z-+/]+);base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      const filename = `${Date.now()}-${input.comprobanteNombre}`;
+      const rutaCompleta = path.join(uploadsDir, filename);
+
+      fs.writeFileSync(rutaCompleta, buffer);
+
+      const documento = await prisma.documento.create({
+        data: {
+          tipoDocumento: 'COMPROBANTE_PAGO',
+          nombreOriginal: input.comprobanteNombre,
+          rutaAlmacen: `uploads/comprobantes/${filename}`,
+          mimeType: input.comprobanteMime,
+          tamanoBytes: buffer.length,
+          pagoId: input.pagoId,
+          alumnoId: input.alumnoId,
+          subidoPor: subidoPorId
+        }
+      });
+      return { success: true, documentoId: documento.documentoId };
+    } catch (error) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'No se pudo guardar el comprobante.'
+      });
+    }
+  }
+
+  static async getComprobanteBase64(pagoId: number) {
+    const documento = await prisma.documento.findFirst({
+      where: { pagoId, tipoDocumento: 'COMPROBANTE_PAGO' },
+      orderBy: { documentoId: 'desc' }
+    });
+
+    if (!documento) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'No hay comprobante asociado.' });
+    }
+
+    try {
+      const rutaCompleta = path.join(process.cwd(), documento.rutaAlmacen);
+      const buffer = fs.readFileSync(rutaCompleta);
+      const base64 = buffer.toString('base64');
+      return {
+        base64: `data:${documento.mimeType};base64,${base64}`,
+        nombre: documento.nombreOriginal,
+        mime: documento.mimeType
+      };
+    } catch (error) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'No se pudo leer el archivo físico.' });
+    }
+  }
+
+  static async getEstadoCuenta(alumnoId: number, cicloId: number) {
+    // 1. Obtener los cargos (CalendarioPago) del ciclo
+    const cargos = await prisma.calendarioPago.findMany({
+      where: {
+        alumnoId,
+        cicloId,
+        eliminadoEn: null,
+        estadoCobro: { not: 'CANCELADO' }
+      }
+    });
+
+    // 2. Obtener los abonos (AplicacionPago -> Pago) para los adeudos de ese ciclo
+    const aplicaciones = await prisma.aplicacionPago.findMany({
+      where: {
+        calendarioPago: {
+          alumnoId,
+          cicloId,
+          eliminadoEn: null,
+          estadoCobro: { not: 'CANCELADO' }
+        }
+      },
+      include: {
+        pago: {
+          include: { documentos: { where: { tipoDocumento: 'COMPROBANTE_PAGO' } } }
+        },
+        calendarioPago: { select: { concepto: true, fechaVencimiento: true, montoOriginal: true } }
+      }
+    });
+
+    type Movimiento = {
+      id: string;
+      tipo: 'CARGO' | 'ABONO';
+      fecha: Date;
+      concepto: string;
+      cargo: number;
+      abono: number;
+      saldo: number;
+      metodoPago?: string;
+      condicionPago?: 'REGULAR' | 'VENCIDO' | 'ABONO' | 'ADELANTADO';
+      pagoId?: number;
+      tieneComprobante?: boolean;
+    };
+
+    const movimientos: Movimiento[] = [];
+
+    for (const c of cargos) {
+      movimientos.push({
+        id: `cargo-${c.calendarioPagoId}`,
+        tipo: 'CARGO',
+        fecha: new Date(c.creadoEn || c.fechaVencimiento),
+        concepto: `Cargo: ${c.concepto}`,
+        cargo: Number(c.montoOriginal),
+        abono: 0,
+        saldo: 0
+      });
+    }
+
+    for (const app of aplicaciones) {
+      const fPago = new Date(app.pago.fechaPago);
+      const fVenc = new Date(app.calendarioPago.fechaVencimiento);
+      
+      let condicionPago: 'REGULAR' | 'VENCIDO' | 'ABONO' | 'ADELANTADO' = 'REGULAR';
+      const montoAplicado = Number(app.montoAplicado);
+      const montoOriginal = Number(app.calendarioPago.montoOriginal);
+
+      if (montoAplicado < montoOriginal) {
+        condicionPago = 'ABONO';
+      } else if (fPago > fVenc) {
+        condicionPago = 'VENCIDO';
+      } else {
+        // Checar si es adelantado (ej. mes anterior)
+        const diffDias = (fVenc.getTime() - fPago.getTime()) / (1000 * 3600 * 24);
+        if (diffDias > 15) {
+          condicionPago = 'ADELANTADO';
+        }
+      }
+
+      movimientos.push({
+        id: `abono-${app.aplicacionId}`,
+        tipo: 'ABONO',
+        fecha: fPago,
+        concepto: `Pago a ${app.calendarioPago.concepto}`,
+        cargo: 0,
+        abono: montoAplicado,
+        saldo: 0,
+        metodoPago: app.pago.metodoPago,
+        condicionPago,
+        pagoId: app.pago.pagoId,
+        tieneComprobante: app.pago.documentos && app.pago.documentos.length > 0
+      });
+    }
+
+    // Ordenar cronológicamente (CARGO antes de ABONO si empatan en fecha)
+    movimientos.sort((a, b) => {
+      const diff = a.fecha.getTime() - b.fecha.getTime();
+      if (diff !== 0) return diff;
+      return a.tipo === 'CARGO' ? -1 : 1;
+    });
+
+    // Calcular saldos arrastrados
+    let saldoActual = 0;
+    for (const mov of movimientos) {
+      saldoActual = saldoActual + mov.cargo - mov.abono;
+      saldoActual = Math.round(saldoActual * 100) / 100;
+      mov.saldo = saldoActual;
+    }
+
+    return movimientos;
+  }
+
+  static async aplicarRecargoManual(calendarioPagoId: number, montoRecargoPersonalizado?: number) {
+    return prisma.$transaction(async (tx) => {
+      const adeudo = await tx.calendarioPago.findUnique({
+        where: { calendarioPagoId }
+      });
+      if (!adeudo || adeudo.eliminadoEn) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Adeudo no encontrado' });
+      }
+
+      let montoRecargo = montoRecargoPersonalizado;
+      if (montoRecargo === undefined) {
+        const config = await tx.configuracionGlobal.findFirst({ where: { configuracionId: 1 } });
+        montoRecargo = Number(config?.montoRecargoDefecto || 0);
+      }
+
+      if (montoRecargo <= 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Monto de recargo inválido (debe ser mayor a 0). Revisa la configuración global de recargos.' });
+      }
+
+      // Sumar al montoRecargo y al saldoPendiente
+      const nuevoMontoRecargo = Number(adeudo.montoRecargo) + montoRecargo;
+      const nuevoSaldoPendiente = Number(adeudo.saldoPendiente) + montoRecargo;
+
+      const actualizado = await tx.calendarioPago.update({
+        where: { calendarioPagoId },
+        data: {
+          montoRecargo: nuevoMontoRecargo,
+          saldoPendiente: nuevoSaldoPendiente,
+          estadoCobro: EstadoCobro.VENCIDO,
+          actualizadoEn: new Date()
+        }
+      });
+      return actualizado;
     });
   }
 }
