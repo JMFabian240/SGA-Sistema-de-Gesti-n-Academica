@@ -12,6 +12,11 @@ vi.mock('jsonwebtoken', () => ({
 describe('Reportes Router (Unit)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prismaMock.logAuditoria.create.mockResolvedValue({} as any);
+    prismaMock.usuarioPermisoModulo.findUnique.mockResolvedValue({
+      activo: true,
+      nivel: 'LECTURA_Y_ESCRITURA'
+    } as any);
   });
 
   const ctxMock = {
@@ -91,7 +96,7 @@ describe('Reportes Router (Unit)', () => {
           fechaPago: new Date('2023-01-15T12:00:00Z'),
           alumno: { nombreCompleto: 'Alumno Pagador' },
           tutor: { nombreCompleto: 'Tutor Pagador' },
-          metodoPago: 'EFECTIVO',
+          metodoPago: 'DEPOSITO',
           montoTotal: 3000,
           registrador: { nombreCompleto: 'Cajero' }
         }
@@ -136,7 +141,7 @@ describe('Reportes Router (Unit)', () => {
       });
 
       expect(prismaMock.inscripcionCiclo.findMany).toHaveBeenCalledWith(expect.objectContaining({
-        where: { grupoId: 10, estadoEnCiclo: 'ACTIVO' }
+        where: { grupoId: 10, estadoEnCiclo: 'INSCRITO' }
       }));
 
       expect(result.totalAlumnos).toBe(2);

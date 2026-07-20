@@ -4,12 +4,13 @@
   "private": true,
   "main": "src/index.ts",
   "scripts": {
-    "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
+    "db:migrate": "powershell -Command \"Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; exit 0\" && prisma migrate dev",
+    "db:generate": "powershell -Command \"Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; exit 0\" && prisma generate",
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.0"
+    "@prisma/client": "^5.7.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "prisma": "^5.7.0",

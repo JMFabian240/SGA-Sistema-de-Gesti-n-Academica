@@ -20,7 +20,20 @@ describe('TutoresService (Unit)', () => {
       expect(result).toHaveLength(2);
       expect(prismaMock.tutor.findMany).toHaveBeenCalledWith({
         where: { eliminadoEn: null },
-        include: { datosFiscales: true },
+        include: {
+          datosFiscales: true,
+          tutoresAlumnos: {
+            include: {
+              alumno: {
+                include: {
+                  calendariosPagos: {
+                    where: { estadoCobro: 'VENCIDO' }
+                  }
+                }
+              }
+            }
+          }
+        },
         orderBy: { nombreCompleto: 'asc' }
       });
     });

@@ -1,35 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
-import jwt from 'jsonwebtoken';
+import { createTestContext } from './testUtils';
 
 describe('Calificaciones Router (Integration)', () => {
-  const validToken = jwt.sign({ usuarioId: 1, rol: 'ADMIN' }, process.env.JWT_SECRET || 'test_secret_integration_key');
-  
-  const ctx = {
-    req: { headers: {} } as any,
-    res: {} as any,
-    prisma: prisma,
-    token: validToken,
-    user: { usuarioId: 1, rol: 'ADMIN' }
-  };
-
   it('debería registrar y actualizar una calificación exitosamente (upsert)', async () => {
+    const { ctx, usuario } = await createTestContext(['Calificaciones']);
     const caller = appRouter.createCaller(ctx);
 
     // 1. Preparar dependencias en BD
-    await prisma.usuario.create({
-      data: {
-        usuarioId: 1,
-        nombreUsuario: 'admin_calif',
-        nombreCompleto: 'Admin Calificaciones',
-        correo: 'admin.calif@test.com',
-        passwordHash: 'hash_falso',
-      }
-    });
-
-    const nivel = await prisma.nivelEducativo.create({
-      data: { codigo: 'SEC', nombre: 'Secundaria', orden: 3 }
+    const nivel = await prisma.nivelEducativo.upsert({
+      where: { codigo: 'SEC_CALIF' },
+      update: {},
+      create: { codigo: 'SEC_CALIF', nombre: 'Secundaria', orden: 3 }
     });
 
     const ciclo = await prisma.cicloEscolar.create({
@@ -41,14 +24,30 @@ describe('Calificaciones Router (Integration)', () => {
       }
     });
 
-    const materia = await prisma.materia.create({
-      data: { nombre: 'Física I', clave: 'FIS1' }
+    const materia = await prisma.materia.upsert({
+      where: { clave: 'FIS1_CALIF' },
+      update: {},
+      create: { nombre: 'Física I', clave: 'FIS1_CALIF' }
+    });
+
+    // Nota: El modelo Grado es requerido en schema.prisma si nivel es agregado, pero en grupos solo nivelId. 
+    // Usaremos un UPSERT manual o create para el grupo ya que no tiene unique puro sin ID, pero no hay problema con create si el nivel es nuevo.
+    // Wait, Grupo requires gradoId en el esquema actual. Vamos a crearlo u omitirlo si el esquema lo permite.
+    // Revisando el esquema: `gradoId` está en Grupo. Let's create a Grado first.
+    // En las versiones anteriores del test de pagos no creamos grupo. Aquí sí.
+    const grado = await prisma.grado.create({
+      data: {
+        nivelId: nivel.nivelId,
+        numero: 3,
+        nombre: 'Tercero'
+      }
     });
 
     const grupo = await prisma.grupo.create({
       data: {
         nivelId: nivel.nivelId,
         cicloId: ciclo.cicloId,
+        gradoId: grado.gradoId,
         nombre: '3A',
         cupoMaximo: 30
       }
@@ -58,14 +57,14 @@ describe('Calificaciones Router (Integration)', () => {
       data: {
         grupoId: grupo.grupoId,
         materiaId: materia.materiaId,
-        docenteId: 1
+        docenteId: usuario.usuarioId
       }
     });
 
     const alumno = await prisma.alumno.create({
       data: {
         nombreCompleto: 'Alumno Calificacion',
-        curp: 'ALUMNOCALIF1234567',
+        curp: `TS${Date.now()}EFG`,
         fechaNacimiento: new Date('2010-05-15'),
         sexo: 'M',
         estado: 'ACTIVO',
@@ -114,6 +113,7 @@ describe('Calificaciones Router (Integration)', () => {
   });
 
   it('debería rechazar si no se envía ni valor numérico ni cualitativo (Zod Refine)', async () => {
+    const { ctx } = await createTestContext(['Calificaciones']);
     const caller = appRouter.createCaller(ctx);
 
     const calificacionInvalida = {

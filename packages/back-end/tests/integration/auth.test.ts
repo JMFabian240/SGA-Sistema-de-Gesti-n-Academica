@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { appRouter } from '../../src/router';
 import { prisma } from '@sga/data-access';
 import bcrypt from 'bcryptjs';
@@ -14,8 +14,8 @@ describe('Auth Router (Integration)', () => {
 
     const caller = appRouter.createCaller(ctx);
 
-    await expect(caller.auth.login({ correo: 'test', contrasena: '' }))
-      .rejects.toThrowError(/Debe ser un correo electrónico válido/);
+    await expect(caller.auth.login({ identificador: '', contrasena: '123' }))
+      .rejects.toThrowError(/El nombre de usuario debe tener al menos 3 caracteres/);
   });
 
   it('debería retornar un token válido si las credenciales son correctas', async () => {
@@ -23,11 +23,12 @@ describe('Auth Router (Integration)', () => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash('ContrasenaSegura123!', salt);
     
+    const uniqueUser = `admin_test_${Date.now()}`;
+
     await prisma.usuario.create({
       data: {
-        nombreUsuario: 'admin_test',
+        nombreUsuario: uniqueUser,
         nombreCompleto: 'Admin Test',
-        correo: 'admin@test.com',
         passwordHash: hash,
         activo: true
       }
@@ -43,7 +44,7 @@ describe('Auth Router (Integration)', () => {
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.auth.login({
-      correo: 'admin@test.com',
+      identificador: uniqueUser,
       contrasena: 'ContrasenaSegura123!'
     });
 
