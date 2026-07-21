@@ -96,7 +96,7 @@ export function AlumnosPage() {
     const niveles = Array.from(new Set((alumnos as any[])?.map(a => a.nivel?.nombre).filter(Boolean)));
     return niveles.sort((a, b) => (nivelRanking[(a as string).toUpperCase()] || 99) - (nivelRanking[(b as string).toUpperCase()] || 99));
   }, [alumnos]);
-  
+
   const availableGrados = useMemo(() => {
     let filtered = alumnos as any[] || [];
     if (nivelFilter !== 'Todos los niveles') {
@@ -163,7 +163,7 @@ export function AlumnosPage() {
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[1600px] mx-auto p-4 md:p-8 bg-[#F8FAFE] min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-[#001429]">Directorio Escolar</h2>
+          <h2 className="text-3xl font-bold text-[#001429]">Directorio de Alumnos</h2>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -298,19 +298,19 @@ export function AlumnosPage() {
               <tbody className="divide-y divide-gray-50">
                 {currentData.map((a: any) => {
                   const inscripcion = a.inscripciones?.[0];
-                  
+
                   const gradoNombre = inscripcion?.grupo?.grado?.nombre || a.grado?.nombre || '';
                   const grupoNombre = inscripcion?.grupo?.nombre || '';
                   const nivelNombre = a.nivel?.nombre || '';
-                  
+
                   let grupoNivel = 'Sin asignar';
                   if (gradoNombre || grupoNombre || nivelNombre) {
                     const partes = [];
                     if (gradoNombre) partes.push(gradoNombre);
-                    
+
                     const grupoNivelText = `${grupoNombre} ${nivelNombre}`.trim();
                     if (grupoNivelText) partes.push(grupoNivelText);
-                    
+
                     grupoNivel = partes.join(' - ');
                   }
                   const tutorPrincipal = a.tutoresAlumnos?.[0]?.tutor;

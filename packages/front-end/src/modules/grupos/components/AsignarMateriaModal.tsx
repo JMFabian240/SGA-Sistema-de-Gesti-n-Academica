@@ -105,7 +105,7 @@ export function AsignarMateriaModal({ isOpen, onClose, gradoId, onSuccess }: Pro
                     size="sm"
                     onClick={() => setIsCrearMateriaOpen(true)}
                   >
-                    + Crear nueva materia
+                    + Nueva Materia
                   </Button>
                 )}
               </div>
@@ -140,7 +140,7 @@ export function AsignarMateriaModal({ isOpen, onClose, gradoId, onSuccess }: Pro
                     size="sm"
                     onClick={() => setIsCrearDocenteOpen(true)}
                   >
-                    + Crear nuevo docente
+                    + Nuevo Docente
                   </Button>
                 )}
               </div>
@@ -197,7 +197,7 @@ export function AsignarMateriaModal({ isOpen, onClose, gradoId, onSuccess }: Pro
                     ))
                   )}
                   {hasPermiso('Usuarios') && (
-                    <div 
+                    <div
                       onMouseDown={(e) => {
                         e.preventDefault();
                         setIsCrearDocenteOpen(true);
