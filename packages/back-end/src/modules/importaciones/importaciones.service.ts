@@ -331,7 +331,7 @@ export class ImportacionesService {
             }
 
             // Inscribir
-            await tx.inscripcionCiclo.create({
+            const nuevaInscripcion = await tx.inscripcionCiclo.create({
               data: {
                 alumnoId: alumno.alumnoId,
                 cicloId: cicloId,
@@ -343,6 +343,42 @@ export class ImportacionesService {
                 fechaIngreso: new Date()
               }
             });
+
+            if (planPagoId) {
+              const planPago = await tx.planPago.findUnique({ where: { planPagoId } });
+              if (planPago && !planPago.eliminadoEn) {
+                const tarifas = await tx.tarifa.findMany({
+                  where: {
+                    cicloId: cicloId,
+                    nivelId: nivel.nivelId,
+                    activa: true,
+                    eliminadoEn: null
+                  }
+                });
+                const tarifasParaCalculadora = tarifas.map(t => ({ concepto: t.concepto, monto: Number(t.monto) }));
+                const { CalculadoraPagos } = require('../inscripciones/inscripciones.utils');
+                const planBase = { meses: planPago.meses };
+                const configGlobal = await tx.configuracionGlobal.findFirst({ where: { configuracionId: 1 } });
+                const diaVencimiento = configGlobal?.diaVencimientoMensual || 1;
+                const añoInicio = new Date(ciclo.fechaInicio).getFullYear();
+                
+                const adeudosCalculados = CalculadoraPagos.generarCalendario(
+                  planBase, 
+                  tarifasParaCalculadora, 
+                  new Date(nuevaInscripcion.fechaIngreso), 
+                  diaVencimiento, 
+                  null, 
+                  añoInicio
+                );
+                
+                const adeudosParaInsertar = adeudosCalculados.map((a: any) => ({
+                  alumnoId: alumno.alumnoId,
+                  cicloId: cicloId,
+                  ...a
+                }));
+                await tx.calendarioPago.createMany({ data: adeudosParaInsertar as any });
+              }
+            }
           }
 
         } catch (error: any) {

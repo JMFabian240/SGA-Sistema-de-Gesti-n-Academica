@@ -6,18 +6,16 @@ export function initCronRecargos() {
   cron.schedule('5 0 * * *', async () => {
     console.log('[CRON] Iniciando cálculo automático de recargos...');
     try {
-      const config = await prisma.configuracionGlobal.findFirst({ where: { configuracionId: 1 } });
-      const montoRecargo = Number(config?.montoRecargoDefecto || 0);
-      const diasGracia = config?.diasGraciaRecargo || 0;
+      const configuracionesRecargo = await prisma.configuracionRecargo.findMany({
+        where: { activo: true }
+      });
 
-      if (montoRecargo <= 0) {
-        console.log('[CRON] No hay monto de recargo configurado. Abortando.');
+      if (configuracionesRecargo.length === 0) {
+        console.log('[CRON] No hay reglas específicas de recargo configuradas. Abortando.');
         return;
       }
 
       const hoy = new Date();
-      // Buscamos los vencidos que exceden los días de gracia, que aún están pendientes o vencidos
-      // Solo aplicamos el recargo automático a los que no tienen recargo (montoRecargo = 0)
       
       const adeudosVencidos = await prisma.calendarioPago.findMany({
         where: {
@@ -29,13 +27,20 @@ export function initCronRecargos() {
 
       let aplicados = 0;
       for (const adeudo of adeudosVencidos) {
+        // Buscar si existe una regla aplicable a este concepto
+        const regla = configuracionesRecargo.find(r => 
+          adeudo.concepto.toLowerCase().includes(r.conceptoPago.toLowerCase())
+        );
+
+        if (!regla) continue; // No hay regla específica para este concepto (ej. Uniforme)
+
         const fechaLimite = new Date(adeudo.fechaVencimiento);
-        fechaLimite.setDate(fechaLimite.getDate() + diasGracia);
+        fechaLimite.setDate(fechaLimite.getDate() + regla.diasGracia);
 
         if (hoy > fechaLimite) {
           // Aplicar recargo
-          const nuevoMontoRecargo = Number(adeudo.montoRecargo) + montoRecargo;
-          const nuevoSaldoPendiente = Number(adeudo.saldoPendiente) + montoRecargo;
+          const nuevoMontoRecargo = Number(adeudo.montoRecargo) + Number(regla.monto);
+          const nuevoSaldoPendiente = Number(adeudo.saldoPendiente) + Number(regla.monto);
           
           await prisma.calendarioPago.update({
             where: { calendarioPagoId: adeudo.calendarioPagoId },
@@ -49,7 +54,7 @@ export function initCronRecargos() {
         }
       }
 
-      console.log(`[CRON] Recargos automáticos aplicados a ${aplicados} adeudos.`);
+      console.log(`[CRON] Recargos automáticos aplicados a ${aplicados} adeudos (basado en reglas específicas).`);
     } catch (err) {
       console.error('[CRON] Error calculando recargos:', err);
     }

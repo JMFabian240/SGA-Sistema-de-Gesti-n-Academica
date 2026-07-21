@@ -623,12 +623,21 @@ export class PagosService {
 
       let montoRecargo = montoRecargoPersonalizado;
       if (montoRecargo === undefined) {
-        const config = await tx.configuracionGlobal.findFirst({ where: { configuracionId: 1 } });
-        montoRecargo = Number(config?.montoRecargoDefecto || 0);
+        // Buscar regla específica por concepto
+        const reglas = await tx.configuracionRecargo.findMany({ where: { activo: true } });
+        const regla = reglas.find(r => adeudo.concepto.toLowerCase().includes(r.conceptoPago.toLowerCase()));
+        
+        if (!regla) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: `No hay una regla de recargo específica configurada para el concepto "${adeudo.concepto}". Debes configurar una en "Recargos y Plazos" o ingresar un monto manual.` 
+          });
+        }
+        montoRecargo = Number(regla.monto);
       }
 
       if (montoRecargo <= 0) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Monto de recargo inválido (debe ser mayor a 0). Revisa la configuración global de recargos.' });
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Monto de recargo inválido (debe ser mayor a 0).' });
       }
 
       // Sumar al montoRecargo y al saldoPendiente

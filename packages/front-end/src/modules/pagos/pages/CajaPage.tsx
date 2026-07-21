@@ -282,15 +282,22 @@ export function CajaPage() {
                           </div>
                         </div>
 
-                        <div className="text-right">
+                        <div className="text-right flex flex-col items-end">
                           <div className={`font-black text-lg ${isPagado ? 'text-slate-400' : 'text-slate-800'}`}>
                             ${Number(adeudo.saldoPendiente).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </div>
-                          {Number(adeudo.montoPagado) > 0 && !isPagado && (
-                            <div className="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-md inline-block mt-1">
-                              Abonado: ${Number(adeudo.montoPagado).toLocaleString()}
-                            </div>
-                          )}
+                          <div className="flex gap-1 mt-1">
+                            {Number(adeudo.montoRecargo) > 0 && !isPagado && (
+                              <div className="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-md inline-block border border-red-100">
+                                + ${Number(adeudo.montoRecargo).toLocaleString()} Recargo
+                              </div>
+                            )}
+                            {Number(adeudo.montoPagado) > 0 && !isPagado && (
+                              <div className="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-md inline-block">
+                                Abonado: ${Number(adeudo.montoPagado).toLocaleString()}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
