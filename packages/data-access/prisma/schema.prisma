@@ -713,6 +713,7 @@ enum MetodoPago {
   TRANSFERENCIA
   TARJETA_DEBITO
   TARJETA_CREDITO
+  EFECTIVO
 }
 
 enum EstadoCobro {
