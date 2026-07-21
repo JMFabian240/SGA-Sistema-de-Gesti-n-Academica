@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
-import { LayoutDashboard, Users, UserSquare2, CreditCard, LogOut, Settings, BookOpen, Layers, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, UserSquare2, CreditCard, LogOut, Settings, BookOpen, Layers, Shield, GraduationCap, FileText } from 'lucide-react';
 
 export function Sidebar() {
   const { user, logout } = useAuthStore();
@@ -25,6 +25,8 @@ export function Sidebar() {
     { to: '/tutores', icon: UserSquare2, label: 'Tutores', modulo: 'Tutores' },
     { to: '/grupos', icon: Layers, label: 'Grupos', modulo: 'Grupos' },
     { to: '/materias', icon: BookOpen, label: 'Materias', modulo: 'Materias' },
+    { to: '/calificaciones', icon: FileText, label: 'Calificaciones', modulo: 'Calificaciones' },
+    { to: '/becas', icon: GraduationCap, label: 'Becas', modulo: 'Becas' },
     { to: '/pagos', icon: CreditCard, label: 'Pagos', modulo: 'Pagos' },
   ];
 
