@@ -8,12 +8,14 @@ import {
   Calendar, 
   Layers, 
   Trash2,
-  LayoutGrid
+  LayoutGrid,
+  Edit2
 } from 'lucide-react';
 import { trpc } from '../../../lib/trpc';
 import { Button } from '../../../components/ui/Button';
 import { GrupoFormModal } from '../components/GrupoFormModal';
 import { AsignarMateriaModal } from '../components/AsignarMateriaModal';
+import { MateriaFormModal } from '../components/MateriaFormModal';
 
 interface CursoSeleccionado {
   gradoId: number;
@@ -36,6 +38,13 @@ export function GruposListPage() {
   const [isAsignarMateriaOpen, setIsAsignarMateriaOpen] = useState(false);
   const [isGrupoModalOpen, setIsGrupoModalOpen] = useState(false);
   const [editingGrupo, setEditingGrupo] = useState<any>(null);
+  const [isMateriaModalOpen, setIsMateriaModalOpen] = useState(false);
+  const [editingMateria, setEditingMateria] = useState<any>(null);
+
+  const handleOpenEditMateria = (materia: any) => {
+    setEditingMateria(materia);
+    setIsMateriaModalOpen(true);
+  };
 
   // --- Queries ---
   const { data: ciclos } = trpc.grupos.getCiclos.useQuery();
@@ -201,15 +210,26 @@ export function GruposListPage() {
                           </span>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDesasignarMateria(mat.materiaId, mat.nombre)}
-                        className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg p-1.5"
-                        title="Desasignar materia de este grado"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenEditMateria(mat)}
+                          className="text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg p-1.5"
+                          title="Editar materia"
+                        >
+                          <Edit2 size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDesasignarMateria(mat.materiaId, mat.nombre)}
+                          className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg p-1.5"
+                          title="Desasignar materia de este grado"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -314,6 +334,16 @@ export function GruposListPage() {
           defaultCicloId={getCicloIdForNivel(cursoSeleccionado.nivelCodigo)}
           defaultNivelId={cursoSeleccionado.nivelId}
           defaultGradoId={cursoSeleccionado.gradoId}
+        />
+
+        <MateriaFormModal
+          isOpen={isMateriaModalOpen}
+          onClose={() => {
+            setIsMateriaModalOpen(false);
+            setEditingMateria(null);
+          }}
+          materiaId={editingMateria?.materiaId}
+          initialData={editingMateria}
         />
       </div>
     );
