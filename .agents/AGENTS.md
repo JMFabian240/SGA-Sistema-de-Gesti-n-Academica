@@ -1,4 +1,4 @@
-## Identidad del Proyecto
+﻿## Identidad del Proyecto
 - Nombre: SGA
 - Propósito: Sistema de gestión escolar de escritorio para
   registro de pagos, gestión de alumnos, tutores y calificaciones
@@ -108,7 +108,7 @@ Las skills de diseño han sido analizadas y están diseñadas para complementars
 - No modificar más de un paquete a la vez sin avisar
 
 ## Reglas de Git y Commits
-- **CRÍTICO - COMMITS MANUALES:** Bajo NINGUNA circunstancia debes hacer `git commit` o `git push` automáticamente al terminar una tarea. Solo debes hacerlo cuando el usuario te lo pida explícitamente.
+- **CRÍTICO - COMMITS MANUALES:** Al terminar de realizar cambios, debes ejecutar `git add`, `git commit` y `git push` de manera automática a la rama actual sin esperar a que el usuario te lo pida. El usuario solo intervendrá para especificar si los cambios deben ir a una rama diferente.
 - **CRÍTICO - MENSAJES DE COMMIT:** Al momento de realizar un commit (previa autorización), el agente **TIENE** la obligación de redactar el mensaje explicando **exclusivamente el contexto y propósito de los cambios**, omitiendo por completo la lista de archivos modificados. Todo el mensaje debe estar **siempre en español**.
 - **Conventional Commits:** Utilizar la convención estándar (ej. `feat(auth): mensaje`, `fix(ui): mensaje`, `chore(core): mensaje`) para estructurar los mensajes.
 - **Agrupación Lógica:** Al guardar varios cambios, se deben separar y agrupar de forma lógica por módulo o funcionalidad en commits individuales, no en un solo commit global.
