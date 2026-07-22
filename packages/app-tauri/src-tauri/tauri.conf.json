@@ -3,7 +3,7 @@
   "identifier": "mx.sga.app",
   "version": "1.0.0",
   "build": {
-    "beforeDevCommand": "npm run dev:front-end --workspace=@sga/front-end",
+    "beforeDevCommand": "npm run dev --workspace=@sga/front-end",
     "beforeBuildCommand": "npm run build --workspace=@sga/front-end",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../../front-end/dist"
@@ -36,10 +36,10 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "binaries/initdb",
-      "binaries/postgres",
-      "binaries/pg_ctl",
       "binaries/sga-back"
+    ],
+    "resources": [
+      "pgsql/**/*"
     ]
   }
 }

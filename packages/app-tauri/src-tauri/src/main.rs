@@ -9,6 +9,7 @@ use tauri::{Manager, Emitter};
 use tauri_plugin_shell::ShellExt;
 use tauri_plugin_shell::process::CommandEvent;
 use postgres::{Client, NoTls};
+use std::os::windows::process::CommandExt;
 
 struct AppState {
     db_process: Option<u32>,
@@ -68,10 +69,10 @@ fn main() {
                     let _ = splash_window.emit("splash-state", "Inicializando base de datos...");
                     std::fs::create_dir_all(&db_dir).unwrap();
                     
-                    let (mut rx, _) = app_handle
-                        .shell()
-                        .sidecar("initdb")
-                        .expect("Failed to create initdb sidecar")
+                    let pgsql_dir = app_handle.path().resource_dir().unwrap().join("pgsql");
+                    let initdb_path = pgsql_dir.join("bin").join("initdb.exe");
+                    
+                    let status = std::process::Command::new(initdb_path)
                         .args([
                             "--pgdata",
                             db_dir.to_str().unwrap(),
@@ -79,18 +80,11 @@ fn main() {
                             "--encoding=UTF8",
                             "--locale=es_MX.UTF-8"
                         ])
-                        .spawn()
+                        .creation_flags(0x08000000)
+                        .status()
                         .expect("Failed to spawn initdb");
                     
-                    let mut success = false;
-                    while let Some(event) = rx.recv().await {
-                        if let CommandEvent::Terminated(payload) = event {
-                            if payload.code.unwrap_or(1) == 0 {
-                                success = true;
-                            }
-                        }
-                    }
-                    if !success {
+                    if !status.success() {
                         show_error_and_exit("Fallo al inicializar el clúster de base de datos.");
                     }
                 }
@@ -98,20 +92,21 @@ fn main() {
                 // FASE B — Levantar PostgreSQL
                 let _ = splash_window.emit("splash-state", "Iniciando motor de base de datos...");
                 
-                let (_, db_child) = app_handle
-                    .shell()
-                    .sidecar("postgres")
-                    .expect("Failed to create postgres command")
+                let pgsql_dir = app_handle.path().resource_dir().unwrap().join("pgsql");
+                let postgres_path = pgsql_dir.join("bin").join("postgres.exe");
+
+                let db_child = std::process::Command::new(postgres_path)
                     .args([
                         "-D",
                         db_dir.to_str().unwrap(),
                         "-p",
                         "5433"
                     ])
+                    .creation_flags(0x08000000)
                     .spawn()
                     .expect("Failed to spawn postgres");
                 
-                let db_pid = db_child.pid();
+                let db_pid = db_child.id();
 
                 // Esperar hasta que PostgreSQL esté listo (timeout 30s)
                 let mut db_ready = false;
@@ -203,15 +198,15 @@ fn main() {
                             .status();
                     }
 
-                    if let Some(db_pid) = state.db_process.take() {
+                    if let Some(_db_pid) = state.db_process.take() {
                         let path_resolver = window.app_handle().path();
                         let db_dir = path_resolver.app_data_dir().unwrap().join("pgdata");
+                        let pgsql_dir = path_resolver.resource_dir().unwrap().join("pgsql");
+                        let pg_ctl_path = pgsql_dir.join("bin").join("pg_ctl.exe");
                         
-                        let _ = window.app_handle()
-                            .shell()
-                            .sidecar("pg_ctl")
-                            .expect("Failed to create pg_ctl command")
+                        let _ = std::process::Command::new(pg_ctl_path)
                             .args(["stop", "-D", db_dir.to_str().unwrap(), "-m", "fast"])
+                            .creation_flags(0x08000000)
                             .spawn();
                     }
                 }
