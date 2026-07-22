@@ -96,8 +96,20 @@ async fn startup_sequence(app_handle: tauri::AppHandle, splash_window: tauri::We
         config.dbname("postgres");
         config.connect_timeout(Duration::from_secs(5));
         
-        let mut client = config.connect(postgres::NoTls)
-            .map_err(|e| format!("No se pudo conectar a PostgreSQL (timeout): {}", e))?;
+        let mut client_opt = None;
+        for _ in 0..10 { // Reintentar por hasta ~10-15 segundos
+            match config.connect(postgres::NoTls) {
+                Ok(c) => {
+                    client_opt = Some(c);
+                    break;
+                },
+                Err(_) => {
+                    std::thread::sleep(Duration::from_millis(1000));
+                }
+            }
+        }
+        
+        let mut client = client_opt.ok_or("No se pudo conectar a PostgreSQL (timeout): error communicating with the server")?;
             
         let rows = client.query("SELECT datname FROM pg_database WHERE datname = 'sga_db'", &[])
             .map_err(|e| format!("Error consultando pg_database: {}", e))?;
@@ -137,7 +149,7 @@ async fn startup_sequence(app_handle: tauri::AppHandle, splash_window: tauri::We
         .map_err(|e| e.to_string())?;
         
     let mut back_ready = false;
-    for _ in 0..30 {
+    for _ in 0..120 { // 60 segundos de timeout
         if let Ok(resp) = client.get("http://localhost:3000/health").send().await {
             if resp.status().is_success() {
                 back_ready = true;
@@ -148,7 +160,7 @@ async fn startup_sequence(app_handle: tauri::AppHandle, splash_window: tauri::We
     }
 
     if !back_ready {
-        return Err("El backend no respondió en 15 segundos o falló al iniciar.".to_string());
+        return Err("El backend no respondió en 60 segundos o falló al iniciar.".to_string());
     }
 
     // FASE E — Abrir la ventana
