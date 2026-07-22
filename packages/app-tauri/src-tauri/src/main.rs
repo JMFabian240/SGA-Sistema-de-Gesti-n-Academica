@@ -20,6 +20,147 @@ struct AppState {
     back_process: Option<u32>,
 }
 
+async fn startup_sequence(app_handle: tauri::AppHandle, splash_window: tauri::WebviewWindow, main_window: tauri::WebviewWindow) -> Result<(), String> {
+    let path_resolver = app_handle.path();
+    let app_data_dir = clean_path(&path_resolver.app_data_dir().map_err(|e| e.to_string())?);
+    let db_dir = app_data_dir.join("pgdata");
+    
+    // FASE A — Inicializar PostgreSQL
+    let pg_version_file = db_dir.join("PG_VERSION");
+    if !pg_version_file.exists() {
+        let _ = splash_window.emit("splash-state", "Inicializando base de datos...");
+        if db_dir.exists() {
+            let _ = std::fs::remove_dir_all(&db_dir);
+        }
+        std::fs::create_dir_all(&db_dir).map_err(|e| format!("Error al crear directorio db_dir: {}", e))?;
+        
+        let resource_dir = clean_path(&path_resolver.resource_dir().map_err(|e| e.to_string())?);
+        let pgsql_dir = resource_dir.join("pgsql");
+        let initdb_path = pgsql_dir.join("bin").join("initdb.exe");
+        
+        let output = std::process::Command::new(initdb_path)
+            .args([
+                "--pgdata",
+                db_dir.to_str().ok_or("Ruta db_dir no es UTF8")?,
+                "--username=sga",
+                "--encoding=UTF8",
+                "--auth=trust"
+            ])
+            .creation_flags(0x08000000)
+            .stdin(std::process::Stdio::null())
+            .output()
+            .map_err(|e| format!("Fallo al ejecutar initdb.exe: {}", e))?;
+            
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            return Err(format!("Fallo al inicializar clúster de BD.\nError: {}\nSalida: {}", stderr, stdout));
+        }
+    }
+
+    // FASE B — Levantar PostgreSQL
+    let _ = splash_window.emit("splash-state", "Iniciando motor de base de datos...");
+    let resource_dir = clean_path(&app_handle.path().resource_dir().map_err(|e| e.to_string())?);
+    let pgsql_dir = resource_dir.join("pgsql");
+    let postgres_path = pgsql_dir.join("bin").join("postgres.exe");
+
+    let db_child = std::process::Command::new(postgres_path)
+        .args(["-D", db_dir.to_str().ok_or("Ruta db no es UTF8")?, "-p", "5433"])
+        .creation_flags(0x08000000)
+        .stdin(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| format!("Fallo al ejecutar postgres.exe: {}", e))?;
+        
+    let db_pid = db_child.id();
+
+    // Esperar hasta que PostgreSQL esté listo (timeout 30s)
+    let mut db_ready = false;
+    for _ in 0..60 { 
+        if let Ok(_) = tokio::time::timeout(Duration::from_millis(100), tokio::net::TcpStream::connect("127.0.0.1:5433")).await {
+            db_ready = true;
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(400)).await;
+    }
+
+    if !db_ready {
+        return Err("PostgreSQL no inició en 30 segundos o el puerto 5433 está bloqueado.".to_string());
+    }
+
+    // Verificar y crear base de datos "sga_db"
+    tokio::task::spawn_blocking(move || -> Result<(), String> {
+        let mut config = postgres::Config::new();
+        config.user("sga");
+        config.host("127.0.0.1");
+        config.port(5433);
+        config.dbname("postgres");
+        config.connect_timeout(Duration::from_secs(5));
+        
+        let mut client = config.connect(postgres::NoTls)
+            .map_err(|e| format!("No se pudo conectar a PostgreSQL (timeout): {}", e))?;
+            
+        let rows = client.query("SELECT datname FROM pg_database WHERE datname = 'sga_db'", &[])
+            .map_err(|e| format!("Error consultando pg_database: {}", e))?;
+            
+        if rows.is_empty() {
+            client.execute("CREATE DATABASE sga_db OWNER sga", &[])
+                .map_err(|e| format!("Error al crear base de datos sga_db: {}", e))?;
+        }
+        Ok(())
+    }).await.map_err(|e| format!("Error en hilo de postgres: {}", e))??;
+
+    // FASE C y D — Levantar Backend
+    let _ = splash_window.emit("splash-state", "Aplicando actualizaciones e iniciando servicios...");
+    let sidecar = app_handle.shell().sidecar("sga-back")
+        .map_err(|e| format!("Error al crear sidecar sga-back: {}", e))?;
+        
+    let (_, back_child) = sidecar
+        .envs(vec![
+            ("DATABASE_URL".to_string(), "postgresql://sga@localhost:5433/sga_db".to_string()),
+            ("TRPC_PORT".to_string(), "3000".to_string()),
+            ("NODE_ENV".to_string(), "production".to_string()),
+            ("RUN_MIGRATIONS".to_string(), "true".to_string())
+        ])
+        .spawn()
+        .map_err(|e| format!("Error al ejecutar backend sga-back: {}", e))?;
+        
+    let back_pid = back_child.pid();
+
+    app_handle.manage(Arc::new(Mutex::new(AppState {
+        db_process: Some(db_pid),
+        back_process: Some(back_pid),
+    })));
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(2))
+        .build()
+        .map_err(|e| e.to_string())?;
+        
+    let mut back_ready = false;
+    for _ in 0..30 {
+        if let Ok(resp) = client.get("http://localhost:3000/health").send().await {
+            if resp.status().is_success() {
+                back_ready = true;
+                break;
+            }
+        }
+        tokio::time::sleep(Duration::from_millis(500)).await;
+    }
+
+    if !back_ready {
+        return Err("El backend no respondió en 15 segundos o falló al iniciar.".to_string());
+    }
+
+    // FASE E — Abrir la ventana
+    let _ = splash_window.emit("splash-state", "Cargando aplicación...");
+    tokio::time::sleep(Duration::from_millis(500)).await;
+    
+    splash_window.close().map_err(|e| e.to_string())?;
+    main_window.show().map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -54,184 +195,16 @@ fn main() {
             main_window.hide().unwrap();
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                let show_error_and_exit = {
-                    let app_handle_clone = app_handle.clone();
-                    move |msg: &str| {
-                        use tauri_plugin_dialog::DialogExt;
-                        app_handle_clone.dialog()
-                            .message(msg)
-                            .title("Error Crítico")
-                            .kind(tauri_plugin_dialog::MessageDialogKind::Error)
-                            .blocking_show();
-                        std::process::exit(1);
-                    }
-                };
-
-                // FASE A — Inicializar PostgreSQL
-                let pg_version_file = db_dir.join("PG_VERSION");
-                if !pg_version_file.exists() {
-                    let _ = splash_window.emit("splash-state", "Inicializando base de datos...");
-                    // Si el directorio existe pero no tiene PG_VERSION, lo borramos para asegurar que initdb no falle por "directorio no vacío"
-                    if db_dir.exists() {
-                        let _ = std::fs::remove_dir_all(&db_dir);
-                    }
-                    if let Err(e) = std::fs::create_dir_all(&db_dir) {
-                        show_error_and_exit(&format!("Error al crear directorio db_dir: {}", e));
-                    }
-                    
-                    let pgsql_dir = clean_path(&app_handle.path().resource_dir().unwrap()).join("pgsql");
-                    let initdb_path = pgsql_dir.join("bin").join("initdb.exe");
-                    
-                    let output = std::process::Command::new(initdb_path)
-                        .args([
-                            "--pgdata",
-                            db_dir.to_str().unwrap(),
-                            "--username=sga",
-                            "--encoding=UTF8",
-                            "--auth=trust"
-                        ])
-                        .creation_flags(0x08000000)
-                        .output();
-                        
-                    let output = match output {
-                        Ok(o) => o,
-                        Err(e) => {
-                            show_error_and_exit(&format!("Fallo al ejecutar initdb.exe: {}", e));
-                            return;
-                        }
-                    };
-                    
-                    if !output.status.success() {
-                        let stderr = String::from_utf8_lossy(&output.stderr);
-                        let stdout = String::from_utf8_lossy(&output.stdout);
-                        let error_msg = format!("Fallo al inicializar el clúster de base de datos.\nError: {}\nSalida: {}", stderr, stdout);
-                        show_error_and_exit(&error_msg);
-                    }
+                if let Err(e) = startup_sequence(app_handle.clone(), splash_window, main_window).await {
+                    use tauri_plugin_dialog::DialogExt;
+                    app_handle.dialog()
+                        .message(&e)
+                        .title("Error Crítico")
+                        .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                        .show(move |_| {
+                            app_handle.exit(1);
+                        });
                 }
-
-                // FASE B — Levantar PostgreSQL
-                let _ = splash_window.emit("splash-state", "Iniciando motor de base de datos...");
-                
-                let pgsql_dir = clean_path(&app_handle.path().resource_dir().unwrap()).join("pgsql");
-                let postgres_path = pgsql_dir.join("bin").join("postgres.exe");
-
-                let db_child = std::process::Command::new(postgres_path)
-                    .args([
-                        "-D",
-                        db_dir.to_str().unwrap(),
-                        "-p",
-                        "5433"
-                    ])
-                    .creation_flags(0x08000000)
-                    .spawn();
-                    
-                let db_child = match db_child {
-                    Ok(c) => c,
-                    Err(e) => {
-                        show_error_and_exit(&format!("Fallo al ejecutar postgres.exe: {}", e));
-                        return;
-                    }
-                };
-                
-                let db_pid = db_child.id();
-
-                // Esperar hasta que PostgreSQL esté listo (timeout 30s)
-                let mut db_ready = false;
-                for _ in 0..60 { 
-                    if std::net::TcpStream::connect("127.0.0.1:5433").is_ok() {
-                        db_ready = true;
-                        break;
-                    }
-                    tokio::time::sleep(Duration::from_millis(500)).await;
-                }
-
-                if !db_ready {
-                    show_error_and_exit("PostgreSQL no inició en 30 segundos o el puerto 5433 está ocupado.");
-                }
-
-                // Verificar y crear base de datos "sga_db"
-                match Client::connect("postgresql://sga@localhost:5433/postgres", NoTls) {
-                    Ok(mut client) => {
-                        match client.query("SELECT datname FROM pg_database WHERE datname = 'sga_db'", &[]) {
-                            Ok(rows) => {
-                                if rows.is_empty() {
-                                    if let Err(e) = client.execute("CREATE DATABASE sga_db OWNER sga", &[]) {
-                                        show_error_and_exit(&format!("Error al crear base de datos sga_db: {}", e));
-                                    }
-                                }
-                            },
-                            Err(e) => show_error_and_exit(&format!("Error consultando pg_database: {}", e))
-                        }
-                    },
-                    Err(_) => {
-                        show_error_and_exit("No se pudo conectar a PostgreSQL para verificar sga_db.");
-                    }
-                }
-
-                // FASE C y D — Levantar Backend (las migraciones se ejecutan automáticamente en start del backend)
-                let _ = splash_window.emit("splash-state", "Aplicando actualizaciones e iniciando servicios...");
-                
-                let sidecar = app_handle.shell().sidecar("sga-back");
-                let sidecar = match sidecar {
-                    Ok(s) => s,
-                    Err(e) => {
-                        show_error_and_exit(&format!("Error al crear sidecar sga-back: {}", e));
-                        return;
-                    }
-                };
-                
-                let back_spawn = sidecar
-                    .envs(vec![
-                        ("DATABASE_URL".to_string(), "postgresql://sga@localhost:5433/sga_db".to_string()),
-                        ("TRPC_PORT".to_string(), "3000".to_string()),
-                        ("NODE_ENV".to_string(), "production".to_string()),
-                        ("RUN_MIGRATIONS".to_string(), "true".to_string())
-                    ])
-                    .spawn();
-                    
-                let (_, back_child) = match back_spawn {
-                    Ok(b) => b,
-                    Err(e) => {
-                        show_error_and_exit(&format!("Error al ejecutar backend sga-back: {}", e));
-                        return;
-                    }
-                };
-                
-                let back_pid = back_child.pid();
-
-                // Guardar PIDs
-                app_handle.manage(Arc::new(Mutex::new(AppState {
-                    db_process: Some(db_pid),
-                    back_process: Some(back_pid),
-                })));
-
-                let client = reqwest::Client::builder()
-                    .timeout(Duration::from_secs(2))
-                    .build()
-                    .unwrap();
-                    
-                // Esperar a que el backend esté listo (GET /health) (timeout 15s)
-                let mut back_ready = false;
-                for _ in 0..30 { // 15 segundos
-                    if let Ok(resp) = client.get("http://localhost:3000/health").send().await {
-                        if resp.status().is_success() {
-                            back_ready = true;
-                            break;
-                        }
-                    }
-                    tokio::time::sleep(Duration::from_millis(500)).await;
-                }
-
-                if !back_ready {
-                    show_error_and_exit("El backend no respondió en 15 segundos o el puerto 3000 está ocupado.");
-                }
-
-                // FASE E — Abrir la ventana
-                let _ = splash_window.emit("splash-state", "Cargando aplicación...");
-                tokio::time::sleep(Duration::from_millis(500)).await; // Pequeña pausa para fluidez
-                
-                splash_window.close().unwrap();
-                main_window.show().unwrap();
             });
 
             Ok(())
