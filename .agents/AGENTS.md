@@ -147,5 +147,5 @@ Al encontrar errores, investiga en el siguiente orden lógico:
 - **CRÍTICO - COMMITS AUTOMÁTICOS:** Debes hacer `git commit` y `git push` automáticamente al finalizar la instrucción en la rama de trabajo actual, para mantener los cambios atómicos. Únicamente omitirás este paso si el usuario te indica explícitamente que NO hagas commit o que lo hagas en otra rama.
 - **CRÍTICO - MENSAJES DE COMMIT:** Redacta el mensaje explicando **exclusivamente el contexto y propósito de los cambios**, omitiendo la lista de archivos. Todo en español.
 - **Conventional Commits:** Utilizar convención estándar (ej. `feat(auth): mensaje`, `fix(ui): mensaje`).
-- **Agrupación Lógica:** Separar y agrupar cambios de forma lógica por módulo en commits individuales.
+- **Agrupación Lógica y Separación:** Separar y agrupar cambios de forma lógica por módulo. **Si una misma instrucción genera cambios de diferentes tipos (ej. un `fix` y un `chore`), es OBLIGATORIO crear un commit separado para cada tipo**, respetando la convención de commits.
 - **Validación Previa:** Antes de hacer commit, el código debe estar libre de errores de TypeScript para evitar romper la build de Tauri.
