@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EditarAlumnoModal } from './EditarAlumnoModal';
-import React from 'react';
 
 vi.mock('lucide-react', () => ({
   X: () => <span data-testid="icon-x" />,
@@ -68,9 +67,9 @@ describe('EditarAlumnoModal Component', () => {
 
   it('debe renderizar y cargar los datos del alumno correctamente', () => {
     const { container } = render(<EditarAlumnoModal isOpen={true} onClose={onClose} alumno={mockAlumno} />);
-    
+
     expect(screen.getByText('Editar Alumno')).toBeInTheDocument();
-    
+
     const inputNombre = container.querySelector('input[name="nombreCompleto"]') as HTMLInputElement;
     expect(inputNombre.value).toBe('Maria Lopez');
 
@@ -86,27 +85,27 @@ describe('EditarAlumnoModal Component', () => {
 
   it('debe mostrar error de validación si se borran datos requeridos', async () => {
     const { container } = render(<EditarAlumnoModal isOpen={true} onClose={onClose} alumno={mockAlumno} />);
-    
+
     const inputNombre = container.querySelector('input[name="nombreCompleto"]');
     if (inputNombre) fireEvent.change(inputNombre, { target: { value: '' } });
-    
+
     const submitBtn = screen.getByRole('button', { name: /Guardar Cambios/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(screen.getByText('Obligatorio')).toBeInTheDocument();
     });
-    
+
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('debe llamar a la API y cerrar el modal al guardar correctamente', async () => {
     mockMutateAsync.mockResolvedValueOnce({});
     const { container } = render(<EditarAlumnoModal isOpen={true} onClose={onClose} alumno={mockAlumno} />);
-    
+
     const inputNombre = container.querySelector('input[name="nombreCompleto"]');
     if (inputNombre) fireEvent.change(inputNombre, { target: { value: 'Maria Lopez Gomez' } });
-    
+
     const submitBtn = screen.getByRole('button', { name: /Guardar Cambios/i });
     fireEvent.click(submitBtn);
 
@@ -117,7 +116,7 @@ describe('EditarAlumnoModal Component', () => {
     const callArgs = mockMutateAsync.mock.calls[0][0];
     expect(callArgs.alumnoId).toBe(10);
     expect(callArgs.nombreCompleto).toBe('Maria Lopez Gomez');
-    
+
     // Debería invalidar queries y cerrar modal
     expect(mockInvalidate).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalled();

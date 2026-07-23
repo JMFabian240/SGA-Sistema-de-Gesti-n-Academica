@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NuevoTutorModal } from './NuevoTutorModal';
-import React from 'react';
 
 vi.mock('lucide-react', () => ({
   X: () => <span data-testid="icon-x" />
@@ -52,7 +51,7 @@ describe('NuevoTutorModal Component', () => {
 
   it('muestra error de validación si se envía sin nombre', async () => {
     render(<NuevoTutorModal isOpen={true} onClose={onClose} onSuccess={onSuccess} />);
-    
+
     const submitBtn = screen.getByRole('button', { name: /Registrar Tutor/i });
     fireEvent.click(submitBtn);
 
@@ -65,7 +64,7 @@ describe('NuevoTutorModal Component', () => {
 
   it('muestra campos fiscales al marcar "Requiere Factura"', async () => {
     const { container } = render(<NuevoTutorModal isOpen={true} onClose={onClose} onSuccess={onSuccess} />);
-    
+
     expect(screen.queryByText(/Razón Social/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^RFC/i)).not.toBeInTheDocument();
 
@@ -81,11 +80,11 @@ describe('NuevoTutorModal Component', () => {
   it('llama a createTutor y linkTutor si se envían datos válidos (factura false)', async () => {
     mockCreateTutor.mockResolvedValueOnce({ tutorId: 50 });
     mockLinkTutor.mockResolvedValueOnce({});
-    
+
     const { container } = render(
       <NuevoTutorModal isOpen={true} alumnoId={100} onClose={onClose} onSuccess={onSuccess} />
     );
-    
+
     const inputNombre = container.querySelector('input[name="nombreCompleto"]');
     if (inputNombre) fireEvent.change(inputNombre, { target: { value: 'Juan Perez' } });
 

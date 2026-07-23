@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TicketCheckout } from './TicketCheckout';
-import React from 'react';
 import toast from 'react-hot-toast';
 
 // ─────────────────────────────────────────────────
@@ -27,7 +26,7 @@ vi.mock('react-to-print', () => ({
 vi.mock('./ReciboPrintTemplate', async () => {
   const React = await import('react');
   return {
-    ReciboPrintTemplate: React.forwardRef((props, ref) => (
+    ReciboPrintTemplate: React.forwardRef((_props, ref) => (
       <div data-testid="print-template" ref={ref as any}>Template</div>
     )),
   };
@@ -41,7 +40,7 @@ vi.mock('../../../lib/trpc', () => ({
   trpc: {
     pagos: {
       getReciboPago: {
-        useQuery: (args: any, opts: any) => ({
+        useQuery: (_args: any, opts: any) => ({
           data: opts?.enabled ? mockReciboData : null,
           isSuccess: opts?.enabled && mockReciboData !== null,
         }),
@@ -105,19 +104,19 @@ describe('TicketCheckout Component', () => {
   // ─── 1. Estado inicial e Interfaz ─────────────────────────────
   it('debe renderizar el total a pagar correctamente', () => {
     renderCheckout();
-    
+
     // 1000 + 500 = 1500
     expect(screen.getByText('Conceptos Seleccionados:')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('$1,500.00')).toBeInTheDocument();
-    
+
     const inputMonto = screen.getByDisplayValue('1500') as HTMLInputElement;
     expect(inputMonto).toBeInTheDocument();
   });
 
   it('el botón de cobrar debe estar deshabilitado si no hay adeudos seleccionados', () => {
     renderCheckout([]);
-    
+
     const btnCobrar = screen.getByRole('button', { name: /Cobrar Ticket/i });
     expect(btnCobrar).toBeDisabled();
   });
@@ -132,9 +131,9 @@ describe('TicketCheckout Component', () => {
   it('debe mostrar la alerta de Abono Parcial si el monto ingresado es menor al total', () => {
     renderCheckout();
     const inputMonto = screen.getByDisplayValue('1500');
-    
+
     fireEvent.change(inputMonto, { target: { value: '1000' } });
-    
+
     expect(screen.getByText(/El padre está pagando menos del total adeudado/i)).toBeInTheDocument();
   });
 
@@ -142,10 +141,10 @@ describe('TicketCheckout Component', () => {
     renderCheckout();
     const inputMonto = screen.getByDisplayValue('1500');
     const btnCobrar = screen.getByRole('button', { name: /Cobrar Ticket/i });
-    
+
     fireEvent.change(inputMonto, { target: { value: '2000' } });
     fireEvent.click(btnCobrar);
-    
+
     expect(toast.error).toHaveBeenCalledWith('El monto no puede ser mayor al total adeudado de los conceptos seleccionados');
     expect(mockRegistrarPago).not.toHaveBeenCalled();
   });
@@ -154,10 +153,10 @@ describe('TicketCheckout Component', () => {
     renderCheckout();
     const inputMonto = screen.getByDisplayValue('1500');
     const btnCobrar = screen.getByRole('button', { name: /Cobrar Ticket/i });
-    
+
     fireEvent.change(inputMonto, { target: { value: '0' } });
     fireEvent.click(btnCobrar);
-    
+
     expect(toast.error).toHaveBeenCalledWith('El monto ingresado no es válido');
     expect(mockRegistrarPago).not.toHaveBeenCalled();
   });
@@ -182,11 +181,11 @@ describe('TicketCheckout Component', () => {
   it('debe distribuir el pago y enviar la mutación correctamente', async () => {
     const onSuccessCb = vi.fn();
     renderCheckout(mockAdeudos, onSuccessCb);
-    
+
     // Seleccionar método de pago: Transferencia
     const btnTransferencia = screen.getByRole('button', { name: /Transferencia/i });
     fireEvent.click(btnTransferencia);
-    
+
     // Referencia
     const inputReferencia = screen.getByPlaceholderText(/Transferencia, Voucher/i);
     fireEvent.change(inputReferencia, { target: { value: 'TRANSF-1234' } });
@@ -196,7 +195,7 @@ describe('TicketCheckout Component', () => {
     fireEvent.click(btnCobrar);
 
     expect(mockRegistrarPago).toHaveBeenCalledTimes(1);
-    
+
     const args = mockRegistrarPago.mock.calls[0][0];
     expect(args.alumnoId).toBe(1);
     expect(args.tutorId).toBe(50);
@@ -204,7 +203,7 @@ describe('TicketCheckout Component', () => {
     expect(args.metodoPago).toBe('TRANSFERENCIA');
     expect(args.observaciones).toBe('TRANSF-1234');
     expect(args.aplicaciones).toHaveLength(2);
-    
+
     // El orden de aplicaciones debe respetar la fecha (prioriza el más viejo, inscripción agosto)
     expect(args.aplicaciones[0].calendarioPagoId).toBe(10);
     expect(args.aplicaciones[0].montoAplicado).toBe(1000);
@@ -222,13 +221,13 @@ describe('TicketCheckout Component', () => {
   // ─── 4. Validación de Archivos (Comprobante) ──────────────────
   it('debe rechazar archivos mayores a 5MB', () => {
     renderCheckout();
-    
+
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const bigFile = new File([''], 'big.pdf', { type: 'application/pdf' });
     Object.defineProperty(bigFile, 'size', { value: 6 * 1024 * 1024 }); // 6MB
 
     fireEvent.change(fileInput, { target: { files: [bigFile] } });
-    
+
     expect(toast.error).toHaveBeenCalledWith('El archivo es demasiado grande (máx 5MB)');
   });
 
@@ -236,7 +235,7 @@ describe('TicketCheckout Component', () => {
   it('debe mostrar el botón de impresión una vez que getReciboPago retorna data', async () => {
     // 1. Configuramos el mock de recibo para simular que ya cargó la información
     mockReciboData = { pagoId: 101, metodoPago: 'EFECTIVO' };
-    
+
     renderCheckout();
     const btnCobrar = screen.getByRole('button', { name: /Cobrar Ticket/i });
     fireEvent.click(btnCobrar);

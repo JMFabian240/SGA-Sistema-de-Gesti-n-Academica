@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VincularTutorModal } from './VincularTutorModal';
-import React from 'react';
 
 vi.mock('lucide-react', () => ({
   X: () => <span data-testid="icon-x" />,
@@ -57,7 +56,7 @@ describe('VincularTutorModal Component', () => {
     render(
       <VincularTutorModal isOpen={true} alumnoId={1} onClose={onClose} onSuccess={onSuccess} onRegistrarPadre={onRegistrarPadre} />
     );
-    
+
     expect(screen.getByText('Juan Perez')).toBeInTheDocument();
     expect(screen.getByText('Maria Garcia')).toBeInTheDocument();
 
@@ -72,7 +71,7 @@ describe('VincularTutorModal Component', () => {
     render(
       <VincularTutorModal isOpen={true} alumnoId={1} onClose={onClose} onSuccess={onSuccess} onRegistrarPadre={onRegistrarPadre} />
     );
-    
+
     const registrarBtn = screen.getByRole('button', { name: /Registrar Padre/i });
     fireEvent.click(registrarBtn);
 
@@ -81,11 +80,11 @@ describe('VincularTutorModal Component', () => {
 
   it('llama a linkTutor y onSuccess al hacer click en Vincular', async () => {
     mockLinkTutor.mockResolvedValueOnce({});
-    
+
     render(
       <VincularTutorModal isOpen={true} alumnoId={99} onClose={onClose} onSuccess={onSuccess} onRegistrarPadre={onRegistrarPadre} />
     );
-    
+
     const vincularBtns = screen.getAllByRole('button', { name: /Vincular/i });
     fireEvent.click(vincularBtns[0]); // Click en el de Juan Perez
 

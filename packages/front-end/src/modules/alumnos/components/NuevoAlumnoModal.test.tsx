@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NuevoAlumnoModal } from './NuevoAlumnoModal';
-import React from 'react';
 
 vi.mock('lucide-react', () => ({
   X: () => <span data-testid="icon-x" />,
@@ -70,30 +69,30 @@ describe('NuevoAlumnoModal Component', () => {
 
   it('debe mostrar errores de validación si se envía vacío', async () => {
     render(<NuevoAlumnoModal isOpen={true} onClose={onClose} onSuccess={onSuccess} />);
-    
+
     const submitBtn = screen.getByRole('button', { name: /Guardar Alumno/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(screen.getAllByText('Obligatorio').length).toBeGreaterThan(0);
     });
-    
+
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('debe llamar a createAlumno con los datos correctos', async () => {
     mockMutateAsync.mockResolvedValueOnce({ alumnoId: 99 });
     const { container } = render(<NuevoAlumnoModal isOpen={true} onClose={onClose} onSuccess={onSuccess} />);
-    
+
     // Llenar campos
     const inputNombre = container.querySelector('input[name="nombreCompleto"]');
     if (inputNombre) fireEvent.change(inputNombre, { target: { value: 'Pepe' } });
-    
+
     const inputDate = container.querySelector('input[type="date"]');
     if (inputDate) {
       fireEvent.change(inputDate, { target: { value: '2010-01-01' } });
     }
-    
+
     const sexSelects = document.querySelectorAll('select');
     fireEvent.change(sexSelects[0], { target: { value: 'M' } });
 
@@ -102,7 +101,7 @@ describe('NuevoAlumnoModal Component', () => {
     if (inputMatricula) {
       fireEvent.change(inputMatricula, { target: { value: 'MAT-123' } });
     }
-    
+
     // Seleccionar nivel
     fireEvent.change(sexSelects[1], { target: { value: '1' } });
 
@@ -116,7 +115,7 @@ describe('NuevoAlumnoModal Component', () => {
     expect(callArgs.nombreCompleto).toBe('Pepe');
     expect(callArgs.matricula).toBe('MAT-123');
     expect(callArgs.sexo).toBe('M');
-    
+
     expect(onSuccess).toHaveBeenCalledWith(99);
   });
 });
