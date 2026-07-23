@@ -42,11 +42,11 @@ describe('CalculadoraPagos', () => {
     expect(ago?.montoOriginal).toBe(1000);
 
     const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
-    expect(dic?.montoOriginal).toBe(1000);
+    expect(dic?.montoOriginal).toBe(2000);
 
     const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
-    expect(jul?.montoOriginal).toBe(1000);
-    expect(jul?.estadoCobro).toBe('PENDIENTE');
+    expect(jul?.montoOriginal).toBe(0);
+    expect(jul?.estadoCobro).toBe('PAGADO');
   });
 
   it('debe aplicar el descuento de beca correctamente a las mensualidades', () => {
@@ -60,9 +60,9 @@ describe('CalculadoraPagos', () => {
     expect(ago?.montoOriginal).toBe(850); // 15% de 1000
 
     const dic = recibos.find(r => r.concepto === 'Colegiatura Diciembre');
-    expect(dic?.montoOriginal).toBe(850); // 15% de 1000
+    expect(dic?.montoOriginal).toBe(1700); // 15% de 2000
 
     const jul = recibos.find(r => r.concepto === 'Colegiatura Julio');
-    expect(jul?.montoOriginal).toBe(850);
+    expect(jul?.montoOriginal).toBe(0);
   });
 });

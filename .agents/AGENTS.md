@@ -144,7 +144,7 @@ Al encontrar errores, investiga en el siguiente orden lógico:
 - **Organización**: No crear subcarpetas anidadas en `.agents/skills/`. Mantén una estructura plana usando prefijos.
 
 ### Reglas de Git y Commits
-- **CRÍTICO - COMMITS MANUALES:** Bajo NINGUNA circunstancia debes hacer `git commit` o `git push` automáticamente al terminar una tarea. Solo debes hacerlo cuando el usuario te lo pida explícitamente.
+- **CRÍTICO - COMMITS AUTOMÁTICOS:** Debes hacer `git commit` y `git push` automáticamente al finalizar la instrucción en la rama de trabajo actual, para mantener los cambios atómicos. Únicamente omitirás este paso si el usuario te indica explícitamente que NO hagas commit o que lo hagas en otra rama.
 - **CRÍTICO - MENSAJES DE COMMIT:** Redacta el mensaje explicando **exclusivamente el contexto y propósito de los cambios**, omitiendo la lista de archivos. Todo en español.
 - **Conventional Commits:** Utilizar convención estándar (ej. `feat(auth): mensaje`, `fix(ui): mensaje`).
 - **Agrupación Lógica:** Separar y agrupar cambios de forma lógica por módulo en commits individuales.

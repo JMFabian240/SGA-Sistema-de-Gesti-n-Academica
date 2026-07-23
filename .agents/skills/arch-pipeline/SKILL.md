@@ -187,9 +187,9 @@ Usa las reglas de la skill `ops-testing`.
 ### FASE 6 — Integración y Cierre
 
 1. **Verificar** que no hay errores de TypeScript (`tsc --noEmit`).
-2. **Hacer commit** con un mensaje en español describiendo el contexto
+2. **Hacer commit automáticamente** con un mensaje en español describiendo el contexto
    y propósito del cambio (sin listar archivos modificados).
-3. **Hacer push** a la rama activa.
+3. **Hacer push automáticamente** a la rama activa.
 
 ---
 
