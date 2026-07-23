@@ -1,6 +1,12 @@
 import { prisma } from '@sga/data-access';
 import * as Papa from 'papaparse';
-import { CatalogoAcademicoSchema, CatalogoAcademicoImportRow } from './importaciones.schema';
+import { 
+  CatalogoAcademicoSchema, 
+  CatalogoAcademicoImportRow,
+  InscripcionAlumnoSchema,
+  PagosAnterioresSchema,
+  SaldosInicialesSchema
+} from './importaciones.schema';
 
 export class ImportacionesService {
   async procesarImportacionCatalogo(csvBuffer: Buffer): Promise<{ success: boolean; message: string }> {
@@ -156,7 +162,6 @@ export class ImportacionesService {
       throw new Error(`Error al parsear CSV: ${errorMsg}`);
     }
 
-    const { InscripcionAlumnoSchema } = require('./importaciones.schema');
     const rows: any[] = [];
     
     for (let i = 0; i < parsed.data.length; i++) {
@@ -405,7 +410,6 @@ export class ImportacionesService {
       throw new Error(`Error al parsear CSV: ${errorMsg}`);
     }
 
-    const { PagosAnterioresSchema } = require('./importaciones.schema');
     const rows: any[] = [];
     
     for (let i = 0; i < parsed.data.length; i++) {
@@ -504,7 +508,6 @@ export class ImportacionesService {
       throw new Error(`Error al parsear CSV: ${errorMsg}`);
     }
 
-    const { SaldosInicialesSchema } = require('./importaciones.schema');
     const rows: any[] = [];
     
     for (let i = 0; i < parsed.data.length; i++) {
