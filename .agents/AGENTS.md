@@ -134,3 +134,54 @@ Las skills de diseño han sido analizadas y están diseñadas para complementars
 - **Prevención del error de inferencia TS2589 (tRPC):** Al crear endpoints en tRPC que devuelven objetos muy anidados de Prisma (con múltiples `.include`), el router debe definir explícitamente el tipo de retorno (ej. `Promise<any>` o una interfaz limpia) para evitar que la inferencia profunda sature el compilador de TypeScript en el Front-End.
 - **Compatibilidad con React Fast Refresh:** En los archivos `.tsx` de páginas o componentes, no exportes constantes ni variables de configuración junto con los componentes React. Esto rompe el 'Fast Refresh'. Las constantes deben mantenerse privadas (sin exportar) o moverse a un archivo de utilidades separado.
 - **Frontera de Tipos Seguros (Safe Type Boundaries):** Queda prohibido enviar objetos crudos de Prisma (como `Decimal` o fechas strictas) directamente al Front-End a través de los routers de tRPC. El Back-End tiene la obligación absoluta de transformar los datos de Prisma en objetos TypeScript estándar (DTOs) antes de retornarlos. Por ejemplo, todo campo `Decimal` de Prisma debe ser convertido a `number` usando `.toNumber()` en la capa del backend antes de viajar al frontend.
+
+## Reglas de Comportamiento General
+
+### Filosofía de Resolución de Problemas
+
+Antes de proponer cualquier solución a un error o problema:
+
+DIAGNÓSTICO OBLIGATORIO
+- Identifica y explícame la causa raíz del problema,
+  no solo el síntoma visible
+- Indica en qué capa ocurre el problema:
+  data-access / back / front / app-tauri
+- Explica por qué ocurrió y en qué condiciones
+  podría volver a ocurrir
+
+CRITERIOS DE LA SOLUCIÓN
+- La solución debe corregir la causa raíz,
+  nunca solo el síntoma
+- No uses parches temporales (workarounds) sin
+  avisarme explícitamente que es temporal y por qué
+- Si la solución correcta requiere modificar más
+  de un archivo o capa, hazlo completo
+- Prefiere soluciones simples sobre soluciones
+  complejas que hagan lo mismo
+- Si existe un patrón ya establecido en el proyecto
+  para ese tipo de problema, úsalo siempre
+
+ROBUSTEZ
+- Agrega manejo de errores donde haga falta
+- Considera casos edge: datos vacíos, nulos,
+  duplicados, valores inesperados
+- Si el problema puede ocurrir en otros lugares
+  similares del código, corrígelos todos
+
+ESCALABILIDAD
+- La solución no debe romperse si el volumen
+  de datos crece significativamente
+- No hardcodees valores que en el futuro
+  podrían cambiar, usa constantes o configuración
+- Si la solución introduce deuda técnica,
+  indícamelo explícitamente
+
+ANTES DE EJECUTAR
+- Explícame en términos simples:
+  1. Cuál es el problema real (causa raíz)
+  2. Qué vas a cambiar y por qué
+  3. Qué archivos se van a modificar
+  4. Si hay algún riesgo en el cambio
+- Espera mi confirmación antes de modificar
+  cualquier archivo
+
